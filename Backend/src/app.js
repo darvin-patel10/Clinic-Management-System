@@ -5,6 +5,7 @@ import cors from "cors";
 
 import authRouter from "./routes/auth.routes.js"
 import medicineRouter from "./routes/medicines.routes.js"
+import patientRouter from "./routes/patient.routes.js";
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use(cookieParser());
 // routes
 app.use("/api/auth", authRouter);
 app.use("/api/medicines", medicineRouter);
+app.use("/api/patient", patientRouter)
 
 export default app;

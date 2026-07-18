@@ -74,6 +74,45 @@ export async function updateMedicine(req, res) {
     }
 }
 
+export async function addQuntity(req, res) {
+    try {
+        const medicine = await medicineModel.findById(req.params.id);
+
+        if (!medicine) {
+            return res.status(404).json({
+                message: "Medicine not found. Make sure you are Selected the correct Medicine."
+            });
+        }
+
+        const drId = req.user.id;
+        if (drId !== medicine.drId) {
+            return res.status(403).json({
+                message: "You are not authorized to add quantity to this medicine"
+            });
+        }
+
+        const { quantity } = req.body;
+        if (!quantity) {
+            return res.status(400).json({
+                message: "Quantity is required"
+            });
+        }
+
+        medicine.quantity += Number(quantity);
+        medicine.totalPrice = medicine.unitPrice * medicine.quantity;
+        await medicine.save();
+
+        return res.status(200).json({
+            message: "Quantity added successfully",
+            medicine
+        });
+    }
+    catch (error) {
+        console.error("[addQuntity]", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 export async function delateMedicine(req, res) {
     try {
         const drId = req.user.id;
