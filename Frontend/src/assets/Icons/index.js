@@ -8,6 +8,7 @@ import Email from './email.svg?react';
 import Phone from './phone.svg?react';
 import Password from './password.svg?react';
 import ErrorIcon from './errorIcon.svg?react';
+import IconAlert from './iconAlert.svg?react';
 
 export {
     Loader,
@@ -19,5 +20,6 @@ export {
     Email,
     Phone,
     Password,
-    ErrorIcon
+    ErrorIcon,
+    IconAlert
 };
