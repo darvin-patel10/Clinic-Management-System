@@ -1,14 +1,13 @@
 import './App.css'
-import SignIn from './pages/Login/signIn'
-import SignUp from './pages/Login/signUp'
+import AppRoutes from './routes/router'
+import { BrowserRouter } from 'react-router'
 
 function App() {
 
   return (
-    <>
-      {/* <SignIn /> */}
-      <SignUp />
-    </>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   )
 }
 

@@ -1,8 +1,10 @@
 import { React, useState, useEffect, useRef } from "react";
-import api from "../../api.js";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { RegisterService, EmailVerify } from "../../service/api/authServices.js";
+import { saveToken } from "../../service/httpServices.js";
 import { ClinicLogo, CloseEye, Email, ErrorIcon, Firstname, Loader, OpenEye, Password, Phone } from "../../assets/Icons/index.js";
 import SuccessScreen from "../../component/SuccessScreen.jsx";
-
 
 /* ── Inject keyframes once into <head> ──────────────────────── */
 const KEYFRAMES = `
@@ -128,87 +130,125 @@ function getStrength(pw) {
    MAIN COMPONENT
 ══════════════════════════════════════════════════════════════ */
 export default function SignUp() {
-    const [form, setForm] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        specialty: "",
-        password: "",
-        confirm: "",
+    const navigate = useNavigate();
+    const {
+        register,
+        handleSubmit,
+        watch,
+        setFocus,
+        formState: { errors }
+    } = useForm({
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            specialty: "",
+            password: "",
+            confirm: "",
+            agreed: false
+        }
     });
+
+    const [step, setStep] = useState("register"); // "register" | "otp"
+    const [userEmail, setUserEmail] = useState("");
+    const [formData, setFormData] = useState(null);
+    const [otp, setOtp] = useState("");
     const [showPw, setShowPw] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-    const [agreed, setAgreed] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [fieldErrors, setFieldErrors] = useState({});
-    const [success, setSuccess] = useState(false);
 
-    const firstNameRef = useRef(null);
     const errorRef = useRef(null);
 
-    useEffect(() => { firstNameRef.current?.focus(); }, []);
+    useEffect(() => {
+        if (step === "register") {
+            setFocus("firstName");
+        }
+    }, [step, setFocus]);
+
     useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
 
-    const strength = getStrength(form.password);
+    const passwordVal = watch("password", "");
+    const confirmVal = watch("confirm", "");
+    const agreedVal = watch("agreed", false);
+    const strength = getStrength(passwordVal);
 
-    /* ── Field change helper ────────────────────────────────── */
-    function update(field, value) {
-        setForm((p) => ({ ...p, [field]: value }));
-        if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" }));
-    }
-
-    /* ── Validation ─────────────────────────────────────────── */
-    function validate() {
-        const errs = {};
-        if (!form.firstName.trim()) errs.firstName = "First name is required.";
-        if (!form.lastName.trim()) errs.lastName = "Last name is required.";
-
-        if (!form.email.trim()) errs.email = "Email address is required.";
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-            errs.email = "Enter a valid email address.";
-
-        if (form.phone && !/^\+?[\d\s\-()]{7,15}$/.test(form.phone))
-            errs.phone = "Enter a valid phone number.";
-
-        if (!form.password) errs.password = "Password is required.";
-        else if (form.password.length < 8) errs.password = "Password must be at least 8 characters.";
-
-        if (!form.confirm) errs.confirm = "Please confirm your password.";
-        else if (form.confirm !== form.password)
-            errs.confirm = "Passwords do not match.";
-
-        if (!agreed) errs.agreed = "You must accept the terms to continue.";
-
-        return errs;
-    }
-
-    /* ── Submit ─────────────────────────────────────────────── */
-    async function handleSubmit(e) {
-        e.preventDefault();
+    /* ── Step 1: Submit Registration ─────────────────────────── */
+    async function onSubmit(data) {
         setError("");
-        setFieldErrors({});
-        const errs = validate();
-        if (Object.keys(errs).length) { setFieldErrors(errs); return; }
+        setLoading(true);
+        const username = `${data.firstName.trim()} ${data.lastName.trim()}`.trim();
+        const email = data.email.trim();
+        const password = data.password;
 
+        try {
+            await RegisterService({
+                username,
+                email,
+                password
+            });
+            setUserEmail(email);
+            setFormData({ username, email, password });
+            setStep("otp");
+        } catch (err) {
+            const apiMessage =
+                err?.response?.data?.massage ||
+                err?.response?.data?.message ||
+                err?.message ||
+                "Registration failed. Please try again.";
+            setError(apiMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    /* ── Step 2: Submit OTP Verification ──────────────────────── */
+    async function handleOtpSubmit(e) {
+        e.preventDefault();
+        if (!otp.trim()) {
+            setError("Please enter the OTP sent to your email.");
+            return;
+        }
+        setError("");
+        setLoading(true);
+
+        try {
+            const resData = await EmailVerify({
+                email: userEmail,
+                otp: otp.trim()
+            });
+
+            if (resData?.accessToken) {
+                saveToken(resData.accessToken);
+            }
+            navigate("/dashboard", { replace: true });
+        } catch (err) {
+            const apiMessage =
+                err?.response?.data?.message ||
+                err?.response?.data?.massage ||
+                err?.message ||
+                "Invalid or expired OTP. Please try again.";
+            setError(apiMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleResendOtp() {
+        if (!formData) return;
+        setError("");
         setLoading(true);
         try {
-            await api.post("/auth/register", {
-                firstName: form.firstName.trim(),
-                lastName: form.lastName.trim(),
-                email: form.email.trim(),
-                phone: form.phone.trim() || undefined,
-                specialty: form.specialty.trim() || undefined,
-                password: form.password,
-            });
-            setSuccess(true);
+            await RegisterService(formData);
+            setError("");
         } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                err.response?.data?.error ||
-                "Registration failed. Please try again."
-            );
+            const apiMessage =
+                err?.response?.data?.massage ||
+                err?.response?.data?.message ||
+                err?.message ||
+                "Failed to resend OTP.";
+            setError(apiMessage);
         } finally {
             setLoading(false);
         }
@@ -328,8 +368,104 @@ export default function SignUp() {
                           border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,.12),0_8px_24px_rgba(15,23,42,.06)]
                           p-10">
 
-                        {success ? (
-                            <SuccessScreen />
+                        {step === "otp" ? (
+                            <div>
+                                {/* ── OTP Header ──────────────────────────── */}
+                                <div className="mb-7 text-center">
+                                    <div className="inline-flex items-center justify-center w-14 h-14
+                                                  rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto text-blue-600">
+                                        <Email className="w-7 h-7" />
+                                    </div>
+                                    <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                                        Verify your email
+                                    </h2>
+                                    <p className="text-[.9rem] text-slate-500">
+                                        We sent a verification code to<br />
+                                        <span className="font-semibold text-slate-800">{userEmail}</span>
+                                    </p>
+                                </div>
+
+                                {/* ── Global error ─────────────────────────── */}
+                                {error && (
+                                    <div
+                                        id="otp-error-banner"
+                                        ref={errorRef}
+                                        className="su-alert-in flex items-start gap-[.625rem] p-[.875rem_1rem]
+                                               rounded-[.625rem] mb-5 text-[.875rem] font-medium leading-snug
+                                               bg-red-50 border border-red-200/50 text-red-600"
+                                        role="alert"
+                                        tabIndex={-1}
+                                    >
+                                        <ErrorIcon className="w-[18px] h-[18px] shrink-0 mt-px" />
+                                        <span>{error}</span>
+                                    </div>
+                                )}
+
+                                {/* ── OTP Form ─────────────────────────────── */}
+                                <form id="otp-form" className="flex flex-col gap-4" onSubmit={handleOtpSubmit}>
+                                    <div className="flex flex-col gap-[.375rem]">
+                                        <label htmlFor="signup-otp"
+                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            One-Time Password (OTP) <span className="text-red-600" aria-hidden="true">*</span>
+                                        </label>
+                                        <input
+                                            id="signup-otp"
+                                            type="text"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                            maxLength={6}
+                                            placeholder="Enter OTP code"
+                                            autoFocus
+                                            className="w-full h-[50px] px-4 text-center text-xl tracking-[0.35em] font-bold rounded-[.625rem] border-[1.5px] border-slate-200 bg-white text-slate-900 outline-none placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 placeholder:text-base transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]"
+                                        />
+                                    </div>
+
+                                    <button
+                                        id="otp-submit"
+                                        type="submit"
+                                        disabled={loading}
+                                        aria-busy={loading}
+                                        className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-2
+                                                 border-none rounded-[.625rem] cursor-pointer font-semibold text-base
+                                                 text-white tracking-[.01em]
+                                                 bg-gradient-to-br from-blue-600 to-blue-800
+                                                 shadow-[0_4px_14px_rgba(37,99,235,.35)]
+                                                 transition-all duration-150
+                                                 hover:not-disabled:from-blue-700 hover:not-disabled:to-blue-900
+                                                 hover:not-disabled:shadow-[0_6px_20px_rgba(37,99,235,.45)]
+                                                 hover:not-disabled:-translate-y-px
+                                                 active:not-disabled:translate-y-0
+                                                 active:not-disabled:shadow-[0_2px_8px_rgba(37,99,235,.3)]
+                                                 disabled:opacity-75 disabled:cursor-not-allowed
+                                                 focus-visible:outline-[3px] focus-visible:outline-blue-600 focus-visible:outline-offset-[3px]"
+                                    >
+                                        {loading ? <><Loader />Verifying…</> : "Verify & Continue to Dashboard"}
+                                    </button>
+                                </form>
+
+                                {/* ── Actions ──────────────────────────────── */}
+                                <div className="flex flex-col gap-2 mt-6 text-center text-sm">
+                                    <button
+                                        type="button"
+                                        onClick={handleResendOtp}
+                                        disabled={loading}
+                                        className="text-blue-600 font-semibold hover:underline bg-transparent border-none cursor-pointer disabled:opacity-50"
+                                    >
+                                        Didn't receive the code? Resend OTP
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setError("");
+                                            setStep("register");
+                                        }}
+                                        disabled={loading}
+                                        className="text-slate-500 font-medium hover:underline bg-transparent border-none cursor-pointer disabled:opacity-50"
+                                    >
+                                        ← Change email / Edit details
+                                    </button>
+                                </div>
+                            </div>
                         ) : (
                             <>
                                 {/* ── Card header ──────────────────────────── */}
@@ -369,7 +505,7 @@ export default function SignUp() {
                                 )}
 
                                 {/* ── Form ─────────────────────────────────── */}
-                                <form id="signup-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+                                <form id="signup-form" className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
 
                                     {/* Section label */}
                                     <p className="text-[.7rem] font-bold text-slate-400 uppercase tracking-widest -mb-1">
@@ -385,33 +521,34 @@ export default function SignUp() {
                                                 First name <span className="text-red-600" aria-hidden="true">*</span>
                                             </label>
                                             <div className="relative flex items-center">
-                                                <Firstname className={`absolute left-[.875rem] w-[16px] h-[16px] pointer-events-none shrink-0 transition-colors duration-150 ${fieldErrors.firstName ? "text-red-500" : "text-slate-400"}`} />
+                                                <Firstname className={`absolute left-[.875rem] w-[16px] h-[16px] pointer-events-none shrink-0 transition-colors duration-150 ${errors.firstName ? "text-red-500" : "text-slate-400"}`} />
                                                 <input
                                                     id="signup-firstname"
-                                                    ref={firstNameRef}
                                                     type="text"
                                                     className={`w-full h-[46px] pl-[2.5rem] pr-3 rounded-[.625rem] border-[1.5px]
                                       bg-white text-[.9375rem] text-slate-900 outline-none
                                       placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150
                                       hover:border-slate-300
                                       focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
-                                      ${fieldErrors.firstName
+                                      ${errors.firstName
                                                             ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                             : "border-slate-200"}`}
                                                     placeholder="John"
-                                                    value={form.firstName}
-                                                    onChange={(e) => update("firstName", e.target.value)}
                                                     autoComplete="given-name"
                                                     aria-required="true"
-                                                    aria-describedby={fieldErrors.firstName ? "signup-firstname-error" : undefined}
-                                                    aria-invalid={!!fieldErrors.firstName}
+                                                    aria-describedby={errors.firstName ? "signup-firstname-error" : undefined}
+                                                    aria-invalid={!!errors.firstName}
+                                                    {...register("firstName", {
+                                                        required: "First name is required.",
+                                                        validate: (val) => val.trim().length > 0 || "First name is required."
+                                                    })}
                                                 />
                                             </div>
-                                            {fieldErrors.firstName && (
+                                            {errors.firstName && (
                                                 <p id="signup-firstname-error"
                                                     className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
                                                     role="alert">
-                                                    <ErrorIcon />{fieldErrors.firstName}
+                                                    <ErrorIcon />{errors.firstName.message}
                                                 </p>
                                             )}
                                         </div>
@@ -426,23 +563,25 @@ export default function SignUp() {
                                                 <input
                                                     id="signup-lastname"
                                                     type="text"
-                                                    className={`w-full h-[46px] px-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${fieldErrors.lastName
+                                                    className={`w-full h-[46px] px-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.lastName
                                                         ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                         : "border-slate-200"}`}
                                                     placeholder="Smith"
-                                                    value={form.lastName}
-                                                    onChange={(e) => update("lastName", e.target.value)}
                                                     autoComplete="family-name"
                                                     aria-required="true"
-                                                    aria-describedby={fieldErrors.lastName ? "signup-lastname-error" : undefined}
-                                                    aria-invalid={!!fieldErrors.lastName}
+                                                    aria-describedby={errors.lastName ? "signup-lastname-error" : undefined}
+                                                    aria-invalid={!!errors.lastName}
+                                                    {...register("lastName", {
+                                                        required: "Last name is required.",
+                                                        validate: (val) => val.trim().length > 0 || "Last name is required."
+                                                    })}
                                                 />
                                             </div>
-                                            {fieldErrors.lastName && (
+                                            {errors.lastName && (
                                                 <p id="signup-lastname-error"
                                                     className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
                                                     role="alert">
-                                                    <ErrorIcon />{fieldErrors.lastName}
+                                                    <ErrorIcon />{errors.lastName.message}
                                                 </p>
                                             )}
                                         </div>
@@ -455,33 +594,36 @@ export default function SignUp() {
                                             Work email <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <div className="relative flex items-center">
-                                            <Email className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${fieldErrors.email ? "text-red-500" : "text-slate-400"}`} />
+                                            <Email className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${errors.email ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-email"
                                                 type="email"
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${fieldErrors.email
+                                                className={`w-full h-[46px] pl-[2.875rem] pr-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.email
                                                     ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                     : "border-slate-200"}`}
                                                 placeholder="doctor@clinic.com"
-                                                value={form.email}
-                                                onChange={(e) => update("email", e.target.value)}
                                                 autoComplete="email"
                                                 aria-required="true"
-                                                aria-describedby={fieldErrors.email ? "signup-email-error" : undefined}
-                                                aria-invalid={!!fieldErrors.email}
+                                                aria-describedby={errors.email ? "signup-email-error" : undefined}
+                                                aria-invalid={!!errors.email}
+                                                {...register("email", {
+                                                    required: "Email address is required.",
+                                                    pattern: {
+                                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                        message: "Enter a valid email address."
+                                                    }
+                                                })}
                                             />
                                         </div>
-                                        {fieldErrors.email && (
+                                        {errors.email && (
                                             <p id="signup-email-error"
                                                 className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
                                                 role="alert">
-                                                <ErrorIcon />{fieldErrors.email}
+                                                <ErrorIcon />{errors.email.message}
                                             </p>
                                         )}
                                     </div>
 
-                                    {/* Phone + Specialty row */}
-                                    {/* <div className="grid grid-cols-2 gap-3"> */}
                                     {/* Phone */}
                                     <div className="flex flex-col gap-[.375rem]">
                                         <label htmlFor="signup-phone"
@@ -491,27 +633,31 @@ export default function SignUp() {
                                         </label>
                                         <div className="relative flex items-center">
                                             <Phone className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150
-                                                    ${fieldErrors.phone ? "text-red-500" : "text-slate-400"}`} />
+                                                    ${errors.phone ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-phone"
                                                 type="tel"
                                                 className={`w-full h-[46px] pl-[2.875rem] pr-3 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
-                                                        ${fieldErrors.phone
+                                                        ${errors.phone
                                                         ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                         : "border-slate-200"}`}
                                                 placeholder="+1 555 000 0000"
-                                                value={form.phone}
-                                                onChange={(e) => update("phone", e.target.value)}
                                                 autoComplete="tel"
-                                                aria-describedby={fieldErrors.phone ? "signup-phone-error" : undefined}
-                                                aria-invalid={!!fieldErrors.phone}
+                                                aria-describedby={errors.phone ? "signup-phone-error" : undefined}
+                                                aria-invalid={!!errors.phone}
+                                                {...register("phone", {
+                                                    pattern: {
+                                                        value: /^\+?[\d\s\-()]{7,15}$/,
+                                                        message: "Enter a valid phone number."
+                                                    }
+                                                })}
                                             />
                                         </div>
-                                        {fieldErrors.phone && (
+                                        {errors.phone && (
                                             <p id="signup-phone-error"
                                                 className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
                                                 role="alert">
-                                                <ErrorIcon />{fieldErrors.phone}
+                                                <ErrorIcon />{errors.phone.message}
                                             </p>
                                         )}
                                     </div>
@@ -531,7 +677,7 @@ export default function SignUp() {
 
                                             <Password className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none
                                                 transition-colors duration-150
-                                                ${fieldErrors.password ? "text-red-500" : "text-slate-400"}`} />
+                                                ${errors.password ? "text-red-500" : "text-slate-400"}`} />
 
                                             <input
                                                 id="signup-password"
@@ -541,18 +687,23 @@ export default function SignUp() {
                                                 placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150
                                                 hover:border-slate-300
                                                 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
-                                                ${fieldErrors.password
+                                                ${errors.password
                                                         ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                         : "border-slate-200"}`}
                                                 placeholder="Min. 8 characters"
-                                                value={form.password}
-                                                onChange={(e) => update("password", e.target.value)}
                                                 autoComplete="new-password"
                                                 aria-required="true"
                                                 aria-describedby={
-                                                    ["signup-password-strength", fieldErrors.password ? "signup-password-error" : ""].filter(Boolean).join(" ") || undefined
+                                                    ["signup-password-strength", errors.password ? "signup-password-error" : ""].filter(Boolean).join(" ") || undefined
                                                 }
-                                                aria-invalid={!!fieldErrors.password}
+                                                aria-invalid={!!errors.password}
+                                                {...register("password", {
+                                                    required: "Password is required.",
+                                                    minLength: {
+                                                        value: 8,
+                                                        message: "Password must be at least 8 characters."
+                                                    }
+                                                })}
                                             />
 
                                             <button
@@ -569,7 +720,7 @@ export default function SignUp() {
                                         </div>
 
                                         {/* Strength meter */}
-                                        {form.password && (
+                                        {passwordVal && (
                                             <div id="signup-password-strength" aria-live="polite">
                                                 <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                                                     <div
@@ -588,11 +739,11 @@ export default function SignUp() {
                                             </div>
                                         )}
 
-                                        {fieldErrors.password && (
+                                        {errors.password && (
                                             <p id="signup-password-error"
                                                 className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
                                                 role="alert">
-                                                <ErrorIcon />{fieldErrors.password}
+                                                <ErrorIcon />{errors.password.message}
                                             </p>
                                         )}
                                     </div>
@@ -604,18 +755,20 @@ export default function SignUp() {
                                             Confirm password <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <div className="relative flex items-center">
-                                            <Password className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${fieldErrors.confirm ? "text-red-500" : "text-slate-400"}`} />
+                                            <Password className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${errors.confirm ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-confirm"
                                                 type={showConfirm ? "text" : "password"}
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-12 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${fieldErrors.confirm ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]" : form.confirm && form.confirm === form.password ? "border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,.15)]" : "border-slate-200"}`}
+                                                className={`w-full h-[46px] pl-[2.875rem] pr-12 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.confirm ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]" : confirmVal && confirmVal === passwordVal ? "border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,.15)]" : "border-slate-200"}`}
                                                 placeholder="Re-enter password"
-                                                value={form.confirm}
-                                                onChange={(e) => update("confirm", e.target.value)}
                                                 autoComplete="new-password"
                                                 aria-required="true"
-                                                aria-describedby={fieldErrors.confirm ? "signup-confirm-error" : undefined}
-                                                aria-invalid={!!fieldErrors.confirm}
+                                                aria-describedby={errors.confirm ? "signup-confirm-error" : undefined}
+                                                aria-invalid={!!errors.confirm}
+                                                {...register("confirm", {
+                                                    required: "Please confirm your password.",
+                                                    validate: (val) => val === watch("password") || "Passwords do not match."
+                                                })}
                                             />
                                             <button
                                                 type="button"
@@ -626,11 +779,11 @@ export default function SignUp() {
                                                 {showConfirm ? <OpenEye /> : <CloseEye />}
                                             </button>
                                         </div>
-                                        {fieldErrors.confirm && (
+                                        {errors.confirm && (
                                             <p id="signup-confirm-error"
                                                 className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
                                                 role="alert">
-                                                <ErrorIcon />{fieldErrors.confirm}
+                                                <ErrorIcon />{errors.confirm.message}
                                             </p>
                                         )}
                                     </div>
@@ -642,17 +795,15 @@ export default function SignUp() {
                                                 id="signup-terms"
                                                 type="checkbox"
                                                 className="sr-only peer"
-                                                checked={agreed}
-                                                onChange={(e) => {
-                                                    setAgreed(e.target.checked);
-                                                    if (fieldErrors.agreed) setFieldErrors((p) => ({ ...p, agreed: "" }));
-                                                }}
+                                                {...register("agreed", {
+                                                    validate: (val) => val === true || "You must accept the terms to continue."
+                                                })}
                                             />
                                             <span
-                                                className={`shrink-0 w-[18px] h-[18px] mt-px rounded-[.3rem] border-[1.5px] bg-white flex items-center justify-center transition-colors duration-150 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600 peer-focus-visible:outline-offset-2 ${fieldErrors.agreed ? "border-red-400" : "border-slate-200"}`}
+                                                className={`shrink-0 w-[18px] h-[18px] mt-px rounded-[.3rem] border-[1.5px] bg-white flex items-center justify-center transition-colors duration-150 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600 peer-focus-visible:outline-offset-2 ${errors.agreed ? "border-red-400" : "border-slate-200"}`}
                                                 aria-hidden="true"
                                             >
-                                                {agreed && (
+                                                {agreedVal && (
                                                     <svg className="w-[10px] h-[10px] text-white" viewBox="0 0 12 12" fill="none"
                                                         stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                         <polyline points="2,6 5,9 10,3" />
@@ -671,10 +822,10 @@ export default function SignUp() {
                                                 <span className="text-red-600 ml-0.5" aria-hidden="true">*</span>
                                             </span>
                                         </label>
-                                        {fieldErrors.agreed && (
+                                        {errors.agreed && (
                                             <p className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
                                                 role="alert">
-                                                <ErrorIcon />{fieldErrors.agreed}
+                                                <ErrorIcon />{errors.agreed.message}
                                             </p>
                                         )}
                                     </div>

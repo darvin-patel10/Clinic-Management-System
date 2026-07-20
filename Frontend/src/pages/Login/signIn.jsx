@@ -1,99 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import api from "../../api.js";
-
-/* ─────────────────────────────────────────────────────────────
-   SignIn — Clinic Management System  (doctor-only login)
-   POST /api/auth/login  →  stores accessToken  →  /dashboard
-   100 % Tailwind CSS v4 — no style={{}}, no <style> injection.
-───────────────────────────────────────────────────────────── */
-
-/* ── Reusable SVG icons ─────────────────────────────────────── */
-function IconEye() {
-  return (
-    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconEyeOff() {
-  return (
-    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
-  );
-}
-
-function IconMail() {
-  return (
-    <svg className="w-[18px] h-[18px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-    </svg>
-  );
-}
-
-function IconLock() {
-  return (
-    <svg className="w-[18px] h-[18px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd"
-        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-        clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function IconAlert() {
-  return (
-    <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd"
-        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-        clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function IconError() {
-  return (
-    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0V5zm-.75 6.5a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-    </svg>
-  );
-}
-
-/* ── Clinic logo SVG ────────────────────────────────────────── */
-function ClinicLogo({ variant = "light" }) {
-  if (variant === "dark") {
-    return (
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="24" cy="24" r="23" stroke="rgba(37,99,235,0.2)" strokeWidth="2" />
-        <path d="M24 10v28M10 24h28" stroke="#2563eb" strokeWidth="3.5" strokeLinecap="round" />
-        <circle cx="24" cy="24" r="8" fill="rgba(37,99,235,0.08)" stroke="#2563eb" strokeWidth="1.5" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="23" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
-      <path d="M24 10v28M10 24h28" stroke="#14b8a6" strokeWidth="3.5" strokeLinecap="round" />
-      <circle cx="24" cy="24" r="8" fill="rgba(20,184,166,0.15)" stroke="#14b8a6" strokeWidth="1.5" />
-    </svg>
-  );
-}
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { LoginService } from "../../service/api/authServices.js";
+import { saveToken } from "../../service/httpServices.js";
+import { ClinicLogo, CloseEye, Email, ErrorIcon, IconAlert, Loader, OpenEye, Password } from "../../assets/Icons/index.js";
 
 /* ── Shared class strings ───────────────────────────────────── */
 const inputBase =
@@ -108,59 +18,73 @@ const inputOk = "border-slate-200";
    MAIN COMPONENT
 ══════════════════════════════════════════════════════════════ */
 export default function SignIn() {
-  const [email,       setEmail]       = useState("");
-  const [password,    setPassword]    = useState("");
-  const [showPw,      setShowPw]      = useState(false);
-  const [rememberMe,  setRememberMe]  = useState(false);
-  const [loading,     setLoading]     = useState(false);
-  const [error,       setError]       = useState("");
-  const [fieldErrors, setFieldErrors] = useState({});
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    setFocus,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false
+    }
+  });
 
-  const emailRef = useRef(null);
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const errorRef = useRef(null);
 
+  const rememberMe = watch("rememberMe");
+
   /* Initial focus */
-  useEffect(() => { emailRef.current?.focus(); }, []);
+  useEffect(() => { setFocus("email"); }, [setFocus]);
 
   /* Pre-fill remembered email */
   useEffect(() => {
     const saved = localStorage.getItem("cms_remembered_email");
-    if (saved) { setEmail(saved); setRememberMe(true); }
-  }, []);
+    if (saved) {
+      setValue("email", saved);
+      setValue("rememberMe", true);
+    }
+  }, [setValue]);
 
   /* Focus error banner for screen-readers */
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
 
-  /* ── Validation ─────────────────────────────────────────── */
-  function validate() {
-    const errs = {};
-    if (!email.trim())                                    errs.email    = "Email address is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))  errs.email    = "Enter a valid email address.";
-    if (!password)                                        errs.password = "Password is required.";
-    else if (password.length < 6)                         errs.password = "Password must be at least 6 characters.";
-    return errs;
-  }
-
   /* ── Submit ─────────────────────────────────────────────── */
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function onSubmit(data) {
+    if (loading) return;
     setError("");
-    setFieldErrors({});
-    const errs = validate();
-    if (Object.keys(errs).length) { setFieldErrors(errs); return; }
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/login", { email, password });
-      localStorage.setItem("accessToken", data.accessToken ?? data.token ?? "");
-      if (rememberMe) localStorage.setItem("cms_remembered_email", email);
-      else            localStorage.removeItem("cms_remembered_email");
-      window.location.href = "/dashboard";
+      const resData = await LoginService({
+        email: data.email,
+        password: data.password,
+      });
+
+      // Persist the access token using the shared helper (key: "token")
+      saveToken(resData.accessToken ?? "");
+
+      // Honour "Remember me" for email pre-fill on next visit
+      if (data.rememberMe) localStorage.setItem("cms_remembered_email", data.email);
+      else localStorage.removeItem("cms_remembered_email");
+
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        err.response?.data?.error   ||
-        "Invalid email or password. Please try again."
-      );
+      // For 401 errors, httpServices.js returns the raw Axios error (no enrichment).
+      // We therefore read the backend's own message first (they use "massage" typo).
+      const apiMessage =
+        err?.response?.data?.massage ||
+        err?.response?.data?.message ||
+        err.message ||
+        "Invalid email or password. Please try again.";
+      setError(apiMessage);
     } finally {
       setLoading(false);
     }
@@ -217,7 +141,7 @@ export default function SignIn() {
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
                           rounded-2xl mb-6 bg-white/5 border border-white/10 backdrop-blur-sm"
             aria-label="ClinicCMS">
-            <div className="w-11 h-11"><ClinicLogo variant="light" /></div>
+            <div className="w-11 h-11"><ClinicLogo className="text-teal-400" /></div>
           </div>
 
           {/* Title with gradient text */}
@@ -265,7 +189,7 @@ export default function SignIn() {
             {/* Mobile-only logo */}
             <div className="lg:hidden inline-flex items-center justify-center w-14 h-14
                             rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto">
-              <div className="w-9 h-9"><ClinicLogo variant="dark" /></div>
+              <div className="w-9 h-9"><ClinicLogo className="text-teal-400" /></div>
             </div>
             <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
               Welcome back, Doctor
@@ -292,7 +216,7 @@ export default function SignIn() {
           )}
 
           {/* ── Form ─────────────────────────────────────── */}
-          <form id="signin-form" className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+          <form id="signin-form" className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
 
             {/* Email field */}
             <div className="flex flex-col gap-1.5">
@@ -303,31 +227,32 @@ export default function SignIn() {
               </label>
               <div className="relative flex items-center">
                 <span className={`absolute left-3.5 pointer-events-none transition-colors duration-150
-                                  ${fieldErrors.email ? "text-red-500" : "text-slate-400"}`}>
-                  <IconMail />
+                                  ${errors.email ? "text-red-500" : "text-slate-400"}`}>
+                  <Email />
                 </span>
                 <input
                   id="signin-email"
-                  ref={emailRef}
                   type="email"
-                  className={`${inputBase} pl-[46px] pr-4 ${fieldErrors.email ? inputErr : inputOk}`}
+                  className={`${inputBase} pl-[46px] pr-4 ${errors.email ? inputErr : inputOk}`}
                   placeholder="doctor@clinic.com"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: "" }));
-                  }}
                   autoComplete="email"
                   aria-required="true"
-                  aria-describedby={fieldErrors.email ? "signin-email-error" : undefined}
-                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby={errors.email ? "signin-email-error" : undefined}
+                  aria-invalid={!!errors.email}
+                  {...register("email", {
+                    required: "Email address is required.",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Enter a valid email address."
+                    }
+                  })}
                 />
               </div>
-              {fieldErrors.email && (
+              {errors.email && (
                 <p id="signin-email-error"
                   className="flex items-center gap-1.5 m-0 text-[0.79rem] font-medium text-red-600"
                   role="alert">
-                  <IconError />{fieldErrors.email}
+                  <ErrorIcon />{errors.email.message}
                 </p>
               )}
             </div>
@@ -350,23 +275,25 @@ export default function SignIn() {
               </div>
               <div className="relative flex items-center">
                 <span className={`absolute left-3.5 pointer-events-none transition-colors duration-150
-                                  ${fieldErrors.password ? "text-red-500" : "text-slate-400"}`}>
-                  <IconLock />
+                                  ${errors.password ? "text-red-500" : "text-slate-400"}`}>
+                  <Password />
                 </span>
                 <input
                   id="signin-password"
                   type={showPw ? "text" : "password"}
-                  className={`${inputBase} pl-[46px] pr-12 ${fieldErrors.password ? inputErr : inputOk}`}
+                  className={`${inputBase} pl-[46px] pr-12 ${errors.password ? inputErr : inputOk}`}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: "" }));
-                  }}
                   autoComplete="current-password"
                   aria-required="true"
-                  aria-describedby={fieldErrors.password ? "signin-password-error" : undefined}
-                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby={errors.password ? "signin-password-error" : undefined}
+                  aria-invalid={!!errors.password}
+                  {...register("password", {
+                    required: "Password is required.",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters."
+                    }
+                  })}
                 />
                 <button
                   type="button"
@@ -377,14 +304,14 @@ export default function SignIn() {
                   onClick={() => setShowPw((v) => !v)}
                   aria-label={showPw ? "Hide password" : "Show password"}
                 >
-                  {showPw ? <IconEye /> : <IconEyeOff />}
+                  {showPw ? <OpenEye /> : <CloseEye />}
                 </button>
               </div>
-              {fieldErrors.password && (
+              {errors.password && (
                 <p id="signin-password-error"
                   className="flex items-center gap-1.5 m-0 text-[0.79rem] font-medium text-red-600"
                   role="alert">
-                  <IconError />{fieldErrors.password}
+                  <ErrorIcon />{errors.password.message}
                 </p>
               )}
             </div>
@@ -396,8 +323,7 @@ export default function SignIn() {
                 id="signin-remember"
                 type="checkbox"
                 className="sr-only peer"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                {...register("rememberMe")}
               />
               <span
                 className="shrink-0 w-[18px] h-[18px] rounded-[5px] border-[1.5px] border-slate-200
@@ -438,7 +364,7 @@ export default function SignIn() {
                          focus-visible:outline-[3px] focus-visible:outline-blue-600
                          focus-visible:outline-offset-[3px]"
             >
-              {loading ? <><Spinner />Signing in…</> : "Sign in to Dashboard"}
+              {loading ? <><Loader />Signing in…</> : "Sign in to Dashboard"}
             </button>
           </form>
 
