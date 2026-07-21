@@ -4,7 +4,8 @@ import SignIn from "../pages/Login/signIn";
 import SignUp from "../pages/Login/signUp";
 import { ProtectedRoute, PublicRoute } from "./routeGuards";
 import Dashboard from "../pages/Deshbord";
-
+import AllMedicines from "../pages/madicin/allmadicin";
+import AddMedicineModal from "../pages/madicin/addMadicin";
 
 export default function AppRoutes() {
     const location = useLocation();
@@ -37,7 +38,23 @@ export default function AppRoutes() {
                         <Dashboard />
                     </ProtectedRoute>
                 } />
-            {/* <Route path="*" element={<NotFound />} /> */}
+            <Route
+                path="/allmadicin"
+                element={
+                    <ProtectedRoute>
+                        <AllMedicines />
+                    </ProtectedRoute>
+                } />
+
+            <Route
+                path="/addmadicin"
+                element={
+                    <ProtectedRoute>
+                        <AddMedicineModal />
+                    </ProtectedRoute>
+                } />
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );
 }
