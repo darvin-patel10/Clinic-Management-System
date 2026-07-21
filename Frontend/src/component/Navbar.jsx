@@ -16,10 +16,12 @@ import {
     Clock,
     Pill,
     Settings,
+    ArrowLeft,
 } from "lucide-react";
 import { ClinicLogo } from "../assets/Icons/index.js";
 import { LogoutService, GetMeService } from "../service/api/authServices.js";
 import { clearToken } from "../service/httpServices.js";
+import Button from "./Button.jsx";
 
 export default function Navbar({
     doctorInfo = null,
@@ -39,6 +41,7 @@ export default function Navbar({
     const profileRef = useRef(null);
     const notifRef = useRef(null);
 
+    const isDashboard = location.pathname === "/dashboard";
     // Fetch user details if not provided via props
     useEffect(() => {
         if (!user) {
@@ -127,8 +130,24 @@ export default function Navbar({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 gap-4">
 
+
+
                     {/* ── 1. Branding & Logo ────────────────────────────────────────── */}
                     <div className="flex items-center gap-3">
+                        {!isDashboard && (
+                            <Button
+                                type="button"
+                                onClick={() => navigate(-1)}
+                                background="bg-white/80 "
+                                border="border border-slate-200/80"
+                                padding="p-2"
+                                className="w-auto text-black! rounded-xl transition-all duration-200 ease-out active:scale-95 animate-in fade-in slide-in-from-left-2 duration-300"
+                                aria-label="Go back"
+                                title="Go back"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                            </Button>
+                        )}
                         <a
                             href="/dashboard"
                             className="flex items-center gap-2.5 group focus:outline-none"
@@ -153,37 +172,20 @@ export default function Navbar({
                         </a>
                     </div>
 
-                    {/* ── 2. Universal Search Bar ───────────────────────────────────── */}
-                    <div className="hidden md:flex flex-1 max-w-md mx-4">
-                        <form onSubmit={handleSearchSubmit} className="w-full relative">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search patients, prescriptions, medicines..."
-                                className="w-full h-10 pl-10 pr-12 rounded-xl border border-slate-200 bg-slate-50/70 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-150 hover:bg-slate-100/80 focus:bg-white focus:border-blue-600 focus:ring-3 focus:ring-blue-500/15"
-                            />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 pointer-events-none">
-                                <kbd className="hidden lg:inline-flex items-center h-5 px-1.5 rounded bg-slate-200/70 text-[10px] font-semibold text-slate-500 border border-slate-300/60">
-                                    ⌘K
-                                </kbd>
-                            </div>
-                        </form>
-                    </div>
-
                     {/* ── 3. Right Controls & Profile ───────────────────────────────── */}
                     <div className="flex items-center gap-2 sm:gap-3">
 
                         {/* Quick Action Button */}
-                        <button
-                            type="button"
-                            onClick={() => onQuickAction("add-patient")}
-                            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-xs shadow-sm hover:shadow transition-all duration-150 active:scale-95"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>Add Patient</span>
-                        </button>
+                        {isDashboard && (
+                            <Button
+                                type="button"
+                                onClick={() => onQuickAction("add-patient")}
+                                className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-xs rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-none shadow-sm hover:shadow transition-all duration-200 ease-out active:scale-95 w-auto animate-in fade-in slide-in-from-right-2 duration-300"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Add Patient</span>
+                            </Button>
+                        )}
 
                         {/* Notifications Dropdown */}
                         <div className="relative" ref={notifRef}>
@@ -307,6 +309,16 @@ export default function Navbar({
                                         >
                                             <Activity className="w-4 h-4 text-slate-400" />
                                             Dashboard Overview
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setIsProfileOpen(false);
+                                                navigate("/allmadicin");
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
+                                        >
+                                            <Pill className="w-4 h-4 text-slate-400" />
+                                            Medicines Inventory
                                         </button>
                                         <button
                                             onClick={() => setIsProfileOpen(false)}

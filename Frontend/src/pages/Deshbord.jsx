@@ -10,7 +10,13 @@ import {
     Clock,
     ChevronRight,
 } from "lucide-react";
-import Navbar from "../component/Navbar";
+import PageWrapper from "../component/PageWrapper";
+import SectionWrapper from "../component/SectionWrapper";
+import Card from "../component/Deshbord/Card";
+import Table from "../component/Deshbord/Table";
+import ErrorState from "../component/Deshbord/ErrorState";
+import KpiCard from "../component/Deshbord/KpiCard";
+import { formatCurrency, formatDate } from "../utils/formatters.js";
 // import {
 //     ResponsiveContainer,
 //     AreaChart,
@@ -43,209 +49,134 @@ export default function Dashboard({
     onRetry = () => { },
 }) {
     if (isError) {
-        return <DashboardErrorState onRetry={onRetry} />;
+        return <ErrorState onRetry={onRetry} />;
     }
 
-    return (
-        <div className="flex flex-col gap-8 p-4 md:p-6">
-            <Navbar />
-            <header>
-                <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-                <p className="mt-1 text-sm text-gray-600">
-                    Here&apos;s what&apos;s happening at your clinic today.
-                </p>
-            </header>
-
-            {/* Row 1 — KPI cards */}
-            <section
-                aria-label="Key metrics"
-                className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
-            >
-                {isLoading
-                    ? Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)
-                    : buildKpiCards(stats).map((kpi) => <KpiCard key={kpi.label} {...kpi} />)}
-            </section>
-
-            {/* Row 2 — Revenue chart + Low stock
-            <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-                <Card title="Revenue overview" subtitle="Last 7 days">
-                    {isLoading ? (
-                        <ChartSkeleton />
-                    ) : (
-                        <RevenueChart data={stats.revenueTrend} />
-                    )}
-                </Card>
-
-                <Card
-                    title="Low stock medicines"
-                    subtitle={`${stats.lowStockMedicines.length} need attention`}
-                    action={
-                        <button
-                            type="button"
-                            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
-                        >
-                            View all
-                            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                    }
-                >
-                    {isLoading ? (
-                        <ListSkeleton rows={5} />
-                    ) : (
-                        <LowStockList items={stats.lowStockMedicines} />
-                    )}
-                </Card>
-            </section> */}
-
-            {/* Row 3 — Recent patients + Recent prescriptions */}
-            <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                <Card
-                    title="Recent patients"
-                    action={<TextLink label="View all" />}
-                >
-                    {isLoading ? (
-                        <TableSkeleton rows={5} />
-                    ) : (
-                        <RecentPatientsTable patients={stats.recentPatients} />
-                    )}
-                </Card>
-
-                <Card
-                    title="Recent prescriptions"
-                    action={<TextLink label="View all" />}
-                >
-                    {isLoading ? (
-                        <TableSkeleton rows={5} />
-                    ) : (
-                        <RecentPrescriptionsTable prescriptions={stats.recentPrescriptions} />
-                    )}
-                </Card>
-            </section>
-        </div>
-    );
-}
-
-/* -------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
  * KPI Cards
  * ---------------------------------------------------------------------- */
 
-function buildKpiCards(stats) {
-    return [
-        {
-            label: "Total medicines",
-            value: stats.totalMedicines.toLocaleString("en-IN"),
-            icon: Pill,
-            tone: "blue",
-        },
-        {
-            label: "Total patients",
-            value: stats.totalPatients.toLocaleString("en-IN"),
-            icon: Users,
-            tone: "blue",
-        },
-        {
-            label: "Today's patients",
-            value: stats.todaysPatients.toLocaleString("en-IN"),
-            icon: CalendarCheck,
-            tone: "green",
-        },
-        {
-            label: "Monthly revenue",
-            value: formatCurrency(stats.monthlyRevenue),
-            icon: IndianRupee,
-            tone: "blue",
-            delta: stats.revenueDeltaPercent,
-        },
-    ];
-}
+    function buildKpiCards(stats) {
+        return [
+            {
+                label: "Total medicines",
+                value: stats.totalMedicines.toLocaleString("en-IN"),
+                icon: Pill,
+                tone: "blue",
+            },
+            {
+                label: "Total patients",
+                value: stats.totalPatients.toLocaleString("en-IN"),
+                icon: Users,
+                tone: "blue",
+            },
+            {
+                label: "Today's patients",
+                value: stats.todaysPatients.toLocaleString("en-IN"),
+                icon: CalendarCheck,
+                tone: "green",
+            },
+            {
+                label: "Monthly revenue",
+                value: formatCurrency(stats.monthlyRevenue),
+                icon: IndianRupee,
+                tone: "blue",
+                delta: stats.revenueDeltaPercent,
+            },
+        ];
+    }
 
-const TONE_STYLES = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600",
-    yellow: "bg-yellow-50 text-yellow-600",
-    red: "bg-red-50 text-red-600",
-};
 
-function KpiCard({ label, value, icon: Icon, tone = "blue", delta }) {
-    const isPositive = typeof delta === "number" && delta >= 0;
-    const hasDelta = typeof delta === "number";
 
-    return (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="flex items-start justify-between">
-                <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${TONE_STYLES[tone]}`}
-                >
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-
-                {hasDelta && (
-                    <span
-                        className={`inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-green-600" : "text-red-600"
-                            }`}
-                    >
-                        {isPositive ? (
-                            <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                        ) : (
-                            <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
-                        )}
-                        {Math.abs(delta)}%
-                    </span>
-                )}
+    function KpiCardSkeleton() {
+        return (
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="h-10 w-10 animate-pulse rounded-full bg-gray-100" />
+                <div className="mt-4 h-7 w-24 animate-pulse rounded bg-gray-100" />
+                <div className="mt-2 h-3 w-28 animate-pulse rounded bg-gray-100" />
             </div>
+        );
+    }
 
-            <p className="mt-4 text-[28px] font-bold leading-8 text-gray-900 tabular-nums">
-                {value}
-            </p>
-            <p className="mt-1 text-xs text-gray-600">{label}</p>
-        </div>
-    );
-}
 
-function KpiCardSkeleton() {
-    return (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="h-10 w-10 animate-pulse rounded-full bg-gray-100" />
-            <div className="mt-4 h-7 w-24 animate-pulse rounded bg-gray-100" />
-            <div className="mt-2 h-3 w-28 animate-pulse rounded bg-gray-100" />
-        </div>
-    );
-}
-
-/* -------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
  * Shared Card shell
  * ---------------------------------------------------------------------- */
 
-function Card({ title, subtitle, action, children }) {
-    return (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
-                    <h2 className="text-[20px] font-semibold leading-7 text-gray-900">
-                        {title}
-                    </h2>
-                    {subtitle && (
-                        <p className="mt-0.5 text-xs text-gray-600">{subtitle}</p>
-                    )}
-                </div>
-                {action}
+    function TextLink({ label }) {
+        return (
+            <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+                {label}
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+        );
+    }
+
+    /* -------------------------------------------------------------------------
+ * Small shared bits
+ * ---------------------------------------------------------------------- */
+
+    function TableSkeleton({ rows = 4 }) {
+        return (
+            <div className="flex flex-col gap-4">
+                {Array.from({ length: rows }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                        <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-gray-100" />
+                        <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+                    </div>
+                ))}
             </div>
-            {children}
-        </div>
+        );
+    }
+
+    return (
+        <PageWrapper
+            title="Dashboard"
+            subtitle="Here's what's happening at your clinic today."
+        >
+            <div className="flex flex-col gap-8">
+                {/* Row 1 — KPI cards */}
+                <SectionWrapper
+                    aria-label="Key metrics"
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                >
+                    {isLoading
+                        ? Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)
+                        : buildKpiCards(stats).map((kpi) => <KpiCard key={kpi.label} {...kpi} />)}
+                </SectionWrapper>
+
+                {/* Row 3 — Recent patients + Recent prescriptions */}
+                <SectionWrapper className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                    <Card
+                        title="Recent patients"
+                        action={<TextLink label="View all" />}
+                    >
+                        {isLoading ? (
+                            <TableSkeleton rows={5} />
+                        ) : (
+                            <Table data={stats.recentPatients} patient={true} />
+                        )}
+                    </Card>
+
+                    <Card
+                        title="Recent prescriptions"
+                        action={<TextLink label="View all" />}
+                    >
+                        {isLoading ? (
+                            <TableSkeleton rows={5} />
+                        ) : (
+                            <Table data={stats.recentPrescriptions} />
+                        )}
+                    </Card>
+                </SectionWrapper>
+            </div>
+        </PageWrapper>
     );
 }
 
-function TextLink({ label }) {
-    return (
-        <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
-        >
-            {label}
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-        </button>
-    );
-}
 
 /* -------------------------------------------------------------------------
  * Revenue chart
@@ -303,246 +234,56 @@ function TextLink({ label }) {
 //   );
 // }
 
-function ChartSkeleton() {
-    return <div className="h-64 w-full animate-pulse rounded-lg bg-gray-100" />;
-}
+// function ChartSkeleton() {
+//     return <div className="h-64 w-full animate-pulse rounded-lg bg-gray-100" />;
+// }
 
 /* -------------------------------------------------------------------------
  * Low stock list
  * ---------------------------------------------------------------------- */
 
-function LowStockList({ items }) {
-    if (!items || items.length === 0) {
-        return <EmptyState message="All medicines are well stocked." />;
-    }
+// function LowStockList({ items }) {
+//     if (!items || items.length === 0) {
+//         return <EmptyState message="All medicines are well stocked." />;
+//     }
 
-    return (
-        <ul className="flex flex-col gap-1">
-            {items.map((med) => (
-                <li
-                    key={med.id}
-                    className="flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 hover:bg-gray-50"
-                >
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-gray-900">
-                            {med.name}
-                        </p>
-                        <p className="text-xs text-gray-600">{med.category}</p>
-                    </div>
-                    <StockBadge quantity={med.quantity} threshold={med.lowStockThreshold} />
-                </li>
-            ))}
-        </ul>
-    );
-}
+//     return (
+//         <ul className="flex flex-col gap-1">
+//             {items.map((med) => (
+//                 <li
+//                     key={med.id}
+//                     className="flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 hover:bg-gray-50"
+//                 >
+//                     <div className="min-w-0">
+//                         <p className="truncate text-sm font-medium text-gray-900">
+//                             {med.name}
+//                         </p>
+//                         <p className="text-xs text-gray-600">{med.category}</p>
+//                     </div>
+//                     <StockBadge quantity={med.quantity} threshold={med.lowStockThreshold} />
+//                 </li>
+//             ))}
+//         </ul>
+//     );
+// }
 
-function StockBadge({ quantity, threshold }) {
-    const isCritical = quantity <= Math.ceil(threshold / 2);
-    const tone = isCritical
-        ? "bg-red-50 text-red-600"
-        : "bg-yellow-50 text-yellow-600";
+// function StockBadge({ quantity, threshold }) {
+//     const isCritical = quantity <= Math.ceil(threshold / 2);
+//     const tone = isCritical
+//         ? "bg-red-50 text-red-600"
+//         : "bg-yellow-50 text-yellow-600";
 
-    return (
-        <span
-            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}
-        >
-            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-            {quantity} left
-        </span>
-    );
-}
+//     return (
+//         <span
+//             className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}
+//         >
+//             <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+//             {quantity} left
+//         </span>
+//     );
+// }
 
-/* -------------------------------------------------------------------------
- * Recent patients table
- * ---------------------------------------------------------------------- */
 
-function RecentPatientsTable({ patients }) {
-    if (!patients || patients.length === 0) {
-        return <EmptyState message="No patients added yet." />;
-    }
-
-    return (
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-                <thead>
-                    <tr className="border-b border-gray-100">
-                        <Th>Name</Th>
-                        <Th>Phone</Th>
-                        <Th>Last visit</Th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {patients.map((p) => (
-                        <tr
-                            key={p.id}
-                            className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
-                        >
-                            <Td>
-                                <div className="flex items-center gap-3">
-                                    <Avatar name={p.name} />
-                                    <span className="font-medium text-gray-900">{p.name}</span>
-                                </div>
-                            </Td>
-                            <Td className="tabular-nums text-gray-600">{p.phone}</Td>
-                            <Td className="text-gray-600">{formatDate(p.lastVisit)}</Td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
-/* -------------------------------------------------------------------------
- * Recent prescriptions table
- * ---------------------------------------------------------------------- */
-
-function RecentPrescriptionsTable({ prescriptions }) {
-    if (!prescriptions || prescriptions.length === 0) {
-        return <EmptyState message="No prescriptions created yet." />;
-    }
-
-    return (
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-                <thead>
-                    <tr className="border-b border-gray-100">
-                        <Th>Patient</Th>
-                        <Th>Medicines</Th>
-                        <Th>Date</Th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {prescriptions.map((rx) => (
-                        <tr
-                            key={rx.id}
-                            className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
-                        >
-                            <Td className="font-medium text-gray-900">{rx.patientName}</Td>
-                            <Td className="text-gray-600">
-                                {rx.medicineCount} medicine{rx.medicineCount !== 1 ? "s" : ""}
-                            </Td>
-                            <Td className="text-gray-600">
-                                <span className="inline-flex items-center gap-1">
-                                    <Clock className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
-                                    {formatDate(rx.date)}
-                                </span>
-                            </Td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
-/* -------------------------------------------------------------------------
- * Small shared bits
- * ---------------------------------------------------------------------- */
-
-function Th({ children }) {
-    return (
-        <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">
-            {children}
-        </th>
-    );
-}
-
-function Td({ children, className = "" }) {
-    return <td className={`py-3 pr-4 text-sm ${className}`}>{children}</td>;
-}
-
-function Avatar({ name }) {
-    const initials = name
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
-
-    return (
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-600">
-            {initials}
-        </span>
-    );
-}
-
-function EmptyState({ message }) {
-    return (
-        <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <AlertTriangle className="h-8 w-8 text-gray-300" aria-hidden="true" />
-            <p className="text-sm text-gray-600">{message}</p>
-        </div>
-    );
-}
-
-function ListSkeleton({ rows = 4 }) {
-    return (
-        <div className="flex flex-col gap-3">
-            {Array.from({ length: rows }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between gap-3">
-                    <div className="h-4 w-2/3 animate-pulse rounded bg-gray-100" />
-                    <div className="h-5 w-14 animate-pulse rounded-full bg-gray-100" />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function TableSkeleton({ rows = 4 }) {
-    return (
-        <div className="flex flex-col gap-4">
-            {Array.from({ length: rows }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                    <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-gray-100" />
-                    <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function DashboardErrorState({ onRetry }) {
-    return (
-        <div className="flex h-[60vh] flex-col items-center justify-center gap-3 p-6 text-center">
-            <AlertTriangle className="h-10 w-10 text-red-600" aria-hidden="true" />
-            <h2 className="text-lg font-semibold text-gray-900">
-                Something went wrong
-            </h2>
-            <p className="max-w-sm text-sm text-gray-600">
-                We couldn&apos;t load your dashboard data. Please check your connection
-                and try again.
-            </p>
-            <button
-                type="button"
-                onClick={onRetry}
-                className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-                Retry
-            </button>
-        </div>
-    );
-}
-
-/* -------------------------------------------------------------------------
- * Helpers
- * ---------------------------------------------------------------------- */
-
-function formatCurrency(amount) {
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 0,
-    }).format(amount);
-}
-
-function formatDate(isoDate) {
-    return new Intl.DateTimeFormat("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    }).format(new Date(isoDate));
-}
 
 /* -------------------------------------------------------------------------
  * Mock data — remove once useDashboardStats() is wired to the real API.
