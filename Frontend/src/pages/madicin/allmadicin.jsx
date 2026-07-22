@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Pill,
@@ -20,100 +20,103 @@ import Card from "../../component/Deshbord/Card";
 import Button from "../../component/Button";
 import KpiCard from "../../component/Deshbord/KpiCard";
 import { formatCurrency, formatDate } from "../../utils/formatters";
-
-// Mock medicine initial data
-const INITIAL_MEDICINES = [
-    {
-        id: "M-101",
-        name: "Amoxicillin 500mg",
-        category: "Antibiotic",
-        dosageForm: "Capsule",
-        manufacturer: "Sun Pharma",
-        quantity: 8,
-        lowStockThreshold: 20,
-        unitPrice: 12.5,
-        expiryDate: "2026-11-15",
-    },
-    {
-        id: "M-102",
-        name: "Paracetamol 650mg",
-        category: "Analgesic",
-        dosageForm: "Tablet",
-        manufacturer: "Cipla Ltd",
-        quantity: 140,
-        lowStockThreshold: 30,
-        unitPrice: 3.0,
-        expiryDate: "2027-04-20",
-    },
-    {
-        id: "M-103",
-        name: "Cetirizine 10mg",
-        category: "Antihistamine",
-        dosageForm: "Tablet",
-        manufacturer: "Dr. Reddy's",
-        quantity: 5,
-        lowStockThreshold: 15,
-        unitPrice: 4.5,
-        expiryDate: "2026-08-10",
-    },
-    {
-        id: "M-104",
-        name: "Metformin 500mg",
-        category: "Antidiabetic",
-        dosageForm: "Tablet",
-        manufacturer: "Zydus Healthcare",
-        quantity: 18,
-        lowStockThreshold: 30,
-        unitPrice: 6.8,
-        expiryDate: "2027-01-05",
-    },
-    {
-        id: "M-105",
-        name: "Pantoprazole 40mg",
-        category: "Antacid",
-        dosageForm: "Tablet",
-        manufacturer: "Alkem Labs",
-        quantity: 85,
-        lowStockThreshold: 25,
-        unitPrice: 9.0,
-        expiryDate: "2026-09-30",
-    },
-    {
-        id: "M-106",
-        name: "Azithromycin 500mg",
-        category: "Antibiotic",
-        dosageForm: "Tablet",
-        manufacturer: "Lupin Ltd",
-        quantity: 0,
-        lowStockThreshold: 10,
-        unitPrice: 22.0,
-        expiryDate: "2026-12-18",
-    },
-    {
-        id: "M-107",
-        name: "Cough Syrup 100ml",
-        category: "Syrup",
-        dosageForm: "Syrup",
-        manufacturer: "Dabur India",
-        quantity: 42,
-        lowStockThreshold: 15,
-        unitPrice: 85.0,
-        expiryDate: "2026-08-01",
-    },
-];
-
-const CATEGORIES = ["All", "Antibiotic", "Analgesic", "Antihistamine", "Antidiabetic", "Antacid", "Syrup"];
+import EditMadition from "../../component/Madition/EditMadition";
+import DeleteAlart from "../../component/DeleteAlart";
+import { useNotification } from "../../hooks/showNotification";
+import Dropdown from "../../component/Dropdown";
+import InputField from "../../component/InputField";
+import AddQty from "../../component/Madition/AddQty";
+import {
+    AllMedicinesService,
+    DeleteMedicineService,
+    AddQuantityService,
+    UpdateMedicineService,
+    SearchMedicineService,
+} from "../../service/api/medicineServices";
 
 export default function AllMedicines() {
     const navigate = useNavigate();
-    const [medicines, setMedicines] = useState(INITIAL_MEDICINES);
+    const [medicines, setMedicines] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
 
+    const { showNotification } = useNotification();
+
+    const fetchMedicines = async () => {
+        try {
+            const data = await AllMedicinesService();
+            if (data && data.medicine) {
+                const mapped = data.medicine.map((med) => ({
+                    id: med._id,
+                    name: med.medicineName,
+                    quantity: med.quantity,
+                    unitPrice: med.unitPrice,
+                    totalPrice: med.totalPrice,
+                    category: med.category || "All",
+                    dosageForm: med.dosageForm || "Tablet",
+                    manufacturer: med.manufacturer || "Generic",
+                    lowStockThreshold: med.lowStockThreshold || 10,
+                    expiryDate: med.expiryDate || "N/A",
+                }));
+                setMedicines(mapped);
+            }
+        } catch (error) {
+            console.error("Failed to fetch medicines:", error);
+            showNotification({
+                title: "Error",
+                message: error.message || "Failed to load medicines inventory.",
+                type: "error",
+            });
+        }
+    };
+
+    const searchMedicinesFromAPI = async (query) => {
+        try {
+            const data = await SearchMedicineService(query);
+            if (data && data.medicines) {
+                const mapped = data.medicines.map((med) => ({
+                    id: med._id,
+                    name: med.medicineName,
+                    quantity: med.quantity,
+                    unitPrice: med.unitPrice,
+                    totalPrice: med.totalPrice,
+                    category: med.category || "All",
+                    dosageForm: med.dosageForm || "Tablet",
+                    manufacturer: med.manufacturer || "Generic",
+                    lowStockThreshold: med.lowStockThreshold || 10,
+                    expiryDate: med.expiryDate || "N/A",
+                }));
+                setMedicines(mapped);
+            }
+        } catch (error) {
+            console.error("Failed to search medicines:", error);
+        }
+    };
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchQuery.trim() === "") {
+                fetchMedicines();
+            } else {
+                searchMedicinesFromAPI(searchQuery);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
+
     // Modal state for edit
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMedicine, setEditingMedicine] = useState(null);
+
+    // Modal state for delete
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [deletingMedicineId, setDeletingMedicineId] = useState(null);
+
+    // Modal state for add quantity
+    const [isAddQtyOpen, setIsAddQtyOpen] = useState(false);
+    const [selectedMedicineForQty, setSelectedMedicineForQty] = useState(null);
 
     // Compute metrics
     const metrics = useMemo(() => {
@@ -161,46 +164,86 @@ export default function AllMedicines() {
 
     // Delete medicine
     const handleDelete = (id) => {
-        if (window.confirm("Are you sure you want to remove this medicine from inventory?")) {
-            setMedicines((prev) => prev.filter((m) => m.id !== id));
+        setDeletingMedicineId(id);
+        setIsDeleteOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (deletingMedicineId) {
+            try {
+                await DeleteMedicineService(deletingMedicineId);
+                showNotification({
+                    title: "Deleted",
+                    message: "Medicine removed from inventory successfully.",
+                    type: "warning"
+                });
+                fetchMedicines();
+            } catch (error) {
+                console.error("Failed to delete medicine:", error);
+                showNotification({
+                    title: "Error",
+                    message: error.message || "Failed to delete medicine.",
+                    type: "error"
+                });
+            } finally {
+                setDeletingMedicineId(null);
+            }
         }
     };
 
-    // Form Submit (Add/Edit)
-    const handleModalSubmit = (submittedData) => {
+    // Form Submit (Edit)
+    const handleModalSubmit = async (submittedData) => {
         if (editingMedicine) {
-            setMedicines((prev) =>
-                prev.map((m) =>
-                    m.id === editingMedicine.id
-                        ? {
-                            ...submittedData,
-                            quantity: Number(submittedData.quantity),
-                            unitPrice: Number(submittedData.unitPrice),
-                            lowStockThreshold: Number(submittedData.lowStockThreshold),
-                        }
-                        : m
-                )
-            );
-        } else {
-            const newId = `M-${100 + medicines.length + 1}`;
-            setMedicines((prev) => [
-                {
-                    ...submittedData,
-                    id: newId,
+            try {
+                const payload = {
+                    medicineName: submittedData.name,
                     quantity: Number(submittedData.quantity),
                     unitPrice: Number(submittedData.unitPrice),
-                    lowStockThreshold: Number(submittedData.lowStockThreshold),
-                },
-                ...prev,
-            ]);
+                };
+                await UpdateMedicineService(editingMedicine.id, payload);
+                fetchMedicines();
+            } catch (error) {
+                console.error("Failed to update medicine details:", error);
+                showNotification({
+                    title: "Error",
+                    message: error.message || "Failed to update medicine details.",
+                    type: "error",
+                });
+            } finally {
+                setIsModalOpen(false);
+                setEditingMedicine(null);
+            }
         }
-        setIsModalOpen(false);
+    };
+
+    const handleAddQuantitySubmit = async (qty) => {
+        if (!selectedMedicineForQty) return;
+        try {
+            await AddQuantityService(selectedMedicineForQty.id, qty);
+            showNotification({
+                title: "Stock Added",
+                message: `Successfully added ${qty} units to ${selectedMedicineForQty.name}.`,
+                type: "success",
+            });
+            fetchMedicines();
+        } catch (error) {
+            console.error("Failed to add stock quantity:", error);
+            showNotification({
+                title: "Error",
+                message: error.message || "Failed to add stock quantity.",
+                type: "error",
+            });
+        } finally {
+            setIsAddQtyOpen(false);
+            setSelectedMedicineForQty(null);
+        }
     };
 
     return (
         <PageWrapper
             title="Medicine Inventory"
             subtitle="Manage clinic drug stock, low-stock alerts, pricing and expiry dates."
+            onBack={() => navigate("/dashboard")}
             actions={
                 <div className="w-full sm:w-auto">
                     <Button
@@ -250,7 +293,7 @@ export default function AllMedicines() {
                         {/* Search Input */}
                         <div className="relative flex-1 w-full lg:max-w-md">
                             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
+                            <InputField
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -269,33 +312,16 @@ export default function AllMedicines() {
 
                         {/* Dropdown Filters */}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
-                            <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-white text-xs font-medium text-slate-700 shadow-sm w-full sm:w-auto">
-                                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full bg-transparent outline-none cursor-pointer text-slate-800 font-semibold"
-                                >
-                                    {CATEGORIES.map((cat) => (
-                                        <option key={cat} value={cat}>
-                                            Category: {cat}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-white text-xs font-medium text-slate-700 shadow-sm w-full sm:w-auto">
-                                <select
-                                    value={stockFilter}
-                                    onChange={(e) => setStockFilter(e.target.value)}
-                                    className="w-full bg-transparent outline-none cursor-pointer text-slate-800 font-semibold"
-                                >
-                                    <option value="All">Stock Status: All</option>
-                                    <option value="instock">In Stock</option>
-                                    <option value="low">Low Stock</option>
-                                    <option value="out">Out of Stock</option>
-                                </select>
-                            </div>
+                            <Dropdown
+                                value={stockFilter}
+                                onChange={(e) => setStockFilter(e.target.value)}
+                                options={[
+                                    { value: "All", label: "Stock Status: All" },
+                                    { value: "instock", label: "In Stock" },
+                                    { value: "low", label: "Low Stock" },
+                                    { value: "out", label: "Out of Stock" },
+                                ]}
+                            />
                         </div>
                     </div>
                 </Card>
@@ -337,6 +363,9 @@ export default function AllMedicines() {
                                             </th>
                                             <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
                                                 Total Price
+                                            </th>
+                                            <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                                                Add Qty
                                             </th>
                                             <th className="pb-3 text-xs font-bold uppercase tracking-wider text-slate-500 text-right whitespace-nowrap">
                                                 Actions
@@ -391,9 +420,26 @@ export default function AllMedicines() {
                                                         {formatCurrency(totalPrice)}
                                                     </td>
 
+                                                    <td className="py-3.5 pr-4">
+                                                        <Button
+                                                            onClick={() => {
+                                                                setSelectedMedicineForQty(med);
+                                                                setIsAddQtyOpen(true);
+                                                            }}
+                                                            background="bg-emerald-50! text-emerald-700! border-none!"
+                                                            className="w-auto font-bold flex items-center justify-center gap-1 active:scale-95 transition-all duration-150 rounded-xl"
+                                                            padding="py-2 px-2"
+                                                            title="Add Quantity"
+                                                        >
+                                                            <Plus className="w-4 h-4 shrink-0" />
+                                                            <span className="hidden lg:inline">Add Qty</span>
+                                                        </Button>
+                                                    </td>
+
                                                     {/* Actions */}
                                                     <td className="py-3.5 text-right">
                                                         <div className="flex items-center justify-end gap-1.5">
+
                                                             <button
                                                                 onClick={() => handleOpenEditModal(med)}
                                                                 className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
@@ -434,6 +480,16 @@ export default function AllMedicines() {
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedMedicineForQty(med);
+                                                            setIsAddQtyOpen(true);
+                                                        }}
+                                                        className="p-2 rounded-lg text-slate-600 bg-slate-100 active:bg-emerald-50 active:text-emerald-600"
+                                                        aria-label="Add Quantity"
+                                                    >
+                                                        <Plus className="w-4 h-4" />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleOpenEditModal(med)}
                                                         className="p-2 rounded-lg text-slate-600 bg-slate-100 active:bg-blue-50 active:text-blue-600"
@@ -492,6 +548,33 @@ export default function AllMedicines() {
                 </Card>
             </div>
 
+            <EditMadition
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                medicine={editingMedicine}
+                onSubmit={handleModalSubmit}
+            />
+
+            <DeleteAlart
+                isOpen={isDeleteOpen}
+                onClose={() => {
+                    setIsDeleteOpen(false);
+                    setDeletingMedicineId(null);
+                }}
+                onConfirm={handleConfirmDelete}
+                title="Remove Medicine"
+                message="Are you sure you want to remove this medicine from the inventory list? This action cannot be undone."
+            />
+
+            <AddQty
+                isOpen={isAddQtyOpen}
+                onClose={() => {
+                    setIsAddQtyOpen(false);
+                    setSelectedMedicineForQty(null);
+                }}
+                medicine={selectedMedicineForQty}
+                onSubmit={handleAddQuantitySubmit}
+            />
         </PageWrapper>
     );
 }

@@ -6,6 +6,8 @@ import { ProtectedRoute, PublicRoute } from "./routeGuards";
 import Dashboard from "../pages/Deshbord";
 import AllMedicines from "../pages/madicin/allmadicin";
 import AddMedicineModal from "../pages/madicin/addMadicin";
+import AddPationt from "../pages/pationt/addPationt";
+import AllPationt from "../pages/pationt/AllPationt";
 
 export default function AppRoutes() {
     const location = useLocation();
@@ -51,6 +53,21 @@ export default function AppRoutes() {
                 element={
                     <ProtectedRoute>
                         <AddMedicineModal />
+                    </ProtectedRoute>
+                } />
+
+            <Route
+                path="/add-pationt"
+                element={
+                    <ProtectedRoute>
+                        <AddPationt />
+                    </ProtectedRoute>
+                } />
+            <Route
+                path="/all-pationt"
+                element={
+                    <ProtectedRoute>
+                        <AllPationt />
                     </ProtectedRoute>
                 } />
             {/* Default redirect */}

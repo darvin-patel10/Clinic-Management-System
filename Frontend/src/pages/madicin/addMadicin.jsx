@@ -4,24 +4,28 @@ import { Pill, ArrowLeft, CheckCircle2 } from "lucide-react";
 import PageWrapper from "../../component/PageWrapper";
 import Card from "../../component/Deshbord/Card";
 import Button from "../../component/Button";
+import InputField from "../../component/InputField";
+import { useNotification } from "../../hooks/showNotification";
+import { AddMedicineService } from "../../service/api/medicineServices";
 
 const DEFAULT_CATEGORIES = ["Antibiotic", "Analgesic", "Antihistamine", "Antidiabetic", "Antacid", "Syrup"];
 
 export default function AddMedicine({
-    onSuccess,
-    editingMedicine = null,
     categories = DEFAULT_CATEGORIES,
 }) {
     const navigate = useNavigate();
+    const { showNotification } = useNotification();
+
     const [formData, setFormData] = useState({
-        name: "",
-        category: "Antibiotic",
-        dosageForm: "Tablet",
-        manufacturer: "",
+        medicineName: "",
         quantity: "",
-        lowStockThreshold: 15,
         unitPrice: "",
-        expiryDate: "",
+    });
+
+    const [errors, setErrors] = useState({
+        medicineName: "",
+        quantity: "",
+        unitPrice: "",
     });
 
     useEffect(() => {
@@ -29,153 +33,166 @@ export default function AddMedicine({
             setFormData({ ...editingMedicine });
         } else {
             setFormData({
-                name: "",
-                category: categories[0] || "Antibiotic",
-                dosageForm: "Tablet",
-                manufacturer: "",
+                medicineName: "",
                 quantity: "",
-                lowStockThreshold: 15,
                 unitPrice: "",
-                expiryDate: "",
             });
         }
+        setErrors({
+            medicineName: "",
+            quantity: "",
+            unitPrice: "",
+        });
     }, [editingMedicine, categories]);
 
     const handleCancel = () => {
         navigate("/allmadicin");
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (onSuccess) {
-            onSuccess(formData);
-        } else {
-            // Default behavior for route /addmadicin
-            alert(`Medicine "${formData.name}" added successfully!`);
+
+        const newErrors = {
+            medicineName: "",
+            quantity: "",
+            unitPrice: "",
+        };
+        let isValid = true;
+
+        if (formData.medicineName.length < 4) {
+            newErrors.medicineName = "Medicine Name must be greater than 3 characters";
+            isValid = false;
+        }
+        if (!formData.medicineName.trim()) {
+            newErrors.medicineName = "Medicine Name is required";
+            isValid = false;
+        }
+
+        if (formData.medicineName.length > 50) {
+            newErrors.medicineName = "Medicine Name must be less than 50 characters";
+            isValid = false;
+        }
+
+        if (formData.unitPrice === "" || isNaN(formData.unitPrice) || Number(formData.unitPrice) <= 0) {
+            newErrors.unitPrice = "Enter a valid unit price";
+            isValid = false;
+        }
+
+        if (formData.quantity === "" || isNaN(formData.quantity) || Number(formData.quantity) < 0) {
+            newErrors.quantity = "Enter a valid quantity";
+            isValid = false;
+        }
+
+        if (!isValid) {
+            setErrors(newErrors);
+            return;
+        }
+
+        const payload = {
+            medicineName: formData.medicineName.trim(),
+            quantity: Number(formData.quantity),
+            unitPrice: Number(formData.unitPrice),
+        };
+
+        try {
+            const respons = await AddMedicineService(payload);
+            showNotification({
+                title: "Success",
+                message: respons.message || "Medicine created successfully",
+                type: "success",
+            });
             navigate("/allmadicin");
+        } catch (error) {
+            console.error("Failed to save medicine details:", error);
+            showNotification({
+                title: "Error",
+                message: error.message || "Failed to save medicine details.",
+                type: "error",
+            });
         }
     };
 
     return (
-        <PageWrapper>
+        <PageWrapper
+            onBack={() => navigate("/allmadicin")}
+
+        >
             <div className="max-w-2xl mx-auto py-2">
                 <Card title={editingMedicine ? "Edit Medicine" : "Add New Medicine"}>
-                    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+                    <form onSubmit={handleSubmit} className="space-y-4 pt-2" noValidate>
                         <div>
                             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                                 Medicine Name *
                             </label>
-                            <input
+                            <InputField
                                 type="text"
                                 required
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                border={errors.medicineName ? "border border-red-500" : "border border-slate-200"}
+                                value={formData.medicineName}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, medicineName: e.target.value });
+                                    if (errors.medicineName) setErrors((prev) => ({ ...prev, medicineName: "" }));
+                                }}
                                 placeholder="e.g. Amoxicillin 500mg"
-                                className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white transition-colors"
                             />
+                            {errors.medicineName && (
+                                <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.medicineName}</p>
+                            )}
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Category
-                                </label>
-                                <select
-                                    value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                                >
-                                    {categories.map((cat) => (
-                                        <option key={cat} value={cat}>
-                                            {cat}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Dosage Form
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.dosageForm}
-                                    onChange={(e) => setFormData({ ...formData, dosageForm: e.target.value })}
-                                    placeholder="Tablet / Syrup"
-                                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Manufacturer *
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.manufacturer}
-                                    onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
-                                    placeholder="Company name"
-                                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                                />
-                            </div>
-
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                                     Unit Price (₹) *
                                 </label>
-                                <input
+                                <InputField
                                     type="number"
                                     step="0.1"
                                     required
+                                    border={errors.unitPrice ? "border border-red-500" : "border border-slate-200"}
                                     value={formData.unitPrice}
-                                    onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, unitPrice: e.target.value });
+                                        if (errors.unitPrice) setErrors((prev) => ({ ...prev, unitPrice: "" }));
+                                    }}
                                     placeholder="12.5"
-                                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
                                 />
+                                {errors.unitPrice && (
+                                    <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.unitPrice}</p>
+                                )}
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                                     Initial Quantity *
                                 </label>
-                                <input
+                                <InputField
                                     type="number"
                                     required
+                                    border={errors.quantity ? "border border-red-500" : "border border-slate-200"}
                                     value={formData.quantity}
-                                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, quantity: e.target.value });
+                                        if (errors.quantity) setErrors((prev) => ({ ...prev, quantity: "" }));
+                                    }}
                                     placeholder="50"
-                                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
                                 />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Expiry Date *
-                                </label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.expiryDate}
-                                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                                    className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                                />
+                                {errors.quantity && (
+                                    <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.quantity}</p>
+                                )}
                             </div>
                         </div>
 
                         {/* Form Footer Controls */}
                         <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                            <button
+                            <Button
                                 type="button"
                                 onClick={handleCancel}
-                                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                                background="bg-slate-100!"
+                                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-black/50!"
                             >
                                 Cancel
-                            </button>
+                            </Button>
                             <Button
                                 type="submit"
                                 className="px-5 py-2.5 font-semibold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-sm w-auto flex items-center gap-1.5"

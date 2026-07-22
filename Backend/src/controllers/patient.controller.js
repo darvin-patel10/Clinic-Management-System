@@ -5,13 +5,15 @@ export async function searchPatient(req, res) {
     try {
 
         const { uniqueno, name, phonenumber } = req.query;
+        const drId = req.user.id;
 
         if (!uniqueno && !name && !phonenumber) {
-            return res.status(400).json({
-                message: "Please provide a search query"
+            const patients = await patientModel.find({ drId });
+            return res.status(200).json({
+                message: "Patients matched successfully",
+                patients
             });
         }
-        const drId = req.user.id;
         if (name) {
             const patients = await patientModel.find({
                 drId,
@@ -25,7 +27,13 @@ export async function searchPatient(req, res) {
         else if (phonenumber) {
             const patients = await patientModel.find({
                 drId,
-                phonenumber
+                $expr: {
+                    $regexMatch: {
+                        input: { $toString: "$phonenumber" },
+                        regex: String(phonenumber),
+                        options: "i"
+                    }
+                }
             });
             return res.status(200).json({
                 message: "Patients matched successfully",
@@ -54,16 +62,78 @@ export async function searchPatient(req, res) {
     }
 }
 
+// Helper to calculate the next auto-incrementing patient unique ID with a 6-month reset
+async function getNextUniqueNo(drId) {
+    // Find the oldest patient for this doctor to establish the sequence reference point
+    const oldestPatient = await patientModel.findOne({ drId }).sort({ createdAt: 1 });
+    if (!oldestPatient) {
+        return 1;
+    }
+
+    const tStart = oldestPatient.createdAt;
+    const tNow = new Date();
+
+    const startYear = tStart.getFullYear();
+    const startMonth = tStart.getMonth();
+    const nowYear = tNow.getFullYear();
+    const nowMonth = tNow.getMonth();
+
+    // Difference in months
+    const diffMonths = (nowYear - startYear) * 12 + (nowMonth - startMonth);
+    // 6-month interval index
+    const intervalIndex = Math.max(0, Math.floor(diffMonths / 6));
+
+    // Calculate the start date of the current 6-month interval
+    const intervalStart = new Date(
+        startYear,
+        startMonth + intervalIndex * 6,
+        tStart.getDate(),
+        tStart.getHours(),
+        tStart.getMinutes(),
+        tStart.getSeconds()
+    );
+
+    // Find the patient with the maximum uniqueno in the current 6-month interval
+    const lastPatientInInterval = await patientModel.findOne({
+        drId,
+        createdAt: { $gte: intervalStart }
+    }).sort({ uniqueno: -1 });
+
+    if (!lastPatientInInterval) {
+        return 1;
+    }
+
+    return lastPatientInInterval.uniqueno + 1;
+}
+
+export async function getNextUniqueNoRoute(req, res) {
+    try {
+        const drId = req.user.id;
+        const nextNo = await getNextUniqueNo(drId);
+        return res.status(200).json({
+            success: true,
+            nextUniqueNo: nextNo
+        });
+    } catch (error) {
+        console.error("Error getting next unique number:", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
+
 export async function addPatient(req, res) {
     try {
 
-        const { uniqueno, patientName, patientAge, patientGender, phonenumber, region, prescription } = req.body;
+        const { patientName, patientAge, patientGender, phonenumber, region, prescription } = req.body;
 
-        if (!uniqueno || !patientName || !patientAge || !patientGender || !phonenumber || !region || !prescription) {
+        if (!patientName || !patientAge || !patientGender || !phonenumber || !region || !prescription) {
             return res.status(400).json({
                 message: "All fields are required"
             });
         }
+
+        const assignedUniqueNo = await getNextUniqueNo(req.user.id);
 
         // 1. Gather all medicine updates first to check availability (prevent partial updates on failure)
         const medicineUpdates = [];
@@ -117,7 +187,7 @@ export async function addPatient(req, res) {
         // 3. Create the patient record
         const patient = await patientModel.create({
             drId: req.user.id,
-            uniqueno,
+            uniqueno: assignedUniqueNo,
             patientName,
             patientAge,
             patientGender,

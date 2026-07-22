@@ -72,6 +72,9 @@ export const patientEndpoints = {
     /** POST — Register a new patient with their first prescription. */
     addPatient: "patient/add-patient",
 
+    /** GET  — Fetch the next available auto-incrementing patient unique ID. */
+    nextUniqueNo: "patient/next-uniqueno",
+
     /** GET  — Fetch a single patient's full record.  Append /:id */
     fetchPatient: "patient/fatch-patient",
 
