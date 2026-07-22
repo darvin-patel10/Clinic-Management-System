@@ -8,7 +8,6 @@ const medicineSchema = new mongoose.Schema({
     medicineName: {
         type: String,
         required: [true, "Medicine Name is requied"],
-        unique: [true, "Medicine Name must be unique"],
     },
     quantity: {
         type: Number,

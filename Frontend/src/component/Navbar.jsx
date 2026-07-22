@@ -5,6 +5,7 @@ import {
     Bell,
     Plus,
     User,
+    Users,
     LogOut,
     ChevronDown,
     ShieldCheck,
@@ -27,6 +28,7 @@ export default function Navbar({
     doctorInfo = null,
     onSearch = () => { },
     onQuickAction = () => { },
+    onBack
 }) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -134,10 +136,10 @@ export default function Navbar({
 
                     {/* ── 1. Branding & Logo ────────────────────────────────────────── */}
                     <div className="flex items-center gap-3">
-                        {!isDashboard && (
+                        {onBack && (
                             <Button
                                 type="button"
-                                onClick={() => navigate(-1)}
+                                onClick={onBack}
                                 background="bg-white/80 "
                                 border="border border-slate-200/80"
                                 padding="p-2"
@@ -179,7 +181,7 @@ export default function Navbar({
                         {isDashboard && (
                             <Button
                                 type="button"
-                                onClick={() => onQuickAction("add-patient")}
+                                onClick={() => navigate("/add-pationt")}
                                 className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-xs rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-none shadow-sm hover:shadow transition-all duration-200 ease-out active:scale-95 w-auto animate-in fade-in slide-in-from-right-2 duration-300"
                             >
                                 <Plus className="w-3.5 h-3.5" />
@@ -309,6 +311,16 @@ export default function Navbar({
                                         >
                                             <Activity className="w-4 h-4 text-slate-400" />
                                             Dashboard Overview
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setIsProfileOpen(false);
+                                                navigate("/all-pationt");
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
+                                        >
+                                            <Users className="w-4 h-4 text-slate-400" />
+                                            Patients Directory
                                         </button>
                                         <button
                                             onClick={() => {

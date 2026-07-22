@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Pill,
     Users,
@@ -48,6 +49,7 @@ export default function Dashboard({
     isError = false,
     onRetry = () => { },
 }) {
+    const navigate = useNavigate();
     if (isError) {
         return <ErrorState onRetry={onRetry} />;
     }
@@ -103,10 +105,11 @@ export default function Dashboard({
  * Shared Card shell
  * ---------------------------------------------------------------------- */
 
-    function TextLink({ label }) {
+    function TextLink({ label, onClick }) {
         return (
             <button
                 type="button"
+                onClick={onClick}
                 className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
             >
                 {label}
@@ -152,7 +155,7 @@ export default function Dashboard({
                 <SectionWrapper className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                     <Card
                         title="Recent patients"
-                        action={<TextLink label="View all" />}
+                        action={<TextLink label="View all" onClick={() => navigate("/all-pationt")} />}
                     >
                         {isLoading ? (
                             <TableSkeleton rows={5} />

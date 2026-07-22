@@ -9,7 +9,16 @@ export async function addMedicine(req, res) {
                 message: "All fields are required"
             });
         }
+        const existingMedicine = await medicineModel.findOne({
+            drId: req.user.id,
+            medicineName
+        });
 
+        if (existingMedicine) {
+            return res.status(400).json({
+                message: "Medicine Name must be unique"
+            });
+        }
         const totalPrice = unitPrice * quantity;
 
         const medicine = await medicineModel.create({
@@ -26,7 +35,10 @@ export async function addMedicine(req, res) {
         });
     }
     catch (error) {
-        console.log(error);
+        console.error("Error in addMedicine:", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
     }
 }
 
