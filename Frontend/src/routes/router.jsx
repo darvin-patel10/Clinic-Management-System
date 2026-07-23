@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import SignIn from "../pages/Login/signIn";
 import SignUp from "../pages/Login/signUp";
+import ForgotPassword from "../pages/Login/forgot";
 import { ProtectedRoute, PublicRoute } from "./routeGuards";
 import Dashboard from "../pages/Deshbord";
 import AllMedicines from "../pages/madicin/allmadicin";
 import AddMedicineModal from "../pages/madicin/addMadicin";
-import AddPationt from "../pages/pationt/addPationt";
+import AddPationt from "../pages/pationt/AddPationt";
 import AllPationt from "../pages/pationt/AllPationt";
 
 export default function AppRoutes() {
@@ -30,6 +31,13 @@ export default function AppRoutes() {
                 element={
                     <PublicRoute>
                         <SignUp />
+                    </PublicRoute>
+                } />
+            <Route
+                path="/forgot-password"
+                element={
+                    <PublicRoute>
+                        <ForgotPassword />
                     </PublicRoute>
                 } />
             {/* Protected pages */}

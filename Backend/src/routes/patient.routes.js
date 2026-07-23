@@ -8,6 +8,7 @@ patientRouter.use(authenticate);
 
 patientRouter.get("/search-patient", patientController.searchPatient);
 patientRouter.get("/next-uniqueno", patientController.getNextUniqueNoRoute);
+patientRouter.get("/dashboard-stats", patientController.getDashboardStats);
 patientRouter.post("/add-patient", patientController.addPatient);
 patientRouter.get("/fatch-patient/:id", patientController.fatchPatient);
 patientRouter.put("/update-patient/:id", patientController.updatePatient);

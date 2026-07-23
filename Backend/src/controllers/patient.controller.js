@@ -1,5 +1,130 @@
 import patientModel from "../models/patient.model.js";
 import medicineModel from "../models/medicines.model.js";
+import dashboardLogModel from "../models/dashboardLog.model.js";
+
+/**
+ * Record a deleted prescription into DashboardLog with automatic monthly and yearly rollover.
+ */
+async function recordDeletedPrescriptionToLog({ drId, patientName, prescription }) {
+    if (!drId || !prescription) return;
+
+    try {
+        const presDate = new Date(prescription.createdAt || prescription.date || Date.now());
+        const MONTH_NAMES = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const monthIndex = presDate.getMonth(); // 0 for January, 11 for December
+        const monthName = MONTH_NAMES[monthIndex];
+        const monthStr = `${monthName} ${presDate.getFullYear()}`;
+        const presYear = String(presDate.getFullYear());
+
+        const medCount = Array.isArray(prescription.medicine) ? prescription.medicine.length : 0;
+        const rev = Number(prescription.totalPrice) || 0;
+        const pName = (patientName || "Unknown Patient").trim();
+
+        // Find or create doctor's dashboard log document
+        let doc = await dashboardLogModel.findOne({ drId });
+        if (!doc) {
+            doc = new dashboardLogModel({ drId, monthlyData: [], yearlyData: [] });
+        }
+
+        // ── 1. SPECIAL HANDLING FOR JANUARY (NEW YEAR TRANSITION) ──────────────
+        if (monthIndex === 0) { // January
+            const prevYear = String(Number(presYear) - 1);
+
+            // Check if yearlyData already has an entry for prevYear
+            const alreadySavedPrevYear = doc.yearlyData.some((y) => y.year === prevYear);
+
+            // Check if monthlyData has entries from previous year to summarize
+            const hasPrevYearMonths = doc.monthlyData.some((m) => {
+                const yearPart = m.month.split(" ")[1];
+                return yearPart === prevYear || !yearPart;
+            });
+
+            if (!alreadySavedPrevYear && hasPrevYearMonths && doc.monthlyData.length > 0) {
+                // Calculate previous year's complete summary from monthlyData
+                let totalMedicines = 0;
+                let totalRevenue = 0;
+                const prevYearPatientNames = new Set();
+                let sumPatientsFallback = 0;
+
+                doc.monthlyData.forEach((m) => {
+                    const yearPart = m.month.split(" ")[1];
+                    if (yearPart === prevYear || !yearPart) {
+                        totalMedicines += m.noOfMedicines || 0;
+                        totalRevenue += m.revenue || 0;
+                        sumPatientsFallback += m.noOfPatients || 0;
+                        (m.patientNames || []).forEach((name) => prevYearPatientNames.add(name));
+                    }
+                });
+
+                const totalPatients = prevYearPatientNames.size > 0 ? prevYearPatientNames.size : sumPatientsFallback;
+
+                // Store previous year's complete summary in yearlyData (stored ONLY ONCE during transition)
+                doc.yearlyData.push({
+                    year: prevYear,
+                    noOfPatients: totalPatients,
+                    noOfMedicines: totalMedicines,
+                    revenue: totalRevenue,
+                });
+
+                // Clear old year's months so monthlyData only contains current year's months
+                doc.monthlyData = doc.monthlyData.filter((m) => {
+                    const yearPart = m.month.split(" ")[1];
+                    return yearPart && yearPart >= presYear;
+                });
+            }
+        }
+
+        // ── 2. PREVENT DUPLICATE MONTHS & UPDATE / REPLACE MONTHLY DATA ─────────
+        // Find existing month entry (matches exact monthStr or monthName prefix)
+        let monthEntry = doc.monthlyData.find(
+            (m) => m.month === monthStr || m.month.startsWith(monthName)
+        );
+
+        if (monthEntry) {
+            // Check if old month entry is from a previous year that needs replacement
+            const entryYearPart = monthEntry.month.split(" ")[1];
+            if (entryYearPart && entryYearPart < presYear) {
+                // Replace old month entry with new year's month data
+                monthEntry.month = monthStr;
+                monthEntry.noOfPatients = 1;
+                monthEntry.noOfMedicines = medCount;
+                monthEntry.revenue = rev;
+                monthEntry.patientNames = [pName];
+            } else {
+                // Same year month update
+                const alreadyExists = monthEntry.patientNames.includes(pName);
+                if (alreadyExists) {
+                    // Duplicate patient name: update medicines and revenue only
+                    monthEntry.noOfMedicines += medCount;
+                    monthEntry.revenue += rev;
+                } else {
+                    // New patient in this month: update patient count, medicines, revenue, and store name
+                    monthEntry.noOfPatients += 1;
+                    monthEntry.noOfMedicines += medCount;
+                    monthEntry.revenue += rev;
+                    monthEntry.patientNames.push(pName);
+                }
+                monthEntry.month = monthStr;
+            }
+        } else {
+            // Add new month entry for current year
+            doc.monthlyData.push({
+                month: monthStr,
+                noOfPatients: 1,
+                noOfMedicines: medCount,
+                revenue: rev,
+                patientNames: [pName],
+            });
+        }
+
+        await doc.save();
+    } catch (err) {
+        console.error("[DashboardLog] Error recording deleted prescription:", err);
+    }
+}
 
 export async function searchPatient(req, res) {
     try {
@@ -130,6 +255,17 @@ export async function addPatient(req, res) {
         if (!patientName || !patientAge || !patientGender || !phonenumber || !region || !prescription) {
             return res.status(400).json({
                 message: "All fields are required"
+            });
+        }
+
+        const isPatientName = await patientModel.findOne({
+            drId: req.user.id,
+            patientName
+        });
+
+        if (isPatientName) {
+            return res.status(400).json({
+                message: "Patient already exists"
             });
         }
 
@@ -432,13 +568,13 @@ export async function editPrescriptionInfo(req, res) {
                     message: "Prescription not found"
                 });
             }
-            const checkDate = existingPrescription.date;
+            const checkDate = existingPrescription.createdAt || existingPrescription.date || patient.createdAt;
             const dateNow = new Date();
             const diffInMilliseconds = dateNow - checkDate;
             const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
-            if (diffInSeconds > 86400) {
+            if (diffInSeconds > 43200) {
                 return res.status(403).json({
-                    message: "You can only update the prescription within 24 hours"
+                    message: "You can only update the prescription within 12 hours"
                 });
             }
             if (note) {
@@ -630,13 +766,13 @@ export async function deletePrescription(req, res) {
             });
         }
 
-        const { checkDate } = prescription;
+        const checkDate = prescription.createdAt || prescription.date || patient.createdAt;
         const dateNow = new Date();
         const diffInMilliseconds = dateNow - checkDate;
         const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
-        if (diffInSeconds > 86400) {
+        if (diffInSeconds > 43200) {
             return res.status(403).json({
-                message: "You can only delete the prescription within 24 hours"
+                message: "You can only delete the prescription within 12 hours"
             });
         }
         // Restore medicine quantities in stock
@@ -658,6 +794,14 @@ export async function deletePrescription(req, res) {
         }
 
         patient.prescription.pull(prescriptionId);
+
+        // Record deleted prescription into DashboardLog
+        await recordDeletedPrescriptionToLog({
+            drId: patient.drId,
+            patientName: patient.patientName,
+            prescription: prescription,
+        });
+
         if (patient.prescription.length === 0) {
             await patientModel.findByIdAndDelete(id);
             return res.status(200).json({
@@ -742,6 +886,24 @@ export async function deleteOldPrescription(req, res) {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - 30);
 
+        // Record prescriptions older than cutoffDate into DashboardLog before pulling them
+        const patientsWithOldPrescriptions = await patientModel.find({
+            "prescription.createdAt": { $lt: cutoffDate }
+        });
+
+        for (const patient of patientsWithOldPrescriptions) {
+            const oldPrescriptions = (patient.prescription || []).filter(
+                (p) => new Date(p.createdAt || p.date) < cutoffDate
+            );
+            for (const oldPres of oldPrescriptions) {
+                await recordDeletedPrescriptionToLog({
+                    drId: patient.drId,
+                    patientName: patient.patientName,
+                    prescription: oldPres,
+                });
+            }
+        }
+
         const result = await patientModel.updateMany(
             {},
             { $pull: { prescription: { createdAt: { $lt: cutoffDate } } } }
@@ -813,6 +975,17 @@ export async function deletePatient(req, res) {
         }
 
 
+        // Record deleted patient prescriptions into DashboardLog
+        if (patient.prescription && Array.isArray(patient.prescription)) {
+            for (const pres of patient.prescription) {
+                await recordDeletedPrescriptionToLog({
+                    drId: patient.drId,
+                    patientName: patient.patientName,
+                    prescription: pres,
+                });
+            }
+        }
+
         await patientModel.findByIdAndDelete(id);
         return res.status(200).json({
             message: "Patient deleted successfully",
@@ -821,5 +994,154 @@ export async function deletePatient(req, res) {
     }
     catch (error) {
         console.log(error);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * getDashboardStats
+ * Returns aggregated statistics for the dashboard:
+ *  - KPI: totalMedicines, totalPatients, todaysPatients, monthlyRevenue
+ *  - todaysPatientsData: full patient objects for today's visits
+ *  - monthlyData: per-month aggregation from active + DashboardLog monthlyData
+ *  - yearlyData:  per-year aggregation from DashboardLog yearlyData
+ * ───────────────────────────────────────────────────────────────────────────── */
+export async function getDashboardStats(req, res) {
+    try {
+        const drId = req.user.id;
+
+        // ── KPI: Total medicines ──────────────────────────────────────────────
+        const totalMedicines = await medicineModel.countDocuments({ drId });
+
+        // ── KPI: Total patients ───────────────────────────────────────────────
+        const totalPatients = await patientModel.countDocuments({ drId });
+
+        // ── KPI: Today's patients ─────────────────────────────────────────────
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const activePatients = await patientModel.find({ drId });
+        const todaysPatientsData = activePatients.filter((p) => {
+            return (p.prescription || []).some((pres) => {
+                const pDate = new Date(pres.createdAt || pres.date);
+                return pDate >= todayStart && pDate <= todayEnd;
+            });
+        });
+        const todaysPatients = todaysPatientsData.length;
+
+        // ── Monthly & Yearly Aggregation ──────────────────────────────────────
+        const MONTH_NAMES = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const now = new Date();
+        const currentMonthStr = `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
+
+        const docLog = await dashboardLogModel.findOne({ drId });
+        const monthlyMap = new Map();
+
+        // 1. Add archived monthlyData from DashboardLog
+        if (docLog && docLog.monthlyData) {
+            docLog.monthlyData.forEach((m) => {
+                monthlyMap.set(m.month, {
+                    month: m.month,
+                    patients: m.noOfPatients,
+                    medicines: m.noOfMedicines,
+                    revenue: m.revenue,
+                    patientNames: new Set(m.patientNames || [])
+                });
+            });
+        }
+
+        // 2. Add active prescriptions from patientModel
+        activePatients.forEach((p) => {
+            (p.prescription || []).forEach((pres) => {
+                const presDate = new Date(pres.createdAt || pres.date || p.createdAt);
+                const monthKey = `${MONTH_NAMES[presDate.getMonth()]} ${presDate.getFullYear()}`;
+                const medCount = Array.isArray(pres.medicine) ? pres.medicine.length : 0;
+                const rev = pres.totalPrice || 0;
+                const pName = (p.patientName || "").trim();
+
+                if (!monthlyMap.has(monthKey)) {
+                    monthlyMap.set(monthKey, {
+                        month: monthKey,
+                        patients: 0,
+                        medicines: 0,
+                        revenue: 0,
+                        patientNames: new Set()
+                    });
+                }
+                const entry = monthlyMap.get(monthKey);
+                if (!entry.patientNames.has(pName)) {
+                    entry.patientNames.add(pName);
+                    entry.patients += 1;
+                }
+                entry.medicines += medCount;
+                entry.revenue += rev;
+            });
+        });
+
+        // Current Month Revenue
+        const currentMonthEntry = monthlyMap.get(currentMonthStr);
+        const monthlyRevenue = currentMonthEntry ? currentMonthEntry.revenue : 0;
+
+        // Convert monthly map to array
+        const monthlyData = Array.from(monthlyMap.values()).map((e) => ({
+            month: e.month,
+            patients: e.patients,
+            medicines: e.medicines,
+            revenue: e.revenue,
+        }));
+
+        // ── Yearly Data aggregation ───────────────────────────────────────────
+        const yearlyMap = new Map();
+
+        // 1. Add archived yearlyData from DashboardLog
+        if (docLog && docLog.yearlyData) {
+            docLog.yearlyData.forEach((y) => {
+                yearlyMap.set(y.year, {
+                    year: y.year,
+                    patients: y.noOfPatients,
+                    medicines: y.noOfMedicines,
+                    revenue: y.revenue
+                });
+            });
+        }
+
+        // 2. Aggregate monthlyData by year for any non-archived years
+        monthlyData.forEach((m) => {
+            const yearKey = m.month.split(" ")[1];
+            if (yearKey) {
+                if (!yearlyMap.has(yearKey)) {
+                    yearlyMap.set(yearKey, {
+                        year: yearKey,
+                        patients: 0,
+                        medicines: 0,
+                        revenue: 0
+                    });
+                }
+                const yEntry = yearlyMap.get(yearKey);
+                yEntry.patients += m.patients;
+                yEntry.medicines += m.medicines;
+                yEntry.revenue += m.revenue;
+            }
+        });
+
+        const yearlyData = Array.from(yearlyMap.values()).sort((a, b) => b.year.localeCompare(a.year));
+
+        return res.status(200).json({
+            success: true,
+            totalMedicines,
+            totalPatients,
+            todaysPatients,
+            todaysPatientsData: todaysPatientsData.filter(Boolean),
+            monthlyRevenue,
+            monthlyData,
+            yearlyData,
+        });
+    } catch (error) {
+        console.error("[getDashboardStats] Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 }

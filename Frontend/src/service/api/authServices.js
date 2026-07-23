@@ -28,4 +28,19 @@ export const LogoutService = async () => {
 export const GetMeService = async () => {
     const { data } = await apiClient.get(authEndpoints.getMe);
     return data;
+};
+
+export const ForgotPasswordService = async (payload) => {
+    const { data } = await apiClient.post(authEndpoints.forgotPassword, payload);
+    return data;
+};
+
+export const OtpVerifyService = async (payload) => {
+    const { data } = await apiClient.post(authEndpoints.otpVerify, payload);
+    return data;
+};
+
+export const ResetPasswordService = async (payload) => {
+    const { data } = await apiClient.post(authEndpoints.resetPassword, payload);
+    return data;
 };
