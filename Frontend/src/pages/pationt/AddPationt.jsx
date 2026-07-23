@@ -31,7 +31,7 @@ import {
     UpdatePatientService,
     EditPrescriptionInfoService
 } from "../../service/api/patientServices";
-import { AllMedicinesService } from "../../service/api/medicineServices";
+import { SearchMedicineService } from "../../service/api/medicineServices";
 import { formatCurrency } from "../../utils/formatters";
 
 // Fallback mock medicines if backend is empty/offline
@@ -75,6 +75,9 @@ export default function AddPationt() {
     const [existingPhonePatientsList, setExistingPhonePatientsList] = useState([]);
     const [editingPrescriptionId, setEditingPrescriptionId] = useState(null);
 
+    // Form Validation Errors State
+    const [errors, setErrors] = useState({});
+
     const searchRef = useRef(null);
     const patientSearchRef = useRef(null);
     const phoneSearchRef = useRef(null);
@@ -98,28 +101,35 @@ export default function AddPationt() {
         fetchNextNo();
     }, []);
 
-    // Fetch inventory medicines on mount
+    // Search inventory medicines as user types in medicine search
     useEffect(() => {
-        const fetchMedicines = async () => {
+        const query = medSearchQuery.trim();
+        if (!query) {
+            setMedicinesList([]);
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(async () => {
             setLoadingInventory(true);
             try {
-                const response = await AllMedicinesService();
-                if (response && response.medicine && response.medicine.length > 0) {
+                const response = await SearchMedicineService(query);
+                if (response && response.medicines && response.medicines.length > 0) {
+                    setMedicinesList(response.medicines);
+                } else if (response && response.medicine && response.medicine.length > 0) {
                     setMedicinesList(response.medicine);
                 } else {
-                    // Fallback if backend returns empty list
-                    setMedicinesList(FALLBACK_MEDICINES);
+                    setMedicinesList([]);
                 }
             } catch (error) {
-                console.warn("Failed to fetch medicines from API, using fallback data:", error);
-                setMedicinesList(FALLBACK_MEDICINES);
+                console.warn("Failed to search medicines from API:", error);
+                setMedicinesList([]);
             } finally {
                 setLoadingInventory(false);
             }
-        };
+        }, 300);
 
-        fetchMedicines();
-    }, []);
+        return () => clearTimeout(delayDebounceFn);
+    }, [medSearchQuery]);
 
     // Debounced search for existing patients as user types Full Name
     useEffect(() => {
@@ -192,6 +202,7 @@ export default function AddPationt() {
         setUniqueno(p.uniqueno.toString());
         setIsSearchingPatients(false);
         setIsSearchingPhonePatients(false);
+        setErrors({});
     };
 
     const handleClearExistingSelection = () => {
@@ -204,6 +215,7 @@ export default function AddPationt() {
         setEditingPrescriptionId(null);
         setSelectedMedicines([]);
         setNote("");
+        setErrors({});
         fetchNextNo();
     };
 
@@ -231,17 +243,13 @@ export default function AddPationt() {
         setNote("");
     };
 
-    // Filter medicines by search query and exclude already added
+    // Filter medicines to exclude already added ones
     const filteredMedicines = useMemo(() => {
-        if (!medSearchQuery.trim()) return [];
         return medicinesList.filter((med) => {
-            const matchesSearch = med.medicineName
-                .toLowerCase()
-                .includes(medSearchQuery.toLowerCase());
             const alreadyAdded = selectedMedicines.some((sm) => sm._id === med._id);
-            return matchesSearch && !alreadyAdded;
+            return !alreadyAdded;
         });
-    }, [medSearchQuery, medicinesList, selectedMedicines]);
+    }, [medicinesList, selectedMedicines]);
 
     // Sort prescriptions in reverse order (newest first)
     const sortedPrescriptions = useMemo(() => {
@@ -273,6 +281,7 @@ export default function AddPationt() {
         ]);
         setMedSearchQuery("");
         setIsSearching(false);
+        if (errors.selectedMedicines) setErrors((prev) => ({ ...prev, selectedMedicines: "" }));
     };
 
     // Update quantity for a selected medicine
@@ -291,6 +300,7 @@ export default function AddPationt() {
                 return med;
             })
         );
+        if (errors.selectedMedicines) setErrors((prev) => ({ ...prev, selectedMedicines: "" }));
     };
 
     // Remove medicine from prescription list
@@ -307,29 +317,50 @@ export default function AddPationt() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const newErrors = {};
+        let isValid = true;
+
         // For existing patients, we only validate the prescription. For new patients, validate profile details.
         if (!selectedExistingPatient) {
             // New Patient Validation
             if (!patientName.trim()) {
-                showNotification({ title: "Validation Error", message: "Patient Name is required", type: "error" });
-                return;
+                newErrors.patientName = "Patient Name is required";
+                isValid = false;
+            } else if (patientName.trim().length < 3) {
+                newErrors.patientName = "Patient Name must be at least 3 characters";
+                isValid = false;
             }
-            if (!patientAge || isNaN(patientAge) || Number(patientAge) <= 0) {
-                showNotification({ title: "Validation Error", message: "Enter a valid patient age", type: "error" });
-                return;
+
+            if (!patientAge) {
+                newErrors.patientAge = "Patient Age is required";
+                isValid = false;
+            } else if (isNaN(patientAge) || Number(patientAge) <= 0 || Number(patientAge) > 120) {
+                newErrors.patientAge = "Enter a valid patient age (1-120)";
+                isValid = false;
             }
-            if (!phonenumber || isNaN(phonenumber) || phonenumber.length !== 10) {
-                showNotification({ title: "Validation Error", message: "Phone number must be exactly 10 digits", type: "error" });
-                return;
+
+            if (!phonenumber) {
+                newErrors.phonenumber = "Phone Number is required";
+                isValid = false;
+            } else if (isNaN(phonenumber) || phonenumber.length !== 10) {
+                newErrors.phonenumber = "Phone number must be exactly 10 digits";
+                isValid = false;
             }
+
             if (!patientGender) {
-                showNotification({ title: "Validation Error", message: "Patient Gender is required", type: "error" });
-                return;
+                newErrors.patientGender = "Patient Gender is required";
+                isValid = false;
             }
+
             if (!region.trim()) {
-                showNotification({ title: "Validation Error", message: "Region/Address is required", type: "error" });
-                return;
+                newErrors.region = "Region / Locality is required";
+                isValid = false;
             }
+        }
+
+        if (!isValid) {
+            setErrors(newErrors);
+            return;
         }
 
         // Prescription Validation
@@ -345,24 +376,23 @@ export default function AddPationt() {
         // Check if any quantity is empty or invalid
         const hasInvalidQty = selectedMedicines.some((m) => m.quantity === "" || m.quantity <= 0);
         if (hasInvalidQty) {
-            showNotification({
-                title: "Validation Error",
-                message: "Please enter valid quantities for all prescribed medicines.",
-                type: "error",
-            });
+            newErrors.selectedMedicines = "Please enter valid quantities for all prescribed medicines.";
+            isValid = false;
+        } else {
+            // Check if any quantity exceeds stock levels
+            const stockExceededMed = selectedMedicines.find((m) => m.quantity > m.availableStock);
+            if (stockExceededMed) {
+                newErrors.selectedMedicines = `Prescribed quantity for "${stockExceededMed.medicineName}" exceeds available stock (${stockExceededMed.availableStock}).`;
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            setErrors(newErrors);
             return;
         }
 
-        // Check if any quantity exceeds stock levels
-        const stockExceededMed = selectedMedicines.find((m) => m.quantity > m.availableStock);
-        if (stockExceededMed) {
-            showNotification({
-                title: "Validation Error",
-                message: `Prescribed quantity for "${stockExceededMed.medicineName}" exceeds available stock (${stockExceededMed.availableStock}).`,
-                type: "error",
-            });
-            return;
-        }
+        setErrors({});
 
         setLoading(true);
         try {
@@ -384,12 +414,18 @@ export default function AddPationt() {
                         ],
                     };
 
-                    await EditPrescriptionInfoService(selectedExistingPatient._id, payload);
-                    showNotification({
-                        title: "Success",
-                        message: `Prescription updated successfully for ${patientName}!`,
-                        type: "success",
-                    });
+                    const response = await EditPrescriptionInfoService(selectedExistingPatient._id, payload);
+
+                    if (response) {
+                        showNotification({
+                            title: "Success",
+                            message: `Prescription updated successfully for ${patientName}!`,
+                            type: "success",
+                        });
+                        handleClearExistingSelection();
+                    }
+                    handleCancelEdit();
+                    fetchMedicines();
                 } else {
                     const payload = {
                         prescription: {
@@ -468,8 +504,8 @@ export default function AddPationt() {
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                    {/* ── Left Column: Patient Details ──────────────────────────────── */}
-                    <div className="lg:col-span-5 space-y-6">
+                    {/* ── Patient Profile ──────────────────────────────── */}
+                    <div className={sortedPrescriptions.length > 0 ? "lg:col-span-6 space-y-6" : "lg:col-span-5 space-y-6"}>
                         <Card title="Patient Profile">
                             <div className="space-y-4 pt-2">
                                 {/* Unique Registration No */}
@@ -509,10 +545,13 @@ export default function AddPationt() {
                                     <InputField
                                         type="text"
                                         required
+                                        disabled={!!selectedExistingPatient}
+                                        border={errors.patientName ? "border border-red-500" : "border border-slate-200"}
                                         value={patientName}
                                         onChange={(e) => {
                                             setPatientName(e.target.value);
                                             setIsSearchingPatients(true);
+                                            if (errors.patientName) setErrors((prev) => ({ ...prev, patientName: "" }));
                                             if (selectedExistingPatient) {
                                                 setSelectedExistingPatient(null);
                                                 fetchNextNo();
@@ -522,6 +561,9 @@ export default function AddPationt() {
                                         placeholder="e.g. Aarav Sharma"
                                         icon={User}
                                     />
+                                    {errors.patientName && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1 pl-1">{errors.patientName}</p>
+                                    )}
 
                                     {/* Patient Search Results Dropdown */}
                                     {isSearchingPatients && patientName.trim() !== "" && !selectedExistingPatient && existingPatientsList.length > 0 && (
@@ -563,16 +605,21 @@ export default function AddPationt() {
                                         maxLength={10}
                                         required
                                         disabled={!!selectedExistingPatient}
+                                        border={errors.phonenumber ? "border border-red-500" : "border border-slate-200"}
                                         value={phonenumber}
                                         onChange={(e) => {
                                             const val = e.target.value.replace(/\D/g, "");
                                             setPhonenumber(val);
                                             setIsSearchingPhonePatients(true);
+                                            if (errors.phonenumber) setErrors((prev) => ({ ...prev, phonenumber: "" }));
                                         }}
                                         onFocus={() => setIsSearchingPhonePatients(true)}
                                         placeholder="e.g. 9876543210"
                                         icon={Phone}
                                     />
+                                    {errors.phonenumber && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1 pl-1">{errors.phonenumber}</p>
+                                    )}
 
                                     {/* Phone Search Results Dropdown */}
                                     {isSearchingPhonePatients && phonenumber.trim().length >= 5 && !selectedExistingPatient && existingPhonePatientsList.length > 0 && (
@@ -619,11 +666,18 @@ export default function AddPationt() {
                                             min="1"
                                             max="120"
                                             disabled={!!selectedExistingPatient}
+                                            border={errors.patientAge ? "border border-red-500" : "border border-slate-200"}
                                             value={patientAge}
-                                            onChange={(e) => setPatientAge(e.target.value)}
+                                            onChange={(e) => {
+                                                setPatientAge(e.target.value);
+                                                if (errors.patientAge) setErrors((prev) => ({ ...prev, patientAge: "" }));
+                                            }}
                                             placeholder="35"
                                             icon={Calendar}
                                         />
+                                        {errors.patientAge && (
+                                            <p className="text-red-500 text-[11px] font-medium mt-1 pl-1">{errors.patientAge}</p>
+                                        )}
                                     </div>
 
                                     <div className="w-full">
@@ -632,7 +686,10 @@ export default function AddPationt() {
                                         </label>
                                         <Dropdown
                                             value={patientGender}
-                                            onChange={(e) => setPatientGender(e.target.value)}
+                                            onChange={(e) => {
+                                                setPatientGender(e.target.value);
+                                                if (errors.patientGender) setErrors((prev) => ({ ...prev, patientGender: "" }));
+                                            }}
                                             disabled={!!selectedExistingPatient}
                                             options={[
                                                 { value: "", label: "Select Gender" },
@@ -640,8 +697,11 @@ export default function AddPationt() {
                                                 { value: "Female", label: "Female" },
                                                 { value: "Other", label: "Other" }
                                             ]}
-                                            selectClassName="h-10 w-full sm:w-full"
+                                            selectClassName={`h-10 w-full sm:w-full ${errors.patientGender ? "border-red-500!" : ""}`}
                                         />
+                                        {errors.patientGender && (
+                                            <p className="text-red-500 text-[11px] font-medium mt-1 pl-1">{errors.patientGender}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -654,15 +714,26 @@ export default function AddPationt() {
                                         type="text"
                                         required
                                         disabled={!!selectedExistingPatient}
+                                        border={errors.region ? "border border-red-500" : "border border-slate-200"}
                                         value={region}
-                                        onChange={(e) => setRegion(e.target.value)}
+                                        onChange={(e) => {
+                                            setRegion(e.target.value);
+                                            if (errors.region) setErrors((prev) => ({ ...prev, region: "" }));
+                                        }}
                                         placeholder="e.g. Andheri East, Mumbai"
                                         icon={MapPin}
                                     />
+                                    {errors.region && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1 pl-1">{errors.region}</p>
+                                    )}
                                 </div>
                             </div>
                         </Card>
-                        {sortedPrescriptions.length > 0 && (
+                    </div>
+
+                    {/* ── Previous Prescriptions ───────────────────────────────────── */}
+                    {sortedPrescriptions.length > 0 && (
+                        <div className="lg:col-span-6 space-y-6">
                             <Card title="Previous Prescriptions" subtitle="Historical visits and prescriptions recorded for this patient.">
                                 <div className="space-y-4 pt-2 max-h-[340px] overflow-y-auto pr-1 divide-y divide-slate-100">
                                     {sortedPrescriptions.map((pres, idx) => {
@@ -716,11 +787,11 @@ export default function AddPationt() {
                                     })}
                                 </div>
                             </Card>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
-                    {/* ── Right Column: First Prescription Builder ─────────────────── */}
-                    <div className="lg:col-span-7 space-y-6">
+                    {/* ── Prescription Builder ─────────────────── */}
+                    <div className={sortedPrescriptions.length > 0 ? "lg:col-span-12 space-y-6" : "lg:col-span-7 space-y-6"}>
                         <Card
                             title={editingPrescriptionId ? "Edit Prescription" : (selectedExistingPatient ? "Add Visit Prescription" : "Initial Prescription")}
                             subtitle={editingPrescriptionId ? "Modify note and medicine quantities for the selected clinical visit." : "Choose medicines from inventory and specify prescribed quantities."}
@@ -908,6 +979,35 @@ export default function AddPationt() {
                                         className="w-full rounded-xl border border-slate-200 p-3 bg-slate-50 text-xs text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all duration-150 resize-none font-medium placeholder:text-slate-400"
                                     />
                                 </div>
+
+                                {/* <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3.5">
+                                    <Button
+                                        type="button"
+                                        onClick={() => navigate("/dashboard")}
+                                        background="bg-slate-100! text-slate-500!"
+                                        border="border-none!"
+                                        className="px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider hover:bg-slate-200! transition-colors cursor-pointer"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="px-6 py-2.5 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-md hover:shadow-lg transition-all duration-150 active:scale-98 flex items-center gap-1.5 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                <span>{editingPrescriptionId ? "Saving..." : (selectedExistingPatient ? "Adding Visit..." : "Registering Patient...")}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle2 className="w-4 h-4" />
+                                                <span>{editingPrescriptionId ? "Save Prescription" : (selectedExistingPatient ? "Add Visit & Prescription" : "Register Patient")}</span>
+                                            </>
+                                        )}
+                                    </Button>
+                                </div> */}
                             </div>
                         </Card>
                     </div>

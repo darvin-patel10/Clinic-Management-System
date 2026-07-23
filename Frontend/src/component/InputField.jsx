@@ -7,7 +7,7 @@ const InputField = React.forwardRef(function InputField(
     background = "bg-slate-50",
     border = "border border-slate-200",
     padding = "px-3.5 h-10",
-    className = "w-full rounded-xl text-sm text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-colors",
+    className = "w-full rounded-xl text-sm text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-colors disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500",
     value,
     name,
     maxLength,

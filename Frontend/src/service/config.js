@@ -95,4 +95,7 @@ export const patientEndpoints = {
 
     /** DELETE — Permanently delete a patient and restore their medicines to stock.  Append /:id */
     deletePatient: "patient/delete-patient",
+
+    /** GET  — Aggregate dashboard KPIs, today's patients, monthly & yearly historical data. */
+    dashboardStats: "patient/dashboard-stats",
 };

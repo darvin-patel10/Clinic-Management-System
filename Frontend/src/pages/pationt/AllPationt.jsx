@@ -35,14 +35,14 @@ import { formatCurrency, formatDate } from "../../utils/formatters";
 // API services
 import {
     SearchPatientService,
-    UpdatePatientService,
     UpdatePatientDataService,
     EditPrescriptionInfoService,
     DeletePrescriptionService,
     DeletePatientService
 } from "../../service/api/patientServices";
-import { AllMedicinesService } from "../../service/api/medicineServices";
+import { SearchMedicineService } from "../../service/api/medicineServices";
 import SectionWrapper from "../../component/SectionWrapper";
+import EditProfile from "../../component/Patient/EditProfile";
 
 // Fallback mock medicines if backend is empty/offline
 const FALLBACK_MEDICINES = [
@@ -65,19 +65,13 @@ export default function AllPationt() {
 
     // Modal state controllers
     const [historyPatient, setHistoryPatient] = useState(null);
-    const [newVisitPatient, setNewVisitPatient] = useState(null);
     const [editProfilePatient, setEditProfilePatient] = useState(null);
     const [deletingPatient, setDeletingPatient] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // New Prescription state (for New Visit modal)
-    const [selectedMedicines, setSelectedMedicines] = useState([]);
-    const [medSearchQuery, setMedSearchQuery] = useState("");
+    // Inventory State
     const [medicinesInventory, setMedicinesInventory] = useState([]);
-    const [isSearchingInventory, setIsSearchingInventory] = useState(false);
     const [loadingInventory, setLoadingInventory] = useState(false);
-    const [visitNote, setVisitNote] = useState("");
-    const inventorySearchRef = useRef(null);
 
     // Edit Prescription state (inside History modal)
     const [editingVisit, setEditingVisit] = useState(null); // holds prescription object to edit
@@ -134,37 +128,39 @@ export default function AllPationt() {
         fetchPatients();
     }, []);
 
-    // Fetch medicines inventory for prescriptions
-    const fetchMedicinesInventory = async () => {
-        setLoadingInventory(true);
-        try {
-            const response = await AllMedicinesService();
-            if (response && response.medicine && response.medicine.length > 0) {
-                setMedicinesInventory(response.medicine);
-            } else {
-                setMedicinesInventory(FALLBACK_MEDICINES);
-            }
-        } catch (error) {
-            console.warn("Failed to fetch medicines from API, using fallback data:", error);
-            setMedicinesInventory(FALLBACK_MEDICINES);
-        } finally {
-            setLoadingInventory(false);
-        }
-    };
-
-    // Trigger medicine fetch when a prescription builder is shown
+    // Search medicines inventory as user types in prescription edit
     useEffect(() => {
-        if (newVisitPatient || editingVisit) {
-            fetchMedicinesInventory();
+        const query = editMedSearchQuery.trim();
+        if (!query) {
+            setMedicinesInventory([]);
+            return;
         }
-    }, [newVisitPatient, editingVisit]);
+
+        const delayDebounceFn = setTimeout(async () => {
+            setLoadingInventory(true);
+            try {
+                const response = await SearchMedicineService(query);
+                if (response && response.medicines && response.medicines.length > 0) {
+                    setMedicinesInventory(response.medicines);
+                } else if (response && response.medicine && response.medicine.length > 0) {
+                    setMedicinesInventory(response.medicine);
+                } else {
+                    setMedicinesInventory([]);
+                }
+            } catch (error) {
+                console.warn("Failed to search medicines from API:", error);
+                setMedicinesInventory([]);
+            } finally {
+                setLoadingInventory(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [editMedSearchQuery]);
 
     // Handle outside clicks for autocomplete search dropdowns
     useEffect(() => {
         function handleClickOutside(event) {
-            if (inventorySearchRef.current && !inventorySearchRef.current.contains(event.target)) {
-                setIsSearchingInventory(false);
-            }
             if (editInventorySearchRef.current && !editInventorySearchRef.current.contains(event.target)) {
                 setIsSearchingEditInventory(false);
             }
@@ -172,6 +168,19 @@ export default function AllPationt() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // Prevent body scrolling when any modal is open
+    useEffect(() => {
+        const isModalOpen = Boolean(historyPatient || editProfilePatient || deletingPatient);
+        if (isModalOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [historyPatient, editProfilePatient, deletingPatient]);
 
     // Search Trigger handler (for search query submission)
     const handleSearchSubmit = (e) => {
@@ -284,131 +293,15 @@ export default function AllPationt() {
         }
     };
 
-    /* ── ADD PRESCRIPTION / NEW VISIT ACTIONS ─────────────────────────── */
-    const filteredMedicines = useMemo(() => {
-        if (!medSearchQuery.trim()) return [];
-        return medicinesInventory.filter((med) => {
-            const matchesSearch = med.medicineName.toLowerCase().includes(medSearchQuery.toLowerCase());
-            const alreadyAdded = selectedMedicines.some((sm) => sm._id === med._id);
-            return matchesSearch && !alreadyAdded;
-        });
-    }, [medSearchQuery, medicinesInventory, selectedMedicines]);
 
-    const handleAddMedicine = (med) => {
-        if (med.quantity <= 0) {
-            showNotification({ title: "Out of Stock", message: `${med.medicineName} is out of stock.`, type: "warning" });
-            return;
-        }
-
-        setSelectedMedicines((prev) => [
-            ...prev,
-            {
-                _id: med._id,
-                medicineName: med.medicineName,
-                availableStock: med.quantity,
-                unitPrice: med.unitPrice,
-                quantity: 1,
-                price: med.unitPrice,
-            },
-        ]);
-        setMedSearchQuery("");
-        setIsSearchingInventory(false);
-    };
-
-    const handleQuantityChange = (medId, val) => {
-        const qty = parseInt(val, 10) || "";
-        setSelectedMedicines((prev) =>
-            prev.map((med) => {
-                if (med._id === medId) {
-                    const finalQty = qty === "" ? "" : Math.max(1, qty);
-                    return {
-                        ...med,
-                        quantity: finalQty,
-                        price: finalQty === "" ? 0 : Number((finalQty * med.unitPrice).toFixed(2)),
-                    };
-                }
-                return med;
-            })
-        );
-    };
-
-    const handleRemoveMedicine = (medId) => {
-        setSelectedMedicines((prev) => prev.filter((m) => m._id !== medId));
-    };
-
-    const totalPrescriptionPrice = useMemo(() => {
-        return Number(selectedMedicines.reduce((sum, med) => sum + (med.price || 0), 0).toFixed(2));
-    }, [selectedMedicines]);
-
-    const handleSaveNewVisit = async (e) => {
-        e.preventDefault();
-        if (selectedMedicines.length === 0) {
-            showNotification({ title: "Validation Error", message: "Prescribe at least one medicine", type: "warning" });
-            return;
-        }
-        const hasInvalidQty = selectedMedicines.some((m) => m.quantity === "" || m.quantity <= 0);
-        if (hasInvalidQty) {
-            showNotification({ title: "Validation Error", message: "Enter valid quantities for all medicines", type: "error" });
-            return;
-        }
-        const stockExceeded = selectedMedicines.find((m) => m.quantity > m.availableStock);
-        if (stockExceeded) {
-            showNotification({
-                title: "Stock Exceeded",
-                message: `Quantity for "${stockExceeded.medicineName}" exceeds stock (${stockExceeded.availableStock})`,
-                type: "error",
-            });
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            const payload = {
-                prescription: {
-                    medicine: selectedMedicines.map((m) => ({
-                        medicineId: m._id,
-                        medicineName: m.medicineName,
-                        quantity: Number(m.quantity),
-                        price: Number(m.price),
-                    })),
-                    note: visitNote.trim() || "No note",
-                    totalPrice: totalPrescriptionPrice,
-                },
-            };
-
-            await UpdatePatientService(newVisitPatient._id, payload);
-            showNotification({
-                title: "Visit Logged",
-                message: `Logged new visit and prescription for ${newVisitPatient.patientName}.`,
-                type: "success",
-            });
-
-            // Reset state and close modal
-            setNewVisitPatient(null);
-            setSelectedMedicines([]);
-            setVisitNote("");
-            fetchPatients(searchQuery);
-        } catch (error) {
-            console.error("Failed to add visit:", error);
-            showNotification({
-                title: "Log Visit Failed",
-                message: error.message || "Failed to log prescription. Verify medicine stocks.",
-                type: "error",
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     /* ── EDIT PRESCRIPTION (timeline visit) ACTIONS ─────────────────────── */
     const filteredEditMedicines = useMemo(() => {
-        if (!editMedSearchQuery.trim()) return [];
         return medicinesInventory.filter((med) => {
-            const matchesSearch = med.medicineName.toLowerCase().includes(editMedSearchQuery.toLowerCase());
             const alreadyAdded = editSelectedMedicines.some((sm) => sm.medicineId === med._id);
-            return matchesSearch && !alreadyAdded;
+            return !alreadyAdded;
         });
-    }, [editMedSearchQuery, medicinesInventory, editSelectedMedicines]);
+    }, [medicinesInventory, editSelectedMedicines]);
 
     const handleAddEditMedicine = (med) => {
         if (med.quantity <= 0) {
@@ -765,6 +658,10 @@ export default function AllPationt() {
                                         {filteredPatients.map((p) => {
                                             const lastVisitObj = p.prescription?.slice(-1)[0];
                                             const lastVisitDate = lastVisitObj ? formatDate(lastVisitObj.createdAt) : "No visits";
+                                            const lastVisitTime = lastVisitObj?.createdAt || lastVisitObj?.date || p.createdAt;
+                                            const isDeletable = lastVisitTime
+                                                ? (new Date() - new Date(lastVisitTime)) / (1000 * 60 * 60) < 12
+                                                : false;
 
                                             return (
                                                 <tr key={p._id} className="hover:bg-slate-50/70 transition-colors">
@@ -809,17 +706,7 @@ export default function AllPationt() {
                                                     {/* Actions */}
                                                     <td className="py-3.5 text-right">
                                                         <div className="flex items-center justify-end gap-1">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setNewVisitPatient(p);
-                                                                    setSelectedMedicines([]);
-                                                                    setVisitNote("");
-                                                                }}
-                                                                className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
-                                                                title="Record New Visit"
-                                                            >
-                                                                <Plus className="w-4 h-4" />
-                                                            </button>
+
                                                             <button
                                                                 onClick={() => setHistoryPatient(p)}
                                                                 className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
@@ -834,13 +721,15 @@ export default function AllPationt() {
                                                             >
                                                                 <Edit3 className="w-4 h-4" />
                                                             </button>
-                                                            <button
-                                                                onClick={() => setDeletingPatient(p)}
-                                                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors"
-                                                                title="Delete Patient Record"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
+                                                            {isDeletable && (
+                                                                <button
+                                                                    onClick={() => setDeletingPatient(p)}
+                                                                    className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors"
+                                                                    title="Delete Patient Record (Available for 12 hours after last visit)"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -855,6 +744,10 @@ export default function AllPationt() {
                                 {filteredPatients.map((p) => {
                                     const lastVisitObj = p.prescription?.slice(-1)[0];
                                     const lastVisitDate = lastVisitObj ? formatDate(lastVisitObj.createdAt) : "No visits";
+                                    const lastVisitTime = lastVisitObj?.createdAt || lastVisitObj?.date || p.createdAt;
+                                    const isDeletable = lastVisitTime
+                                        ? (new Date() - new Date(lastVisitTime)) / (1000 * 60 * 60) < 12
+                                        : false;
 
                                     return (
                                         <div key={p._id} className="p-4 space-y-3">
@@ -871,17 +764,7 @@ export default function AllPationt() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0">
-                                                    <button
-                                                        onClick={() => {
-                                                            setNewVisitPatient(p);
-                                                            setSelectedMedicines([]);
-                                                            setVisitNote("");
-                                                        }}
-                                                        className="p-2 rounded-lg text-emerald-600 bg-emerald-50"
-                                                        aria-label="Add Visit"
-                                                    >
-                                                        <Plus className="w-4 h-4" />
-                                                    </button>
+
                                                     <button
                                                         onClick={() => setHistoryPatient(p)}
                                                         className="p-2 rounded-lg text-blue-600 bg-blue-50"
@@ -896,13 +779,16 @@ export default function AllPationt() {
                                                     >
                                                         <Edit3 className="w-4 h-4" />
                                                     </button>
-                                                    <button
-                                                        onClick={() => setDeletingPatient(p)}
-                                                        className="p-2 rounded-lg text-rose-600 bg-rose-50"
-                                                        aria-label="Delete Patient"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    {isDeletable && (
+                                                        <button
+                                                            onClick={() => setDeletingPatient(p)}
+                                                            className="p-2 rounded-lg text-rose-600 bg-rose-50"
+                                                            aria-label="Delete Patient"
+                                                            title="Delete Patient Record (Available for 12 hours after last visit)"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -930,299 +816,24 @@ export default function AllPationt() {
             </div>
 
             {/* ── 4. PROFILE EDIT MODAL ────────────────────────────────────────── */}
-            {editProfilePatient && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Edit Patient Profile</h3>
-                                <p className="text-[10px] text-slate-500 font-semibold">Unique ID: #{editProfilePatient.uniqueno}</p>
-                            </div>
-                            <button
-                                onClick={() => setEditProfilePatient(null)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSaveProfile} className="p-5 space-y-4 overflow-y-auto">
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Patient Name *</label>
-                                <InputField
-                                    type="text"
-                                    required
-                                    value={profileName}
-                                    onChange={(e) => setProfileName(e.target.value)}
-                                    placeholder="e.g. Aarav Sharma"
-                                    icon={User}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Phone Number *</label>
-                                <InputField
-                                    type="text"
-                                    required
-                                    maxLength={10}
-                                    value={profilePhone}
-                                    onChange={(e) => setProfilePhone(e.target.value.replace(/\D/g, ""))}
-                                    placeholder="e.g. 9876543210"
-                                    icon={Phone}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3.5">
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Age *</label>
-                                    <InputField
-                                        type="number"
-                                        required
-                                        min="1"
-                                        max="120"
-                                        value={profileAge}
-                                        onChange={(e) => setProfileAge(e.target.value)}
-                                        placeholder="35"
-                                        icon={Calendar}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Gender *</label>
-                                    <Dropdown
-                                        value={profileGender}
-                                        onChange={(e) => setProfileGender(e.target.value)}
-                                        options={[
-                                            { value: "", label: "Select" },
-                                            { value: "Male", label: "Male" },
-                                            { value: "Female", label: "Female" },
-                                            { value: "Other", label: "Other" },
-                                        ]}
-                                        selectClassName="h-10 w-full"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Region / Address *</label>
-                                <InputField
-                                    type="text"
-                                    required
-                                    value={profileRegion}
-                                    onChange={(e) => setProfileRegion(e.target.value)}
-                                    placeholder="e.g. Andheri East, Mumbai"
-                                    icon={MapPin}
-                                />
-                            </div>
+            <EditProfile
+                editProfilePatient={editProfilePatient}
+                setEditProfilePatient={setEditProfilePatient}
+                handleSaveProfile={handleSaveProfile}
+                profileName={profileName}
+                setProfileName={setProfileName}
+                profilePhone={profilePhone}
+                setProfilePhone={setProfilePhone}
+                profileAge={profileAge}
+                setProfileAge={setProfileAge}
+                profileGender={profileGender}
+                setProfileGender={setProfileGender}
+                profileRegion={profileRegion}
+                setProfileRegion={setProfileRegion}
+                isSubmitting={isSubmitting}
+            />
 
-                            <div className="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
-                                <Button
-                                    type="button"
-                                    onClick={() => setEditProfilePatient(null)}
-                                    background="bg-slate-100! text-slate-500!"
-                                    border="border-none!"
-                                    className="px-4 py-2 rounded-xl text-xs font-bold"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="px-5 py-2 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-sm flex items-center gap-1"
-                                >
-                                    {isSubmitting ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save Changes"}
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
 
-            {/* ── 5. RECORD NEW VISIT / ADD PRESCRIPTION MODAL ────────────────── */}
-            {newVisitPatient && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Record Patient Visit & Prescription</h3>
-                                <p className="text-[10px] text-slate-500 font-semibold">Patient: {newVisitPatient.patientName} (ID: #{newVisitPatient.uniqueno})</p>
-                            </div>
-                            <button
-                                onClick={() => setNewVisitPatient(null)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSaveNewVisit} className="p-5 space-y-4 overflow-y-auto flex-1">
-                            {/* Medicine Search Autocomplete */}
-                            <div className="relative" ref={inventorySearchRef}>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Search & Add Medicine *</label>
-                                <div className="relative">
-                                    <InputField
-                                        type="text"
-                                        value={medSearchQuery}
-                                        onChange={(e) => {
-                                            setMedSearchQuery(e.target.value);
-                                            setIsSearchingInventory(true);
-                                        }}
-                                        onFocus={() => setIsSearchingInventory(true)}
-                                        placeholder="Type medicine name to search inventory..."
-                                        icon={Search}
-                                    />
-                                    {loadingInventory && (
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {isSearchingInventory && medSearchQuery.trim() !== "" && (
-                                    <div className="absolute left-0 right-0 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden max-h-48 overflow-y-auto">
-                                        {filteredMedicines.length === 0 ? (
-                                            <div className="p-3 text-xs font-medium text-slate-500 text-center flex items-center justify-center gap-1">
-                                                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-                                                No in-stock medicines match "{medSearchQuery}"
-                                            </div>
-                                        ) : (
-                                            <div className="divide-y divide-slate-100">
-                                                {filteredMedicines.map((med) => (
-                                                    <button
-                                                        key={med._id}
-                                                        type="button"
-                                                        onClick={() => handleAddMedicine(med)}
-                                                        className="w-full px-4 py-2 text-left text-xs font-semibold hover:bg-slate-50 flex items-center justify-between transition-colors cursor-pointer"
-                                                    >
-                                                        <div className="flex items-center gap-1.5">
-                                                            <Pill className="w-3.5 h-3.5 text-blue-500" />
-                                                            <div>
-                                                                <p className="text-slate-800 font-bold">{med.medicineName}</p>
-                                                                <p className="text-[9px] text-slate-400 mt-0.5">Price: {formatCurrency(med.unitPrice)}</p>
-                                                            </div>
-                                                        </div>
-                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${med.quantity <= 15 ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
-                                                            {med.quantity} stock
-                                                        </span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Prescribed Medicines List Table */}
-                            <div className="border border-slate-100 rounded-xl overflow-hidden bg-slate-50/50">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-xs border-collapse">
-                                        <thead>
-                                            <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                                                <th className="py-2 px-3">Medicine</th>
-                                                <th className="py-2 px-3 w-28">Prescribed Qty</th>
-                                                <th className="py-2 px-3 text-right">Price</th>
-                                                <th className="py-2 px-3 text-right w-12"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {selectedMedicines.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="4" className="py-6 px-4 text-center text-slate-400 font-medium">
-                                                        <ClipboardList className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                                                        No medicines prescribed yet.<br />
-                                                        <span className="text-[10px] text-slate-400">Search and select medicines from the input above.</span>
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                                selectedMedicines.map((med) => {
-                                                    const isExceeded = med.quantity > med.availableStock;
-                                                    return (
-                                                        <tr key={med._id} className="hover:bg-slate-50">
-                                                            <td className="py-2.5 px-3">
-                                                                <div className="font-bold text-slate-800">{med.medicineName}</div>
-                                                                <div className="text-[10px] text-slate-400 font-medium mt-0.5">
-                                                                    Stock: <span className="font-bold">{med.availableStock}</span> • {formatCurrency(med.unitPrice)}/unit
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-2.5 px-3">
-                                                                <div className="relative">
-                                                                    <input
-                                                                        type="number"
-                                                                        min="1"
-                                                                        required
-                                                                        value={med.quantity}
-                                                                        onChange={(e) => handleQuantityChange(med._id, e.target.value)}
-                                                                        className={`w-20 px-2 py-0.5 text-xs font-semibold rounded-lg border outline-none text-slate-800 bg-white ${isExceeded ? "border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-100" : "border-slate-200 focus:border-blue-500"}`}
-                                                                    />
-                                                                    {isExceeded && (
-                                                                        <span className="absolute -bottom-4 left-0 text-[8px] font-semibold text-red-500 whitespace-nowrap">Exceeds stock</span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-2.5 px-3 text-right font-bold text-slate-700">{formatCurrency(med.price)}</td>
-                                                            <td className="py-2.5 px-3 text-right">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleRemoveMedicine(med._id)}
-                                                                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {selectedMedicines.length > 0 && (
-                                    <div className="bg-slate-100/60 p-3 border-t border-slate-200 flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Total Prescription Cost</span>
-                                        <div className="flex items-center gap-0.5 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-xl">
-                                            <IndianRupee className="w-3.5 h-3.5 text-blue-600" />
-                                            <span className="text-base font-extrabold text-blue-700 leading-none">{totalPrescriptionPrice.toLocaleString("en-IN")}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Visit treatment notes */}
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Treatment Notes / Instructions</label>
-                                <textarea
-                                    rows="3"
-                                    value={visitNote}
-                                    onChange={(e) => setVisitNote(e.target.value)}
-                                    placeholder="Dosage directions, follow-up recommendations, or special symptoms..."
-                                    className="w-full rounded-xl border border-slate-200 p-3 bg-slate-50 text-xs text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all duration-150 resize-none font-medium placeholder:text-slate-400"
-                                />
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
-                                <Button
-                                    type="button"
-                                    onClick={() => setNewVisitPatient(null)}
-                                    background="bg-slate-100! text-slate-500!"
-                                    border="border-none!"
-                                    className="px-4 py-2 rounded-xl text-xs font-bold"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="px-5 py-2 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-sm flex items-center gap-1"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            <span>Saving visit...</span>
-                                        </>
-                                    ) : (
-                                        "Log Patient Visit"
-                                    )}
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
 
             {/* ── 6. DETAILED VISIT HISTORY & TIMELINE MODAL ─────────────────── */}
             {historyPatient && (

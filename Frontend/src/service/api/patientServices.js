@@ -93,3 +93,12 @@ export const DeletePatientService = async (id) => {
     const { data } = await apiClient.delete(`${patientEndpoints.deletePatient}/${id}`);
     return data;
 };
+
+/**
+ * Fetch aggregated dashboard statistics (KPIs, today's patients, monthly & yearly data).
+ * @returns {Promise<Object>} Dashboard stats response from the server.
+ */
+export const GetDashboardStatsService = async () => {
+    const { data } = await apiClient.get(patientEndpoints.dashboardStats);
+    return data;
+};

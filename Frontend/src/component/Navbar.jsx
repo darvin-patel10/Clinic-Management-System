@@ -190,7 +190,7 @@ export default function Navbar({
                         )}
 
                         {/* Notifications Dropdown */}
-                        <div className="relative" ref={notifRef}>
+                        {/* <div className="relative" ref={notifRef}>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -251,7 +251,7 @@ export default function Navbar({
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </div> */}
 
                         {/* Divider */}
                         <div className="h-6 w-px bg-slate-200 hidden sm:block" />
