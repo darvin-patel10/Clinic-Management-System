@@ -1,23 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-    Search,
-    Bell,
     Plus,
-    User,
     Users,
     LogOut,
     ChevronDown,
     ShieldCheck,
-    Menu,
-    X,
     Stethoscope,
     Activity,
-    CheckCircle2,
-    Clock,
     Pill,
     Settings,
     ArrowLeft,
+    Maximize,
+    Minimize,
 } from "lucide-react";
 import { ClinicLogo } from "../assets/Icons/index.js";
 import { LogoutService, GetMeService } from "../service/api/authServices.js";
@@ -26,19 +21,15 @@ import Button from "./Button.jsx";
 
 export default function Navbar({
     doctorInfo = null,
-    onSearch = () => { },
-    onQuickAction = () => { },
     onBack
 }) {
     const navigate = useNavigate();
     const location = useLocation();
 
     const [user, setUser] = useState(doctorInfo);
-    const [searchQuery, setSearchQuery] = useState("");
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [unreadNotifs, setUnreadNotifs] = useState(2);
+    const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
 
     const profileRef = useRef(null);
     const notifRef = useRef(null);
@@ -73,6 +64,25 @@ export default function Navbar({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Fullscreen state listener & toggle handler
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(`Error enabling fullscreen: ${err.message}`);
+            });
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    };
+
     // Handle Logout
     const handleLogout = async () => {
         try {
@@ -82,41 +92,6 @@ export default function Navbar({
             navigate("/signin", { replace: true });
         }
     };
-
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        onSearch(searchQuery);
-    };
-
-    const notifications = [
-        {
-            id: 1,
-            title: "Low Stock Alert",
-            message: "Amoxicillin 500mg has reached low threshold (8 left).",
-            time: "10m ago",
-            icon: Pill,
-            type: "warning",
-            unread: true,
-        },
-        {
-            id: 2,
-            title: "New Patient Registered",
-            message: "Aarav Shah was added to your clinic queue.",
-            time: "1h ago",
-            icon: CheckCircle2,
-            type: "success",
-            unread: true,
-        },
-        {
-            id: 3,
-            title: "Daily Summary Ready",
-            message: "Yesterday's clinic visit summary report is ready.",
-            time: "5h ago",
-            icon: Activity,
-            type: "info",
-            unread: false,
-        },
-    ];
 
     const doctorName = user?.username || "Dr. Alex Vance";
     const doctorEmail = user?.email || "doctor@cliniccms.com";
@@ -182,76 +157,28 @@ export default function Navbar({
                             <Button
                                 type="button"
                                 onClick={() => navigate("/add-pationt")}
-                                className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-xs rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-none shadow-sm hover:shadow transition-all duration-200 ease-out active:scale-95 w-auto animate-in fade-in slide-in-from-right-2 duration-300"
+                                className="inline-flex items-center justify-center gap-1.5 font-semibold text-xs rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-none shadow-sm hover:shadow transition-all duration-200 ease-out active:scale-95 w-auto animate-in fade-in slide-in-from-right-2 duration-300 p-2 sm:px-3 sm:py-2"
+                                title="Add Patient"
                             >
-                                <Plus className="w-3.5 h-3.5" />
-                                <span>Add Patient</span>
+                                <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                                <span className="hidden sm:inline">Add Patient</span>
                             </Button>
                         )}
 
-                        {/* Notifications Dropdown */}
-                        {/* <div className="relative" ref={notifRef}>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsNotifOpen(!isNotifOpen);
-                                    setIsProfileOpen(false);
-                                }}
-                                className="relative flex items-center justify-center w-9 h-9 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-colors duration-150 focus:outline-none"
-                                aria-label="Notifications"
-                            >
-                                <Bell className="w-4 h-4" />
-                                {unreadNotifs > 0 && (
-                                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-                                )}
-                            </button>
-
-                            {isNotifOpen && (
-                                <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-2xl bg-white border border-slate-200/90 shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                                    <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm text-slate-900">Notifications</span>
-                                            {unreadNotifs > 0 && (
-                                                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold text-[10px]">
-                                                    {unreadNotifs} new
-                                                </span>
-                                            )}
-                                        </div>
-                                        {unreadNotifs > 0 && (
-                                            <button
-                                                onClick={() => setUnreadNotifs(0)}
-                                                className="text-xs text-blue-600 hover:underline font-medium"
-                                            >
-                                                Mark all read
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                                        {notifications.map((n) => {
-                                            const IconComponent = n.icon;
-                                            return (
-                                                <div
-                                                    key={n.id}
-                                                    className={`p-3.5 flex items-start gap-3 hover:bg-slate-50/80 transition-colors cursor-pointer ${n.unread ? "bg-blue-50/30" : ""}`}
-                                                >
-                                                    <div className={`p-2 rounded-lg shrink-0 ${n.type === "warning" ? "bg-amber-100 text-amber-600" : n.type === "success" ? "bg-emerald-100 text-emerald-600" : "bg-blue-100 text-blue-600"}`}>
-                                                        <IconComponent className="w-4 h-4" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-1">
-                                                            <p className="text-xs font-semibold text-slate-900 truncate">{n.title}</p>
-                                                            <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
-                                                        </div>
-                                                        <p className="text-xs text-slate-600 mt-0.5 leading-snug">{n.message}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
+                        {/* Full Screen Button */}
+                        <button
+                            type="button"
+                            onClick={toggleFullscreen}
+                            className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80 transition-all duration-150 focus:outline-none cursor-pointer"
+                            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                            aria-label="Toggle Fullscreen"
+                        >
+                            {isFullscreen ? (
+                                <Minimize className="w-4 h-4" />
+                            ) : (
+                                <Maximize className="w-4 h-4" />
                             )}
-                        </div> */}
+                        </button>
 
                         {/* Divider */}
                         <div className="h-6 w-px bg-slate-200 hidden sm:block" />
@@ -354,53 +281,8 @@ export default function Navbar({
                                 </div>
                             )}
                         </div>
-
-                        {/* Mobile Menu Toggle */}
-                        <button
-                            type="button"
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none"
-                            aria-label="Toggle Navigation"
-                        >
-                            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                        </button>
                     </div>
                 </div>
-
-                {/* ── 4. Mobile Drawer ────────────────────────────────────────── */}
-                {isMobileMenuOpen && (
-                    <div className="md:hidden pb-4 pt-2 border-t border-slate-200/80 animate-in fade-in slide-in-from-top-1">
-                        <form onSubmit={handleSearchSubmit} className="relative mb-3">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search patients or medicines..."
-                                className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none"
-                            />
-                        </form>
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => {
-                                    setIsMobileMenuOpen(false);
-                                    onQuickAction("add-patient");
-                                }}
-                                className="flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-blue-600 text-white font-semibold text-xs"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add New Patient
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center justify-center gap-2 h-10 w-full rounded-xl border border-rose-200 text-rose-600 font-semibold text-xs bg-rose-50"
-                            >
-                                <LogOut className="w-4 h-4" />
-                                Sign Out
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
         </header>
     );

@@ -9,20 +9,18 @@ import {
     RefreshCw,
     AlertTriangle,
     Calendar,
-    TrendingUp,
     BarChart3,
     Eye,
     Edit3,
     Trash2,
-    X,
-    Clock,
-    Search,
-    Plus,
 } from "lucide-react";
 import PageWrapper from "../component/PageWrapper";
 import SectionWrapper from "../component/SectionWrapper";
 import Card from "../component/Deshbord/Card";
 import KpiCard from "../component/Deshbord/KpiCard";
+import KpiCardSkeleton from "../component/Deshbord/KpiCardSkeleton";
+import TableSkeleton from "../component/Deshbord/TableSkeleton";
+import HistoryTableSkeleton from "../component/Deshbord/HistoryTableSkeleton";
 import DeleteAlart from "../component/DeleteAlart";
 import EditProfile from "../component/Patient/EditProfile";
 import ViewPatient from "../component/Deshbord/ViewPatient";
@@ -425,61 +423,7 @@ export default function Dashboard() {
         : [];
 
     /* ── Skeletons ────────────────────────────────────────────────────── */
-    function KpiCardSkeleton() {
-        return (
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm animate-pulse">
-                <div className="h-10 w-10 rounded-xl bg-slate-100" />
-                <div className="mt-4 h-7 w-24 rounded-lg bg-slate-100" />
-                <div className="mt-2 h-3 w-28 rounded bg-slate-100" />
-            </div>
-        );
-    }
 
-    function TableSkeleton({ rows = 4 }) {
-        return (
-            <div className="flex flex-col divide-y divide-slate-100">
-                {Array.from({ length: rows }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 py-3 px-1 animate-pulse">
-                        <div className="h-8 w-8 shrink-0 rounded-full bg-slate-100" />
-                        <div className="flex-1 space-y-1.5">
-                            <div className="h-3 w-36 rounded bg-slate-100" />
-                            <div className="h-2.5 w-24 rounded bg-slate-100" />
-                        </div>
-                        <div className="h-3 w-16 rounded bg-slate-100" />
-                    </div>
-                ))}
-            </div>
-        );
-    }
-
-    function HistoryTableSkeleton({ cols, rows = 4 }) {
-        return (
-            <div className="overflow-x-auto animate-pulse">
-                <table className="w-full text-xs">
-                    <thead>
-                        <tr className="border-b border-slate-100">
-                            {Array.from({ length: cols }).map((_, i) => (
-                                <th key={i} className="py-2 px-3">
-                                    <div className="h-3 w-16 rounded bg-slate-100" />
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {Array.from({ length: rows }).map((_, i) => (
-                            <tr key={i}>
-                                {Array.from({ length: cols }).map((_, j) => (
-                                    <td key={j} className="py-2.5 px-3">
-                                        <div className="h-3 w-20 rounded bg-slate-100" />
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        );
-    }
 
     /* ── Error state ──────────────────────────────────────────────────── */
     if (!loading && error) {

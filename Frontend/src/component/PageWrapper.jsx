@@ -24,7 +24,7 @@ export default function PageWrapper({
 
       <main className={`flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 ${className}`}>
         {(title || subtitle || actions) && (
-          <header className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <header className="mb-6 flex flex-col items-center justify-center text-center gap-4">
             <div>
               {title && (
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -37,7 +37,7 @@ export default function PageWrapper({
                 </p>
               )}
             </div>
-            {actions && <div className="flex items-center gap-3">{actions}</div>}
+            {actions && <div className="flex items-center justify-center gap-3">{actions}</div>}
           </header>
         )}
 
