@@ -10,3 +10,18 @@
     min-height: 100dvh;
   }
 }
+
+@keyframes loaderProgress {
+  0% {
+    width: 0%;
+    margin-left: 0;
+  }
+  50% {
+    width: 75%;
+    margin-left: 15%;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0;
+  }
+}
