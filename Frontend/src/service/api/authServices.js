@@ -43,4 +43,9 @@ export const OtpVerifyService = async (payload) => {
 export const ResetPasswordService = async (payload) => {
     const { data } = await apiClient.post(authEndpoints.resetPassword, payload);
     return data;
-};
+};
+
+export const ClinicInfoService = async (payload) => {
+    const { data } = await apiClient.post(authEndpoints.clinicInfo, payload);
+    return data;
+};

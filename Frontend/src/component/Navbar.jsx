@@ -86,10 +86,24 @@ export default function Navbar({
     // Handle Logout
     const handleLogout = async () => {
         try {
-            await LogoutService();
-        } finally {
-            clearToken();
-            navigate("/signin", { replace: true });
+            const res = await LogoutService();
+
+            if (res) {
+                showNotification({
+                    title: "Success",
+                    message: res.message || "Logout successful",
+                    type: "success",
+                });
+                clearToken();
+                localStorage.clear();
+                navigate("/signin", { replace: true });
+            }
+        } catch (err) {
+            showNotification({
+                title: "Error",
+                message: err?.message || "Logout failed",
+                type: "error",
+            });
         }
     };
 

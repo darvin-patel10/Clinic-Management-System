@@ -12,6 +12,7 @@ const DEFAULT_CATEGORIES = ["Antibiotic", "Analgesic", "Antihistamine", "Antidia
 
 export default function AddMedicine({
     categories = DEFAULT_CATEGORIES,
+    editingMedicine = null,
 }) {
     const navigate = useNavigate();
     const { showNotification } = useNotification();

@@ -21,6 +21,8 @@ export default function ViewPatient({
     editPrescriptionPrice,
     editVisitNote,
     setEditVisitNote,
+    editPayAmount,
+    setEditPayAmount,
     isSubmitting,
     isWithin24Hours,
     handleStartEditPrescription,
@@ -184,23 +186,61 @@ export default function ViewPatient({
                                     </tbody>
                                 </table>
 
-                                {editSelectedMedicines.length > 0 && (
-                                    <div className="bg-slate-50 p-2.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-700">
-                                        <span>Total Price:</span>
-                                        <span className="text-blue-700">{formatCurrency(editPrescriptionPrice)}</span>
-                                    </div>
-                                )}
+                                {editSelectedMedicines.length > 0 && (() => {
+                                    const currentPayAmount = Number(editPayAmount) || 0;
+                                    const initialDocCharges = editingVisit?.visitingcharge !== undefined && editingVisit?.visitingcharge !== null
+                                        ? editingVisit.visitingcharge
+                                        : 0;
+
+                                    const totalConsultationFee = currentPayAmount > 0
+                                        ? currentPayAmount
+                                        : (initialDocCharges + editPrescriptionPrice);
+
+                                    const calcDocCharges = currentPayAmount > 0
+                                        ? Math.max(0, currentPayAmount - editPrescriptionPrice)
+                                        : initialDocCharges;
+
+                                    return (
+                                        <div className="bg-slate-50 p-3 border-t border-slate-200/80 space-y-1.5 text-xs text-slate-600 font-semibold">
+                                            <div className="flex items-center justify-between text-[11px]">
+                                                <span>Total Medicine Cost:</span>
+                                                <span className="font-bold text-slate-800">{formatCurrency(editPrescriptionPrice)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-[11px]">
+                                                <span>Doctor Charges:</span>
+                                                <span className="font-bold text-slate-800">{formatCurrency(calcDocCharges)}</span>
+                                            </div>
+                                            <div className="pt-1 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-800">
+                                                <span>Total Consultation Cost:</span>
+                                                <span className="text-blue-700 font-extrabold">{formatCurrency(totalConsultationFee)}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
-                            {/* Edit Note */}
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Dosage Instructions</label>
-                                <textarea
-                                    rows="2"
-                                    value={editVisitNote}
-                                    onChange={(e) => setEditVisitNote(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-200 p-2.5 bg-white text-xs text-slate-800 outline-none focus:border-blue-500 resize-none font-medium"
-                                />
+                            {/* Edit Note & Pay Amount */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Dosage Instructions</label>
+                                    <textarea
+                                        rows="2"
+                                        value={editVisitNote}
+                                        onChange={(e) => setEditVisitNote(e.target.value)}
+                                        className="w-full rounded-xl border border-slate-200 p-2.5 bg-white text-xs text-slate-800 outline-none focus:border-blue-500 resize-none font-medium"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Pay Amount (₹)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={editPayAmount}
+                                        onChange={(e) => setEditPayAmount && setEditPayAmount(e.target.value)}
+                                        placeholder="e.g. 500"
+                                        className="w-full rounded-xl border border-slate-200 p-2.5 bg-white text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
@@ -250,7 +290,7 @@ export default function ViewPatient({
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
-                                                                {formatCurrency(visit.totalPrice)}
+                                                                {formatCurrency(visit.payamount !== undefined && visit.payamount !== null ? visit.payamount : visit.totalPrice)}
                                                             </span>
                                                             {editable && (
                                                                 <div className="flex items-center gap-0.5">

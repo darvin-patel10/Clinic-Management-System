@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-
-// ─── Base URL ─────────────────────────────────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000";
+import { Navigate, useLocation } from "react-router-dom";
+import { apiClient } from "../service/httpServices";
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 
@@ -24,52 +22,20 @@ export function clearAccessToken() {
 // ─── Session Verification ─────────────────────────────────────────────────────
 
 /**
- * Calls GET /api/auth/get-me with the current access token.
- *
- * The backend's `authenticate` middleware handles the full chain:
- *  - Verifies the JWT signature / expiry
- *  - If the access token is EXPIRED it silently refreshes it using
- *    the httpOnly refreshToken cookie and returns the new token in the
- *    "X-New-Access-Token" response header.
- *  - Checks the session still exists and hasn't been revoked.
- *
- * Returns `true` when the session is valid, `false` otherwise.
+ * Calls GET /api/auth/get-me via the shared apiClient.
+ * Returns { isValid: boolean, user: object | null }.
  */
 async function verifySession() {
     const token = getAccessToken();
 
     // No token in storage → definitely not authenticated
-    if (!token) return false;
+    if (!token) return { isValid: false, user: null };
 
     try {
-        const res = await fetch(`${API_BASE}/api/auth/get-me`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            // Include httpOnly refreshToken cookie for silent refresh
-            credentials: "include",
-        });
-
-        if (res.ok) {
-            // Pick up a silently-refreshed access token if the backend issued one
-            const newToken = res.headers.get("X-New-Access-Token");
-            if (newToken) {
-                setAccessToken(newToken);
-            }
-            return true;
-        }
-
-        // 401 → token invalid / session revoked / refresh cookie also expired
-        if (res.status === 401) {
-            clearAccessToken();
-            return false;
-        }
-
-        return false;
+        const { data } = await apiClient.get("auth/get-me");
+        return { isValid: true, user: data?.user || null };
     } catch {
-        // Network error — treat as unauthenticated to be safe
-        return false;
+        return { isValid: false, user: null };
     }
 }
 
@@ -87,23 +53,27 @@ function AuthLoadingSpinner() {
 
 /**
  * Wraps routes that require an active, server-verified session.
- *
- * Flow:
- *  1. Shows a loading spinner while verifying the session with the backend.
- *  2. If the session is valid  → renders {children}.
- *  3. If the session is invalid → redirects to {redirectTo} (default: "/signin").
- *
- * @param {React.ReactNode} children  - The protected page/component.
- * @param {string}          redirectTo - Where to send unauthenticated users.
+ * Enforces that users must fill clinic details before accessing other protected routes.
  */
 export function ProtectedRoute({ children, redirectTo = "/signin" }) {
+    const location = useLocation();
     const [status, setStatus] = useState("checking"); // "checking" | "auth" | "unauth"
+    const [hasClinicInfo, setHasClinicInfo] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
 
-        verifySession().then((isValid) => {
-            if (!cancelled) setStatus(isValid ? "auth" : "unauth");
+        verifySession().then(({ isValid, user }) => {
+            if (!cancelled) {
+                if (!isValid) {
+                    setStatus("unauth");
+                } else {
+                    const clinicName = user?.clinicinfo?.clinicName;
+                    const isClinicFilled = Boolean(clinicName && clinicName.trim() !== "");
+                    setHasClinicInfo(isClinicFilled);
+                    setStatus("auth");
+                }
+            }
         });
 
         return () => {
@@ -113,6 +83,14 @@ export function ProtectedRoute({ children, redirectTo = "/signin" }) {
 
     if (status === "checking") return <AuthLoadingSpinner />;
     if (status === "unauth") return <Navigate to={redirectTo} replace />;
+
+    const isMedicalInfoPage = location.pathname === "/medical-info";
+
+    // If user has NOT filled clinic details, force redirect to /medical-info
+    if (!hasClinicInfo && !isMedicalInfoPage) {
+        return <Navigate to="/medical-info" replace />;
+    }
+
     return <>{children}</>;
 }
 
@@ -121,23 +99,25 @@ export function ProtectedRoute({ children, redirectTo = "/signin" }) {
 /**
  * Wraps public-only routes (e.g. Sign In, Sign Up, Forgot Password).
  * Redirects already-authenticated users away from these pages.
- *
- * Flow:
- *  1. Shows a loading spinner while verifying the session with the backend.
- *  2. If the session is valid   → redirects to {redirectTo} (default: "/").
- *  3. If the session is invalid → renders {children}.
- *
- * @param {React.ReactNode} children  - The public page/component.
- * @param {string}          redirectTo - Where to send authenticated users.
  */
-export function PublicRoute({ children, redirectTo = "/" }) {
+export function PublicRoute({ children, redirectTo = "/dashboard" }) {
     const [status, setStatus] = useState("checking"); // "checking" | "auth" | "unauth"
+    const [hasClinicInfo, setHasClinicInfo] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
 
-        verifySession().then((isValid) => {
-            if (!cancelled) setStatus(isValid ? "auth" : "unauth");
+        verifySession().then(({ isValid, user }) => {
+            if (!cancelled) {
+                if (!isValid) {
+                    setStatus("unauth");
+                } else {
+                    const clinicName = user?.clinicinfo?.clinicName;
+                    const isClinicFilled = Boolean(clinicName && clinicName.trim() !== "");
+                    setHasClinicInfo(isClinicFilled);
+                    setStatus("auth");
+                }
+            }
         });
 
         return () => {
@@ -146,7 +126,10 @@ export function PublicRoute({ children, redirectTo = "/" }) {
     }, []);
 
     if (status === "checking") return <AuthLoadingSpinner />;
-    if (status === "auth") return <Navigate to={redirectTo} replace />;
+    if (status === "auth") {
+        if (!hasClinicInfo) return <Navigate to="/medical-info" replace />;
+        return <Navigate to={redirectTo} replace />;
+    }
     return <>{children}</>;
 }
 

@@ -71,11 +71,22 @@ export default function SignIn() {
       // Persist the access token using the shared helper (key: "token")
       saveToken(resData.accessToken ?? "");
 
+      // Store username in localStorage
+      if (resData?.user?.username) {
+        localStorage.setItem("username", resData.user.username);
+      }
+
       // Honour "Remember me" for email pre-fill on next visit
       if (data.rememberMe) localStorage.setItem("cms_remembered_email", data.email);
       else localStorage.removeItem("cms_remembered_email");
 
-      navigate("/dashboard", { replace: true });
+      const hasClinic = Boolean(resData?.user?.clinicinfo?.clinicName && resData.user.clinicinfo.clinicName.trim() !== "");
+      if (hasClinic) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/medical-info", { replace: true });
+      }
+
     } catch (err) {
       // For 401 errors, httpServices.js returns the raw Axios error (no enrichment).
       // We therefore read the backend's own message first (they use "massage" typo).

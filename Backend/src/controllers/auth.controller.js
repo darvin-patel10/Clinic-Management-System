@@ -183,7 +183,8 @@ export async function verifyEmail(req, res) {
         user: {
             username: user.username,
             email: user.email,
-            verified: user.verified
+            verified: user.verified,
+            clinicinfo: user.clinicinfo
         },
         accessToken
     });
@@ -258,7 +259,8 @@ export async function login(req, res) {
         massage: "User logged in successfully",
         user: {
             username: user.username,
-            email: user.email
+            email: user.email,
+            clinicinfo: user.clinicinfo
         },
         accessToken
     })
@@ -274,6 +276,7 @@ export async function getMe(req, res) {
         user: {
             username: user.username,
             email: user.email,
+            clinicinfo: user.clinicinfo
         }
     })
 }
@@ -506,4 +509,95 @@ export async function resetPassword(req, res) {
     res.status(200).json({
         message: "Password reset successfully"
     });
+}
+
+export async function clinicInfo(req, res) {
+    try {
+        const {
+            qulification,
+            doctorName,
+            doctorTitle,
+            qualification,
+            registrationNo,
+            specialty,
+            experienceYears,
+            medicalcouncil,
+            clinicinfo,
+            clinicName,
+            clinicAddress,
+            clinicTiming,
+            emergencyAvailable,
+            teleConsultation
+        } = req.body;
+
+        const user = await userModel.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Qualification details
+        const qData = qulification || {};
+        const targetRegNo = (qData.registrationNo || registrationNo || "").trim();
+
+        if (targetRegNo) {
+            const existingRegUser = await userModel.findOne({
+                "qulification.registrationNo": targetRegNo,
+                _id: { $ne: user._id }
+            });
+
+            if (existingRegUser) {
+                return res.status(400).json({
+                    message: "Registration number already exists"
+                });
+            }
+        }
+
+        user.qulification = {
+            doctorName: qData.doctorName || (doctorTitle ? `${doctorTitle} ${doctorName || ""}`.trim() : doctorName) || user.qulification?.doctorName || "",
+            qualification: qData.qualification || qualification || user.qulification?.qualification || "",
+            registrationNo: targetRegNo || user.qulification?.registrationNo || "",
+            specialty: qData.specialty || specialty || user.qulification?.specialty || "",
+            experienceYears: qData.experienceYears || experienceYears || user.qulification?.experienceYears || "",
+            medicalcouncil: qData.medicalcouncil || medicalcouncil || user.qulification?.medicalcouncil || ""
+        };
+
+        // Clinic info details
+        const cData = clinicinfo || {};
+        const cAddr = cData.clinicAddress || (typeof clinicAddress === "object" ? clinicAddress : { address: clinicAddress || "" });
+
+        user.clinicinfo = {
+            clinicName: cData.clinicName || clinicName || user.clinicinfo?.clinicName || "",
+            clinicphone: Number(cData.clinicphone || cData.clinicPhone || req.body.clinicphone || req.body.clinicPhone || user.clinicinfo?.clinicphone || 0),
+            consultationfee: Number(cData.consultationfee || cData.consultationFee || req.body.consultationfee || req.body.consultationFee || user.clinicinfo?.consultationfee || 0),
+            clinicAddress: {
+                address: cAddr.address || (typeof clinicAddress === "string" ? clinicAddress : "") || user.clinicinfo?.clinicAddress?.address || "",
+                city: cAddr.city || "",
+                state: cAddr.state || "",
+                pinCode: cAddr.pinCode || ""
+            },
+            clinicTiming: cData.clinicTiming || clinicTiming || user.clinicinfo?.clinicTiming || "",
+        };
+
+        // Status flags
+        if (emergencyAvailable !== undefined) {
+            user.emergencyAvailable = Boolean(emergencyAvailable);
+        }
+        if (teleConsultation !== undefined) {
+            user.teleConsultation = Boolean(teleConsultation);
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Medical info updated successfully",
+            user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Internal server error"
+        });
+    }
 }

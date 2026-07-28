@@ -54,9 +54,17 @@ const patientSchema = new mongoose.Schema({
             type: String,
             default: "No note",
         },
+        visitingcharge: {
+            type: Number,
+            required: [true, "Visiting charge is required"],
+        },
         totalPrice: {
             type: Number,
             required: [true, "Total Price is required"],
+        },
+        payamount: {
+            type: Number,
+            default: 0
         },
         createdAt: {
             type: Date,

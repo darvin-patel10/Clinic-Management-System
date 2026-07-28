@@ -1,5 +1,6 @@
 import patientModel from "../models/patient.model.js";
 import medicineModel from "../models/medicines.model.js";
+import userModel from "../models/user.model.js";
 import { recordDeletedPrescriptionToLog, getDashboardStats } from "./dashboard.controller.js";
 export { recordDeletedPrescriptionToLog, getDashboardStats };
 
@@ -148,7 +149,13 @@ export async function addPatient(req, res) {
 
         const assignedUniqueNo = await getNextUniqueNo(req.user.id);
 
+        // Fetch doctor's consultation fee from userModel
+        const userDoc = await userModel.findById(req.user.id);
+        const doctorConsultationFee = Number(userDoc?.clinicinfo?.consultationfee || 0);
+
         // 1. Gather all medicine updates first to check availability (prevent partial updates on failure)
+
+        let totalMedicineCost = 0;
         const medicineUpdates = [];
         const prescriptionsArray = Array.isArray(prescription) ? prescription : [prescription];
 
@@ -181,6 +188,8 @@ export async function addPatient(req, res) {
                         });
                     }
 
+                    totalMedicineCost += (Number(medicineDoc.unitPrice) || 0) * prescribedQty;
+
                     medicineUpdates.push({
                         doc: medicineDoc,
                         prescribedQty
@@ -189,7 +198,15 @@ export async function addPatient(req, res) {
             }
         }
 
-        // 2. Perform the updates (decrease quantity & recalculate totalPrice)
+        // 2. Calculate visitingcharge, totalPrice, and payamount
+        const visitingcharge = req.body.visitingcharge !== undefined ? Number(req.body.visitingcharge) : doctorConsultationFee;
+        const totalPrice = req.body.totalPrice !== undefined ? Number(req.body.totalPrice) : (visitingcharge + totalMedicineCost);
+        const reqPayAmount = req.body.payamount;
+        const payamount = (reqPayAmount !== undefined && reqPayAmount !== null && reqPayAmount !== "" && Number(reqPayAmount) > 0)
+            ? Number(reqPayAmount)
+            : totalPrice;
+
+        // 3. Perform the updates (decrease quantity & recalculate totalPrice)
         for (const update of medicineUpdates) {
             const { doc, prescribedQty } = update;
             doc.quantity -= prescribedQty;
@@ -197,7 +214,24 @@ export async function addPatient(req, res) {
             await doc.save();
         }
 
-        // 3. Create the patient record
+        // 4. Populate missing fields on prescription subdocuments
+        const formattedPrescription = prescriptionsArray.map((p) => {
+            const vCharge = p.visitingcharge !== undefined ? Number(p.visitingcharge) : visitingcharge;
+            const tPrice = p.totalPrice !== undefined ? Number(p.totalPrice) : totalPrice;
+            const pAmount = (p.payamount !== undefined && p.payamount !== null && p.payamount !== "" && Number(p.payamount) > 0)
+                ? Number(p.payamount)
+                : (payamount || tPrice);
+
+            return {
+                medicine: p.medicine || [],
+                note: p.note?.trim() || "No note",
+                visitingcharge: vCharge,
+                totalPrice: tPrice,
+                payamount: pAmount,
+            };
+        });
+
+        // 5. Create the patient record
         const patient = await patientModel.create({
             drId: req.user.id,
             uniqueno: assignedUniqueNo,
@@ -206,7 +240,7 @@ export async function addPatient(req, res) {
             patientGender,
             phonenumber,
             region,
-            prescription
+            prescription: formattedPrescription,
         });
 
         return res.status(201).json({
@@ -324,31 +358,32 @@ export async function updatePatient(req, res) {
             await doc.save();
         }
 
-        //Check priscription is array or not
-        const prescriptionsCheck = Array.isArray(prescription) ? prescription : [prescription];
-        for (const p of prescriptionsCheck) {
-            for (const med of p.medicine) {
-                const { medicineId, quantity: prescribedQty } = med;
-                if (!medicineId || prescribedQty === undefined) {
-                    return res.status(400).json({
-                        message: "Medicine ID and quantity are required in prescription"
-                    });
-                }
-            }
-            if (!p.note) {
-                return res.status(400).json({
-                    message: "Note is required"
-                });
-            }
-            if (!p.totalPrice) {
-                return res.status(400).json({
-                    message: "Total Price is required"
-                });
-            }
-        }
+        // Fetch doctor's consultation fee from userModel
+        const userDoc = await userModel.findById(req.user.id);
+        const doctorConsultationFee = Number(userDoc?.clinicinfo?.consultationfee || 0);
+
+        // Populate visitingcharge, totalPrice (consultation fee + medicine cost), and payamount on each new prescription
+        const formattedNewPrescriptions = prescriptionsArray.map((p) => {
+            const medCost = (p.medicine || []).reduce((sum, m) => sum + (Number(m.price) || 0), 0);
+            const vCharge = (p.visitingcharge !== undefined && p.visitingcharge !== null) ? Number(p.visitingcharge) : doctorConsultationFee;
+            const tPrice = (p.totalPrice !== undefined && Number(p.totalPrice) >= (vCharge + medCost))
+                ? Number(p.totalPrice)
+                : (vCharge + medCost);
+            const pAmount = (p.payamount !== undefined && p.payamount !== null && p.payamount !== "" && Number(p.payamount) > 0)
+                ? Number(p.payamount)
+                : tPrice;
+
+            return {
+                medicine: p.medicine || [],
+                note: p.note?.trim() || "No note",
+                visitingcharge: vCharge,
+                totalPrice: tPrice,
+                payamount: pAmount,
+            };
+        });
 
         // update prescription
-        patient.prescription.push(...prescriptionsArray);
+        patient.prescription.push(...formattedNewPrescriptions);
         await patient.save();
 
         return res.status(200).json({
@@ -433,7 +468,7 @@ export async function editPrescriptionInfo(req, res) {
                     message: "Prescription object is required"
                 });
             }
-            const { prescriptionId, note, totalPrice, medicine } = prescriptionObj;
+            const { prescriptionId, note, totalPrice, payamount, medicine } = prescriptionObj;
             if (!prescriptionId) {
                 return res.status(400).json({
                     message: "Prescription ID is required"
@@ -459,6 +494,11 @@ export async function editPrescriptionInfo(req, res) {
             }
             if (totalPrice) {
                 existingPrescription.totalPrice = totalPrice;
+            }
+            if (payamount !== undefined && payamount !== null && payamount !== "") {
+                existingPrescription.payamount = Number(payamount);
+            } else if (existingPrescription.totalPrice) {
+                existingPrescription.payamount = existingPrescription.totalPrice;
             }
             if (medicine && Array.isArray(medicine)) {
                 if (totalPrice === undefined || totalPrice === null || totalPrice === "") {
@@ -873,4 +913,4 @@ export async function deletePatient(req, res) {
         console.log(error);
     }
 }
-
+

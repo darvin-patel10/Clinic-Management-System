@@ -22,6 +22,8 @@ authRouter.post("/reset-password", authController.resetPassword);
 
 authRouter.post("/otp-verify", authController.otpverify);
 
+authRouter.post("/clinic-info", authenticate, authController.clinicInfo);
+
 
 // authRouter.post("/login", (req, res) => {
 //     res.send("login");

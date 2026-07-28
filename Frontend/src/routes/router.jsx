@@ -9,6 +9,7 @@ import AllMedicines from "../pages/madicin/allmadicin";
 import AddMedicineModal from "../pages/madicin/addMadicin";
 import AddPationt from "../pages/pationt/AddPationt";
 import AllPationt from "../pages/pationt/AllPationt";
+import MedicalInfo from "../pages/Login/clinicinfo";
 
 export default function AppRoutes() {
     const location = useLocation();
@@ -41,6 +42,13 @@ export default function AppRoutes() {
                     </PublicRoute>
                 } />
             {/* Protected pages */}
+            <Route
+                path="/medical-info"
+                element={
+                    <ProtectedRoute>
+                        <MedicalInfo />
+                    </ProtectedRoute>
+                } />
             <Route
                 path="/dashboard"
                 element={
