@@ -78,7 +78,7 @@ app.use(async (req, res, next) => {
 // ---------------------------------------------------------------------------
 app.get("/", (req, res) => {
     res.status(200).json({
-        message: "Madhuram Clinic API is running",
+        message: "Clinic_Management_System API is running",
         status: "online",
         timestamp: new Date().toISOString(),
     });
