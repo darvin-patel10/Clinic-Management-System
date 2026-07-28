@@ -43,19 +43,19 @@ export default function Dropdown({
         : value;
 
     return (
-        <div className={`relative w-full sm:w-auto ${className}`} ref={containerRef}>
+        <div className={`relative w-full ${className}`} ref={containerRef}>
             {/* Trigger Button */}
             <button
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
-                className={`flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-3.5 py-2 bg-white text-xs font-semibold text-slate-800 shadow-sm w-full sm:w-auto hover:bg-slate-50 active:scale-98 transition-all cursor-pointer focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50 ${selectClassName}`}
+                className={`flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-4 h-11 bg-white text-sm font-medium ${!value ? "text-slate-400" : "text-slate-900"} shadow-sm w-full hover:border-slate-300 transition-all cursor-pointer focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50 ${selectClassName}`}
             >
-                <div className="flex items-center gap-2">
-                    {Icon && <Icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                    <span>{triggerLabel}</span>
+                <div className="flex items-center gap-2.5 truncate">
+                    {Icon && <Icon className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />}
+                    <span className="truncate">{triggerLabel}</span>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Dropdown Panel */}
@@ -66,17 +66,21 @@ export default function Dropdown({
                             const isObject = typeof opt === "object" && opt !== null;
                             const val = isObject ? opt.value : opt;
                             const label = isObject ? opt.label : opt;
-                            const isSelected = val === value;
+                            const isDisabled = isObject ? (opt.disabled || val === "") : val === "";
+                            const isSelected = val === value && val !== "";
 
                             return (
                                 <button
-                                    key={val}
+                                    key={val || label}
                                     type="button"
-                                    onClick={() => handleSelect(val)}
-                                    className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-colors cursor-pointer block ${
-                                        isSelected
-                                            ? "text-blue-600 bg-blue-50/50 font-bold"
-                                            : "text-slate-700 hover:bg-slate-50 font-medium"
+                                    disabled={isDisabled}
+                                    onClick={() => !isDisabled && handleSelect(val)}
+                                    className={`w-full text-left px-3.5 py-2.5 text-xs transition-colors block ${
+                                        isDisabled
+                                            ? "text-slate-300 font-normal cursor-not-allowed bg-slate-50/50 pointer-events-none"
+                                            : isSelected
+                                                ? "text-teal-600 bg-teal-50/50 font-bold cursor-pointer"
+                                                : "text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
                                     }`}
                                 >
                                     {label}

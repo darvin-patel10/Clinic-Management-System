@@ -55,6 +55,7 @@ export default function Dashboard() {
     const [editSelectedMedicines, setEditSelectedMedicines] = useState([]);
     const [editMedSearchQuery, setEditMedSearchQuery] = useState("");
     const [editVisitNote, setEditVisitNote] = useState("");
+    const [editPayAmount, setEditPayAmount] = useState("");
     const [isSearchingEditInventory, setIsSearchingEditInventory] = useState(false);
     const [medicinesInventory, setMedicinesInventory] = useState([]);
     const editInventorySearchRef = useRef(null);
@@ -249,6 +250,7 @@ export default function Dashboard() {
     const handleStartEditPrescription = (visit) => {
         setEditingVisit(visit);
         setEditVisitNote(visit.note || "");
+        setEditPayAmount(visit.payamount !== undefined && visit.payamount !== null ? visit.payamount : (visit.totalPrice || ""));
 
         const mapped = (visit.medicine || []).map((m) => {
             const invDoc = medicinesInventory.find((inv) => inv._id === m.medicineId);
@@ -302,6 +304,7 @@ export default function Dashboard() {
                     prescriptionId: editingVisit._id,
                     note: editVisitNote.trim() || "No note",
                     totalPrice: editPrescriptionPrice,
+                    payamount: editPayAmount !== "" ? Number(editPayAmount) : editPrescriptionPrice,
                     medicine: validMedicines.map((m) => ({
                         medicineId: m.medicineId,
                         medicineName: m.medicineName,
@@ -522,14 +525,14 @@ export default function Dashboard() {
                                             <th className="py-2 px-3">ID</th>
                                             <th className="py-2 px-3">Contact</th>
                                             <th className="py-2 px-3">Visits</th>
-                                            <th className="py-2 px-3 text-right">Total Spend</th>
+                                            <th className="py-2 px-3 text-right">Pay Amount</th>
                                             <th className="py-2 px-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         {stats.todaysPatientsData.map((p) => {
-                                            const totalSpend = (p.prescription || []).reduce(
-                                                (sum, pres) => sum + (pres.totalPrice || 0),
+                                            const payAmount = (p.prescription || []).reduce(
+                                                (sum, pres) => sum + (pres.payamount !== undefined && pres.payamount !== null ? pres.payamount : (pres.totalPrice || 0)),
                                                 0
                                             );
                                             const lastVisitObj = p.prescription?.slice(-1)[0];
@@ -561,7 +564,7 @@ export default function Dashboard() {
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-3 text-right font-bold text-slate-800">
-                                                        {formatCurrency(totalSpend)}
+                                                        {formatCurrency(payAmount)}
                                                     </td>
                                                     <td className="py-3 px-3 text-right">
                                                         <div className="flex items-center justify-end gap-1">
@@ -687,6 +690,8 @@ export default function Dashboard() {
                 editPrescriptionPrice={editPrescriptionPrice}
                 editVisitNote={editVisitNote}
                 setEditVisitNote={setEditVisitNote}
+                editPayAmount={editPayAmount}
+                setEditPayAmount={setEditPayAmount}
                 isSubmitting={isSubmitting}
                 isWithin24Hours={isWithin24Hours}
                 handleStartEditPrescription={handleStartEditPrescription}

@@ -39,6 +39,9 @@ export const authEndpoints = {
 
     /** POST — Set a new password using the resetToken returned by otpVerify. */
     resetPassword: "auth/reset-password",
+
+    /** POST — Update clinic medical info for authenticated doctor. */
+    clinicInfo: "auth/clinic-info",
 };
 
 // ─── Medicines ────────────────────────────────────────────────────────────────

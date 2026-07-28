@@ -222,7 +222,7 @@ export default function SignUp() {
             if (resData?.accessToken) {
                 saveToken(resData.accessToken);
             }
-            navigate("/dashboard", { replace: true });
+            navigate("/medical-info", { replace: true });
         } catch (err) {
             const apiMessage =
                 err?.response?.data?.message ||
