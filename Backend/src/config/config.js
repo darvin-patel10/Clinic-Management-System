@@ -33,5 +33,6 @@ const config = {
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
     GOOGLE_USER: process.env.GOOGLE_USER,
     CLIENT_URL: process.env.CLIENT_URL,
+    DEV_URL: process.env.DEV_URL
 }
 export default config;
