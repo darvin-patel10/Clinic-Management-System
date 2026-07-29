@@ -33,8 +33,8 @@ Visit :- https://clinic-management-system-djsx.vercel.app/
 ## 🛠️ Tech Stack
 
 ### **Frontend**
-- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Routing**: React Router v7
 - **Form Management**: React Hook Form
 - **Icons & UI**: Lucide React, React Toastify
@@ -42,8 +42,8 @@ Visit :- https://clinic-management-system-djsx.vercel.app/
 
 ### **Backend**
 - **Runtime**: [Node.js](https://nodejs.org/) (ES Modules)
-- **Framework**: [Express.js 5](https://expressjs.com/)
-- **Database**: [MongoDB](https://www.mongodb.com/) via Mongoose 9
+- **Framework**: [Express.js](https://expressjs.com/)
+- **Database**: [MongoDB](https://www.mongodb.com/) via Mongoose 
 - **Authentication**: JSON Web Tokens (`jsonwebtoken`) + `cookie-parser`
 - **Email Service**: `nodemailer` (Google OAuth2 integration)
 - **Task Scheduler**: `node-cron`
