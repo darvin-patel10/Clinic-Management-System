@@ -41,11 +41,10 @@ import Button from "../../component/Button.jsx";
 import Loader from "../../component/Loader.jsx";
 import SectionWrapper from "../../component/SectionWrapper.jsx";
 import DoctorProfileTab from "../../component/Docter/Profile.jsx";
-import ClinicEdit from "./ClinicEdit.jsx";
-import SecurityTab from "./Security.jsx";
-import { ClinicLogo } from "../../assets/Icons/index.js";
-import { GetMeService, ClinicInfoService } from "../../service/api/authServices.js";
-import { updateDetails } from "../../service/api/accountServices.js";
+import ClinicEdit from "../../component/Docter/ClinicEdit.jsx";
+import SecurityTab from "../../component/Docter/Security.jsx";
+import { GetMeService } from "../../service/api/authServices.js";
+import { accountDetails, updateDetails } from "../../service/api/accountServices.js";
 import { useNotification } from "../../hooks/showNotification.jsx";
 
 /* ── Inject Custom Animations & Keyframes ────────────────────── */
@@ -118,6 +117,15 @@ export default function DoctorAccount() {
     const [isEditing, setIsEditing] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
 
+    // Header display state (only updated from accountDetails API response / saved changes)
+    const [headerData, setHeaderData] = useState({
+        doctorTitle: "Dr.",
+        doctorName: "",
+        qualification: "",
+        registrationNo: "",
+        specialty: ""
+    });
+
     // Main Form State initialized from database
     const [formData, setFormData] = useState({
         // Auth / User Account
@@ -127,33 +135,31 @@ export default function DoctorAccount() {
         // Qualifications
         doctorTitle: "Dr.",
         doctorName: "",
-        qualification: "MBBS, MD (General Medicine)",
-        registrationNo: "MCI/2022/88741",
-        specialty: "General Physician / Internal Medicine",
-        experienceYears: "8 Years",
-        medicalcouncil: "National Medical Commission (NMC)",
+        qualification: "",
+        registrationNo: "",
+        specialty: "",
+        experienceYears: "",
+        medicalcouncil: "",
 
         // Clinic Details
-        clinicName: "Apex Wellness Medical Center",
-        clinicphone: "9876543210",
-        consultationfee: "500",
-        clinicTiming: "Mon - Sat (09:00 AM - 01:00 PM, 05:00 PM - 09:00 PM)",
+        clinicName: "",
+        clinicphone: "",
+        consultationfee: "",
+        clinicTiming: "",
 
         // Clinic Address
-        address: "Suite 402, Healthcare Plaza, MG Road",
-        city: "Ahmedabad",
-        state: "Gujarat",
-        pinCode: "380009",
+        address: "",
+        city: "",
+        state: "",
+        pinCode: "",
 
         // Toggles
-        emergencyAvailable: true,
-        teleConsultation: true,
+        emergencyAvailable: false,
+        teleConsultation: false,
 
         // Additional Settings
-        emailAlerts: true,
-        smsAlerts: true,
-        autoPrintPrescription: false,
-        rxFooterNote: "Valid for 7 days. Take medicines strictly as advised."
+        emailAlerts: false,
+        rxFooterNote: ""
     });
 
     // Password State
@@ -162,6 +168,7 @@ export default function DoctorAccount() {
         newPassword: "",
         confirmPassword: ""
     });
+
     const [showPass, setShowPass] = useState({ current: false, new: false, confirm: false });
     const [passSaving, setPassSaving] = useState(false);
 
@@ -171,10 +178,17 @@ export default function DoctorAccount() {
         setLoading(true);
 
         GetMeService()
+            .then((meRes) => {
+                const userId = meRes?.user?.id || meRes?.user?._id;
+                if (userId) {
+                    return accountDetails(userId);
+                }
+                return meRes;
+            })
             .then((res) => {
-                if (!isMounted) return;
-                if (res?.user) {
-                    const u = res.user;
+                if (!isMounted || !res) return;
+                const u = res?.data?.user || res?.user;
+                if (u) {
                     const q = u.qulification || {};
                     const c = u.clinicinfo || {};
                     const ca = c.clinicAddress || {};
@@ -189,6 +203,14 @@ export default function DoctorAccount() {
                         title = "Prof. Dr.";
                         rawName = rawName.replace("Prof. Dr. ", "");
                     }
+
+                    setHeaderData({
+                        doctorTitle: title,
+                        doctorName: rawName || u.username || "",
+                        qualification: q.qualification || "",
+                        registrationNo: q.registrationNo || "",
+                        specialty: q.specialty || ""
+                    });
 
                     setFormData((prev) => ({
                         ...prev,
@@ -273,6 +295,13 @@ export default function DoctorAccount() {
             const res = await updateDetails(payload);
 
             if (res?.status === 200 || res?.data?.user || res?.user) {
+                setHeaderData({
+                    doctorTitle: formData.doctorTitle,
+                    doctorName: formData.doctorName,
+                    qualification: formData.qualification,
+                    registrationNo: formData.registrationNo,
+                    specialty: formData.specialty
+                });
                 showNotification({
                     title: "Profile Updated!",
                     message: res?.data?.message || res?.message || "Doctor account and clinic details have been saved.",
@@ -321,7 +350,7 @@ export default function DoctorAccount() {
         }, 1200);
     };
 
-    const initials = (formData.doctorName || "Doctor")
+    const initials = (headerData.doctorName || "Doctor")
         .split(" ")
         .map((n) => n[0])
         .slice(0, 2)
@@ -374,19 +403,19 @@ export default function DoctorAccount() {
                                         Medical License Verified
                                     </span>
                                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-slate-300 border border-white/15">
-                                        Reg: {formData.registrationNo || "Pending"}
+                                        Reg: {headerData.registrationNo || "Pending"}
                                     </span>
                                 </div>
 
                                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                                    {formData.doctorTitle} {formData.doctorName || "Doctor Name"}
+                                    {headerData.doctorTitle} {headerData.doctorName || "Doctor Name"}
                                 </h1>
 
                                 <p className="text-xs sm:text-sm text-teal-300/90 font-medium flex items-center gap-1.5 flex-wrap">
                                     <Stethoscope className="w-4 h-4 text-teal-400 shrink-0" />
-                                    <span>{formData.qualification || "Medical Practitioner"}</span>
+                                    <span>{headerData.qualification || "Medical Practitioner"}</span>
                                     <span className="text-slate-500">•</span>
-                                    <span className="text-slate-300">{formData.specialty}</span>
+                                    <span className="text-slate-300">{headerData.specialty}</span>
                                 </p>
                             </div>
                         </div>
@@ -403,21 +432,6 @@ export default function DoctorAccount() {
                                     <span className="text-sm font-extrabold text-blue-300 block leading-none">100%</span>
                                     <span className="text-[10px] font-semibold text-blue-200/80">HIPAA Compliant</span>
                                 </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                {isDirty && (
-                                    <Button
-                                        type="button"
-                                        onClick={() => window.location.reload()}
-                                        background="bg-white/10"
-                                        border="border border-white/15"
-                                        padding="px-4 py-2.5"
-                                        className="rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer hover:bg-white/20 w-auto"
-                                    >
-                                        <RotateCcw className="w-4 h-4" /> Discard
-                                    </Button>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -544,6 +558,7 @@ export default function DoctorAccount() {
                     {/* ── TAB 3: SECURITY & PASSWORD ───────────────────────── */}
                     {activeTab === "security" && (
                         <SecurityTab
+                            userEmail={formData.email}
                             handlePasswordSubmit={handlePasswordSubmit}
                             passwordData={passwordData}
                             setPasswordData={setPasswordData}

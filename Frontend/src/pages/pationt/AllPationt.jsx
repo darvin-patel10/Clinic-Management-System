@@ -34,6 +34,7 @@ import { formatCurrency, formatDate } from "../../utils/formatters";
 
 // API services
 import {
+    PatientsService,
     SearchPatientService,
     UpdatePatientDataService,
     EditPrescriptionInfoService,
@@ -92,9 +93,11 @@ export default function AllPationt() {
     const fetchPatients = async (queryParam = "") => {
         setLoading(true);
         try {
-            let params = {};
             const trimmedQuery = queryParam.trim();
+            let response;
+
             if (trimmedQuery) {
+                let params = {};
                 // Determine search field based on input format
                 if (/^\d+$/.test(trimmedQuery)) {
                     if (trimmedQuery.length === 10) {
@@ -105,9 +108,11 @@ export default function AllPationt() {
                 } else {
                     params.name = trimmedQuery;
                 }
+                response = await SearchPatientService(params);
+            } else {
+                response = await PatientsService();
             }
 
-            const response = await SearchPatientService(params);
             if (response && response.patients) {
                 setPatients(response.patients);
             }
@@ -123,10 +128,14 @@ export default function AllPationt() {
         }
     };
 
-    // Load patients on mount
+    // Load patients on mount & debounced search when searchQuery changes
     useEffect(() => {
-        fetchPatients();
-    }, []);
+        const timer = setTimeout(() => {
+            fetchPatients(searchQuery);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     // Search medicines inventory as user types in prescription edit
     useEffect(() => {

@@ -6,6 +6,8 @@ const accountRouter = Router();
 
 accountRouter.use(authenticate);
 
+accountRouter.get("/details/:id", accountController.accountDetails);
+
 // accountRouter.put("/change-password", accountController.changePassword);
 accountRouter.put("/update-details", accountController.updateDetails);
 

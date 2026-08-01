@@ -11,6 +11,11 @@ export const AddPatientService = async (payload) => {
     return data;
 };
 
+export const PatientsService = async () => {
+    const { data } = await apiClient.get(patientEndpoints.patients);
+    return data;
+};
+
 /**
  * Fetch the next available unique patient ID.
  * @returns {Promise<Object>} Response containing the nextUniqueNo.

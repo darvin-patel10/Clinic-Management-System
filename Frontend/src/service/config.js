@@ -72,6 +72,9 @@ export const patientEndpoints = {
     /** GET  — Search patients by name/phone.  Pass ?q=<query> */
     searchPatient: "patient/search-patient",
 
+    /** GET  — Fetch all patients. */
+    patients: "patient/patients",
+
     /** POST — Register a new patient with their first prescription. */
     addPatient: "patient/add-patient",
 
@@ -104,6 +107,9 @@ export const patientEndpoints = {
 };
 
 export const accountEndpoints = {
+    /** GET  — Fetch doctor account details.  Append /:id */
+    accountDetails: "account/details",
+
     /** PUT  — Update user details.  Append /:id */
     updateDetails: "account/update-details",
 

@@ -84,7 +84,9 @@ export async function recordDeletedPrescriptionToLog({ drId, patientName, prescr
         const presYear = String(presDate.getFullYear());
 
         const medCount = Array.isArray(prescription.medicine) ? prescription.medicine.length : 0;
-        const rev = Number(prescription.totalPrice) || 0;
+        const rev = (prescription.payamount !== undefined && prescription.payamount !== null && prescription.payamount !== "")
+            ? Number(prescription.payamount)
+            : (Number(prescription.totalPrice) || 0);
         const pName = (patientName || "Unknown Patient").trim();
 
         // Find or create doctor's dashboard log document
@@ -217,7 +219,9 @@ export async function getDashboardStats(req, res) {
                 const presDate = new Date(pres.createdAt || pres.date || p.createdAt);
                 const monthKey = `${MONTH_NAMES[presDate.getMonth()]} ${presDate.getFullYear()}`;
                 const medCount = Array.isArray(pres.medicine) ? pres.medicine.length : 0;
-                const rev = pres.totalPrice || 0;
+                const rev = (pres.payamount !== undefined && pres.payamount !== null && pres.payamount !== "")
+                    ? Number(pres.payamount)
+                    : (Number(pres.totalPrice) || 0);
                 const pName = (p.patientName || "").trim();
 
                 if (!monthlyMap.has(monthKey)) {

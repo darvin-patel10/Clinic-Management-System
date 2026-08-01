@@ -330,6 +330,11 @@ export default function AddPationt() {
         return Number(selectedMedicines.reduce((sum, med) => sum + (med.price || 0), 0).toFixed(2));
     }, [selectedMedicines]);
 
+    // Calculate total consultation cost
+    const totalConsultationCost = useMemo(() => {
+        return Number((doctorCharges + totalPrescriptionPrice).toFixed(2));
+    }, [doctorCharges, totalPrescriptionPrice]);
+
     // Handle Form Submit
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -424,7 +429,7 @@ export default function AddPationt() {
                                 note: note.trim() || "No note",
                                 visitingcharge: Number(doctorCharges) || 0,
                                 totalPrice: totalConsultationCost,
-                                payamount: Number(payAmount) || 0,
+                                payamount: Number(payAmount) || "",
                                 medicine: selectedMedicines.map((m) => ({
                                     medicineId: m._id,
                                     medicineName: m.medicineName,
@@ -446,7 +451,6 @@ export default function AddPationt() {
                         handleClearExistingSelection();
                     }
                     handleCancelEdit();
-                    fetchMedicines();
                 } else {
                     const payload = {
                         prescription: {
@@ -1050,7 +1054,7 @@ export default function AddPationt() {
                                             min="0"
                                             value={payAmount}
                                             onChange={(e) => setPayAmount(e.target.value)}
-                                            placeholder="e.g. 500"
+                                            placeholder={totalConsultationCost}
                                             icon={IndianRupee}
                                             padding="px-4 h-11"
                                             background="bg-white"

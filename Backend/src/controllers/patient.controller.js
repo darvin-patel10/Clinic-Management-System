@@ -65,6 +65,20 @@ export async function searchPatient(req, res) {
     }
 }
 
+export async function getPatient(req, res) {
+    try {
+
+        const patients = await patientModel.find({ drId: req.user.id });
+        return res.status(200).json({
+            message: "Patients matched successfully",
+            patients
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
 // Helper to calculate the next auto-incrementing patient unique ID with a 6-month reset
 async function getNextUniqueNo(drId) {
     // Find the oldest patient for this doctor to establish the sequence reference point
