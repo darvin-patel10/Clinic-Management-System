@@ -7,7 +7,7 @@ import { ClinicLogo, CloseEye, Email, ErrorIcon, IconAlert, Loader, OpenEye, Pas
 
 /* ── Shared class strings ───────────────────────────────────── */
 const inputBase =
-  "w-full h-[46px] rounded-[10px] border-[1.5px] bg-white text-[15px] text-slate-900 " +
+  "w-full h-10 sm:h-[46px] rounded-xl border-[1.5px] bg-white text-xs sm:text-[15px] text-slate-900 " +
   "outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 " +
   "hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]";
 const inputErr =
@@ -150,7 +150,7 @@ export default function SignIn() {
         <div className="relative z-10 max-w-sm">
           {/* Logo */}
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
-                          rounded-2xl mb-6 bg-white/5 border border-white/10 backdrop-blur-sm"
+                          rounded-2xl mb-6 bg-white shadow-xl shadow-slate-950/30 border border-white/30 p-3.5"
             aria-label="ClinicCMS">
             <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
           </div>
@@ -189,23 +189,23 @@ export default function SignIn() {
       {/* ════════════════════════════════════════════════════
           RIGHT PANEL — Sign-in form
       ════════════════════════════════════════════════════ */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-[440px] bg-white rounded-[20px]
+      <main className="flex-1 flex items-center justify-center px-3.5 sm:px-6 py-6 sm:py-8 overflow-y-auto">
+        <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[20px]
                         border border-slate-200
                         shadow-[0_20px_60px_rgba(15,23,42,.12),0_8px_24px_rgba(15,23,42,.06)]
-                        p-10">
+                        p-4 sm:p-7 md:p-10">
 
           {/* ── Card header ──────────────────────────────── */}
-          <div className="mb-7 text-center">
+          <div className="mb-5 sm:mb-7 text-center">
             {/* Mobile-only logo */}
-            <div className="lg:hidden inline-flex items-center justify-center w-14 h-14
-                            rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto">
-              <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
+            <div className="lg:hidden inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14
+                            rounded-2xl border border-slate-200/90 shadow-sm mb-4 sm:mb-5 mx-auto p-1 sm:p-2.5">
+              <ClinicLogo className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-sm" />
             </div>
-            <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+            <h2 className="text-xl sm:text-2xl md:text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
               Welcome back, Doctor
             </h2>
-            <p className="text-[0.9rem] text-slate-500">
+            <p className="text-xs sm:text-[0.9rem] text-slate-500">
               Sign in to your clinic dashboard
             </p>
           </div>
@@ -215,8 +215,8 @@ export default function SignIn() {
             <div
               id="signin-error-banner"
               ref={errorRef}
-              className="flex items-start gap-2.5 p-3.5 rounded-[10px] mb-5
-                         text-[0.875rem] font-medium leading-snug
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl mb-4 sm:mb-5
+                         text-xs sm:text-[0.875rem] font-medium leading-snug
                          bg-red-50 border border-red-200/60 text-red-600"
               role="alert"
               tabIndex={-1}
@@ -227,12 +227,12 @@ export default function SignIn() {
           )}
 
           {/* ── Form ─────────────────────────────────────── */}
-          <form id="signin-form" className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <form id="signin-form" className="flex flex-col gap-4 sm:gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
 
             {/* Email field */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="signin-email"
-                className="text-[0.8125rem] font-semibold text-slate-900 tracking-[0.01em]">
+                className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900 tracking-[0.01em]">
                 Email address{" "}
                 <span className="text-red-600" aria-hidden="true">*</span>
               </label>
@@ -261,7 +261,7 @@ export default function SignIn() {
               </div>
               {errors.email && (
                 <p id="signin-email-error"
-                  className="flex items-center gap-1.5 m-0 text-[0.79rem] font-medium text-red-600"
+                  className="flex items-center gap-1.5 m-0 text-[11px] sm:text-[0.79rem] font-medium text-red-600"
                   role="alert">
                   <ErrorIcon />{errors.email.message}
                 </p>
@@ -272,12 +272,12 @@ export default function SignIn() {
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                 <label htmlFor="signin-password"
-                  className="text-[0.8125rem] font-semibold text-slate-900 tracking-[0.01em]">
+                  className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900 tracking-[0.01em]">
                   Password{" "}
                   <span className="text-red-600" aria-hidden="true">*</span>
                 </label>
                 <a href="/forgot-password"
-                  className="text-[0.8rem] font-medium text-blue-600 no-underline
+                  className="text-[11px] sm:text-[0.8rem] font-medium text-blue-600 no-underline
                              hover:text-blue-700 hover:underline transition-colors duration-150
                              focus-visible:outline-2 focus-visible:outline-blue-600
                              focus-visible:outline-offset-2 focus-visible:rounded-sm">
@@ -310,7 +310,7 @@ export default function SignIn() {
                   type="button"
                   className="absolute right-3 flex items-center justify-center w-8 h-8
                              border-none bg-transparent text-slate-400 cursor-pointer
-                             rounded-[6px] p-0 hover:text-blue-600 transition-colors duration-150
+                             rounded-lg p-0 hover:text-blue-600 transition-colors duration-150
                              focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-1"
                   onClick={() => setShowPw((v) => !v)}
                   aria-label={showPw ? "Hide password" : "Show password"}
@@ -320,7 +320,7 @@ export default function SignIn() {
               </div>
               {errors.password && (
                 <p id="signin-password-error"
-                  className="flex items-center gap-1.5 m-0 text-[0.79rem] font-medium text-red-600"
+                  className="flex items-center gap-1.5 m-0 text-[11px] sm:text-[0.79rem] font-medium text-red-600"
                   role="alert">
                   <ErrorIcon />{errors.password.message}
                 </p>
@@ -337,7 +337,7 @@ export default function SignIn() {
                 {...register("rememberMe")}
               />
               <span
-                className="shrink-0 w-[18px] h-[18px] rounded-[5px] border-[1.5px] border-slate-200
+                className="shrink-0 w-4 h-4 sm:w-[18px] sm:h-[18px] rounded-md border-[1.5px] border-slate-200
                            bg-white flex items-center justify-center transition-colors duration-150
                            peer-checked:bg-blue-600 peer-checked:border-blue-600
                            peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600
@@ -351,7 +351,7 @@ export default function SignIn() {
                   </svg>
                 )}
               </span>
-              <span className="text-[0.875rem] text-slate-500">Remember me for 30 days</span>
+              <span className="text-xs sm:text-[0.875rem] text-slate-500">Remember me for 30 days</span>
             </label>
 
             {/* Submit button */}
@@ -360,8 +360,8 @@ export default function SignIn() {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-1
-                         border-none rounded-[10px] font-semibold text-base text-white
+              className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                         border-none rounded-xl font-semibold text-sm sm:text-base text-white
                          tracking-[0.01em] cursor-pointer
                          bg-gradient-to-br from-blue-600 to-blue-800
                          shadow-[0_4px_14px_rgba(37,99,235,.35)]
@@ -380,7 +380,7 @@ export default function SignIn() {
           </form>
 
           {/* ── Divider ──────────────────────────────────── */}
-          <div className="flex items-center gap-3 my-6 text-slate-400 text-[0.8rem]"
+          <div className="flex items-center gap-3 my-4 sm:my-6 text-slate-400 text-xs sm:text-[0.8rem]"
             aria-hidden="true">
             <span className="flex-1 h-px bg-slate-200" />
             <span>New to ClinicCMS?</span>
@@ -391,9 +391,9 @@ export default function SignIn() {
           <a
             href="/signup"
             id="signin-signup-link"
-            className="flex items-center justify-center h-[46px] w-full px-6
-                       border-[1.5px] border-slate-200 rounded-[10px] bg-white
-                       text-slate-900 font-semibold text-[0.9375rem] no-underline
+            className="flex items-center justify-center h-10 sm:h-[46px] w-full px-6
+                       border-[1.5px] border-slate-200 rounded-xl bg-white
+                       text-slate-900 font-semibold text-xs sm:text-[0.9375rem] no-underline
                        transition-all duration-150
                        hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600
                        hover:shadow-sm hover:-translate-y-px
@@ -404,7 +404,7 @@ export default function SignIn() {
           </a>
 
           {/* Footer note */}
-          <p className="mt-5 text-center text-[0.775rem] text-slate-400 leading-relaxed">
+          <p className="mt-4 sm:mt-5 text-center text-[10px] sm:text-[0.775rem] text-slate-400 leading-relaxed">
             By signing in you agree to our{" "}
             <a href="/terms"
               className="text-blue-600 no-underline font-medium hover:underline

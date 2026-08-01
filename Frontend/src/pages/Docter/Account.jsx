@@ -371,75 +371,68 @@ export default function DoctorAccount() {
                 className="bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-b border-slate-800 text-white relative overflow-hidden"
             >
                 {/* Background decorative Orbs */}
-                <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-10 left-10 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-0 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-10 left-10 w-60 sm:w-80 h-60 sm:h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 lg:py-9 relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
 
                         {/* Left: Avatar & Identity Summary */}
-                        <div className="flex items-center gap-5">
-                            <div className="relative group">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-teal-500 via-sky-600 to-blue-600 text-white flex items-center justify-center font-extrabold text-2xl sm:text-3xl shadow-xl ring-4 ring-white/10 group-hover:scale-105 transition-transform duration-200">
+                        <div className="flex flex-row items-center gap-3.5 sm:gap-5 min-w-0">
+                            <div className="relative group shrink-0">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-tr from-teal-500 via-sky-600 to-blue-600 text-white flex items-center justify-center font-extrabold text-xl sm:text-2xl lg:text-3xl shadow-xl ring-2 sm:ring-4 ring-white/10 group-hover:scale-105 transition-transform duration-200">
                                     {initials}
                                 </div>
-                                {/* <Button
-                                    type="button"
-                                    onClick={() => showNotification({ title: "Photo Upload", message: "Profile picture avatar update coming soon!", type: "info" })}
-                                    background="bg-slate-900"
-                                    border="border border-slate-700"
-                                    padding="p-2"
-                                    className="absolute -bottom-1 -right-1 rounded-xl text-teal-400 hover:text-white hover:bg-teal-600 transition-colors shadow-md cursor-pointer w-auto"
-                                    title="Upload Profile Picture"
-                                >
-                                    <Camera className="w-4 h-4" />
-                                </Button> */}
                             </div>
 
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 inline-flex items-center gap-1">
-                                        <BadgeCheck className="w-3.5 h-3.5 text-teal-400" />
+                            <div className="space-y-1 min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                    <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 inline-flex items-center gap-1">
+                                        <BadgeCheck className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-teal-400 shrink-0" />
                                         Medical License Verified
                                     </span>
-                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-slate-300 border border-white/15">
+                                    <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/10 text-slate-300 border border-white/15">
                                         Reg: {headerData.registrationNo || "Pending"}
                                     </span>
                                 </div>
 
-                                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                                <h1 className="text-lg sm:text-2xl lg:text-3xl flex justify-start font-extrabold tracking-tight text-white leading-snug truncate">
                                     {headerData.doctorTitle} {headerData.doctorName || "Doctor Name"}
                                 </h1>
 
-                                <p className="text-xs sm:text-sm text-teal-300/90 font-medium flex items-center gap-1.5 flex-wrap">
-                                    <Stethoscope className="w-4 h-4 text-teal-400 shrink-0" />
+                                <p className="text-[11px] sm:text-xs md:text-sm text-teal-300/90 font-medium flex items-center gap-1.5 flex-wrap">
+                                    <Stethoscope className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-400 shrink-0" />
                                     <span>{headerData.qualification || "Medical Practitioner"}</span>
-                                    <span className="text-slate-500">•</span>
-                                    <span className="text-slate-300">{headerData.specialty}</span>
+                                    {headerData.specialty && (
+                                        <>
+                                            <span className="text-slate-500">•</span>
+                                            <span className="text-slate-300">{headerData.specialty}</span>
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         </div>
 
                         {/* Right: Quick Action Controls & Practice Status */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 self-start md:self-center">
+                        <div className="w-full md:w-auto">
                             {/* Practice Status */}
-                            <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-1.5 rounded-2xl">
-                                <div className="px-3 py-1.5 rounded-xl bg-teal-500/20 border border-teal-500/30 text-center">
-                                    <span className="text-sm font-extrabold text-teal-300 block leading-none">Active</span>
-                                    <span className="text-[10px] font-semibold text-teal-200/80">Prescription Stamp</span>
+                            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 bg-white/5 border border-white/10 p-1 sm:p-1.5 rounded-2xl w-full">
+                                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-teal-500/20 border border-teal-500/30 text-center min-w-0">
+                                    <span className="text-xs sm:text-sm font-extrabold text-teal-300 block leading-none">Active</span>
+                                    <span className="text-[8px] sm:text-[10px] font-semibold text-teal-200/80 mt-0.5 block truncate">Prescription Stamp</span>
                                 </div>
-                                <div className="px-3 py-1.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-center">
-                                    <span className="text-sm font-extrabold text-blue-300 block leading-none">100%</span>
-                                    <span className="text-[10px] font-semibold text-blue-200/80">HIPAA Compliant</span>
+                                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-center min-w-0">
+                                    <span className="text-xs sm:text-sm font-extrabold text-blue-300 block leading-none">100%</span>
+                                    <span className="text-[8px] sm:text-[10px] font-semibold text-blue-200/80 mt-0.5 block truncate">HIPAA Compliant</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Navigation Tabs Header */}
-                    <div className="flex items-center gap-2 mt-8 pt-4 border-t border-white/10 overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mt-5 sm:mt-8 pt-3.5 sm:pt-4 border-t border-white/10 overflow-x-auto no-scrollbar pb-0.5">
                         {[
-                            { id: "profile", label: "Profile & Medical Credentials", icon: User },
+                            { id: "profile", label: "Profile & Credentials", icon: User },
                             { id: "clinic", label: "Clinic & OPD Practice", icon: Building2 },
                             { id: "security", label: "Security & Password", icon: ShieldCheck },
                         ].map((tab) => {
@@ -452,13 +445,12 @@ export default function DoctorAccount() {
                                     onClick={() => setActiveTab(tab.id)}
                                     background={isActive ? "bg-teal-500" : "bg-transparent"}
                                     border="border-none"
-                                    padding="px-4 py-2.5"
-                                    className={`rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all duration-200 cursor-pointer w-auto normal-case ${isActive
-                                        ? "text-white shadow-md shadow-teal-500/30"
+                                    className={`rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap transition-all duration-200 cursor-pointer w-auto normal-case ${isActive
+                                        ? "text-white shadow-md shadow-teal-500/30 font-bold"
                                         : "text-slate-400 hover:text-white hover:bg-white/10"
                                         }`}
                                 >
-                                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                                    <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
                                     {tab.label}
                                 </Button>
                             );
@@ -474,7 +466,7 @@ export default function DoctorAccount() {
 
                 {/* View-Only Mode Banner */}
                 {!isEditing && activeTab !== "security" && (
-                    <div className="mb-6 p-4 rounded-2xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-between gap-4 animate-in fade-in">
+                    <div className="mb-6 p-4 rounded-2xl bg-slate-100 border border-slate-200/90 text-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 animate-in fade-in">
                         <div className="flex items-center gap-3">
                             <Lock className="w-5 h-5 text-slate-500 shrink-0" />
                             <div>
@@ -485,10 +477,9 @@ export default function DoctorAccount() {
                         <Button
                             type="button"
                             onClick={() => setIsEditing(true)}
-                            background="bg-teal-600"
+                            background="bg-teal-600 hover:bg-teal-700 text-white"
                             border="border-none"
-                            padding="px-4 py-2"
-                            className="rounded-xl hover:bg-teal-700 text-white text-xs font-bold transition-all cursor-pointer w-auto flex items-center gap-1.5 shrink-0 shadow-md shadow-teal-600/15"
+                            className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-teal-600/15"
                         >
                             <Edit3 className="w-4 h-4" /> Edit Details
                         </Button>
@@ -497,7 +488,7 @@ export default function DoctorAccount() {
 
                 {/* Edit Mode Active Banner */}
                 {isEditing && activeTab !== "security" && (
-                    <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-2">
                         <div className="flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                             <div>
@@ -505,14 +496,13 @@ export default function DoctorAccount() {
                                 <p className="text-[11px] text-amber-700">Modify your fields below and click "Save Changes" to update your profile.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                             <Button
                                 type="button"
                                 onClick={() => setIsEditing(false)}
-                                background="bg-slate-200"
+                                background="bg-slate-200 hover:bg-slate-300 text-slate-700"
                                 border="border-none"
-                                padding="px-3.5 py-1.5"
-                                className="rounded-lg hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors cursor-pointer w-auto"
+                                className="px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer w-full sm:w-auto text-center"
                             >
                                 Cancel
                             </Button>
@@ -523,10 +513,9 @@ export default function DoctorAccount() {
                                     setIsEditing(false);
                                 }}
                                 disabled={saving}
-                                background="bg-teal-600"
+                                background="bg-teal-600 hover:bg-teal-700 text-white"
                                 border="border-none"
-                                padding="px-4 py-1.5"
-                                className="rounded-lg hover:bg-teal-700 text-white text-xs font-bold transition-colors cursor-pointer w-auto flex items-center gap-1.5 shadow-md shadow-teal-600/20"
+                                className="px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer w-full sm:w-auto flex items-center justify-center gap-1.5 shadow-md shadow-teal-600/20"
                             >
                                 {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                 Save Changes

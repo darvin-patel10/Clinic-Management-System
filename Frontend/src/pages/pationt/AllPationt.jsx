@@ -44,14 +44,8 @@ import {
 import { SearchMedicineService } from "../../service/api/medicineServices";
 import SectionWrapper from "../../component/SectionWrapper";
 import EditProfile from "../../component/Patient/EditProfile";
+import ProfileView from "../../component/Patient/ProfileView";
 
-// Fallback mock medicines if backend is empty/offline
-const FALLBACK_MEDICINES = [
-    { _id: "m1", medicineName: "Amoxicillin 500mg", quantity: 80, unitPrice: 12.5 },
-    { _id: "m2", medicineName: "Paracetamol 650mg", quantity: 140, unitPrice: 3.0 },
-    { _id: "m3", medicineName: "Cetirizine 10mg", quantity: 50, unitPrice: 4.5 },
-    { _id: "m4", medicineName: "Metformin 500mg", quantity: 180, unitPrice: 6.8 },
-];
 
 export default function AllPationt() {
     const navigate = useNavigate();
@@ -540,9 +534,9 @@ export default function AllPationt() {
                 </Button>
             }
         >
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
                 {/* ── 1. KPI Cards Row ────────────────────────────────────────── */}
-                <SectionWrapper className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+                <SectionWrapper className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <KpiCard
                         label="Total Active Patients"
                         value={metrics.total.toString()}
@@ -571,16 +565,16 @@ export default function AllPationt() {
 
                 {/* ── 2. Filters & Toolbar Card ────────────────────────────────── */}
                 <Card>
-                    <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5">
+                    <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
                         {/* Search Input */}
                         <div className="relative flex-1 w-full lg:max-w-md">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             <InputField
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search by Patient Name, Phone, or ID..."
-                                className="w-full h-10 pl-10 pr-9 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 outline-none focus:bg-white focus:border-blue-500 transition-colors"
+                                className="w-full h-10 pl-10 pr-9 rounded-xl border border-slate-200 bg-slate-50/50 text-xs sm:text-sm text-slate-800 outline-none focus:bg-white focus:border-blue-500 transition-colors"
                             />
                             {searchQuery && (
                                 <button
@@ -589,7 +583,8 @@ export default function AllPationt() {
                                         setSearchQuery("");
                                         fetchPatients("");
                                     }}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                                    aria-label="Clear search"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -619,7 +614,7 @@ export default function AllPationt() {
                             <button
                                 type="button"
                                 onClick={handleResetFilters}
-                                className="inline-flex h-10 items-center justify-center gap-1.5 px-4 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 active:bg-slate-100 transition-all cursor-pointer"
+                                className="inline-flex h-10 items-center justify-center gap-1.5 px-4 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 active:bg-slate-100 transition-all cursor-pointer w-full sm:w-auto shrink-0"
                             >
                                 <RefreshCw className="w-3.5 h-3.5" />
                                 Reset Filters
@@ -642,7 +637,7 @@ export default function AllPationt() {
                             <p className="text-xs text-slate-500 mt-1">Try resetting search filters or register a new patient file.</p>
                             <button
                                 onClick={handleResetFilters}
-                                className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer"
                             >
                                 <RefreshCw className="w-3.5 h-3.5" />
                                 Reset Filters
@@ -651,8 +646,8 @@ export default function AllPationt() {
                     ) : (
                         <>
                             {/* ── Desktop & Tablet Table View (md+) ────────────────────── */}
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="w-full border-collapse text-left">
+                            <div className="hidden md:block overflow-x-auto -mx-1">
+                                <table className="w-full border-collapse text-left min-w-[700px]">
                                     <thead>
                                         <tr className="border-b border-slate-100">
                                             <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">ID</th>
@@ -749,7 +744,7 @@ export default function AllPationt() {
                             </div>
 
                             {/* ── Mobile Card View (< md) ──────────────────────────────── */}
-                            <div className="block md:hidden divide-y divide-slate-100 -mx-2">
+                            <div className="block md:hidden space-y-3 -mx-1 sm:mx-0">
                                 {filteredPatients.map((p) => {
                                     const lastVisitObj = p.prescription?.slice(-1)[0];
                                     const lastVisitDate = lastVisitObj ? formatDate(lastVisitObj.createdAt) : "No visits";
@@ -759,60 +754,93 @@ export default function AllPationt() {
                                         : false;
 
                                     return (
-                                        <div key={p._id} className="p-4 space-y-3">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-xs shrink-0">
+                                        <div
+                                            key={p._id}
+                                            className="bg-white rounded-2xl border border-slate-200/90 p-2 shadow-sm hover:shadow-md transition-all duration-200 space-y-3.5 min-w-0 relative overflow-hidden"
+                                        >
+                                            {/* Header: Avatar, Name, Badges & Actions */}
+                                            <div className="flex items-start justify-between gap-1">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 flex items-center justify-center font-bold text-xs shrink-0">
                                                         {getInitials(p.patientName)}
                                                     </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-bold text-slate-900">{p.patientName}</h4>
-                                                        <p className="text-[11px] text-slate-400 font-semibold">
-                                                            #{p.uniqueno} • {p.patientGender} • {p.patientAge} Yrs
-                                                        </p>
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="text-sm font-bold text-slate-900 truncate tracking-tight">
+                                                                {p.patientName}
+                                                            </h4>
+                                                            <span className="p-1 bg-blue-50 text-blue-700 border border-blue-200/60 rounded-md text-[8px] font-bold shrink-0">
+                                                                #{p.uniqueno}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 font-medium">
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px]">
+                                                                {p.patientGender}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span className="text-slate-600">{p.patientAge} Yrs</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-1 shrink-0">
 
+                                                {/* Action buttons */}
+                                                <div className="flex items-center gap-1 shrink-0 bg-slate-50 p-0.5 rounded-xl border border-slate-100">
                                                     <button
+                                                        type="button"
                                                         onClick={() => setHistoryPatient(p)}
-                                                        className="p-2 rounded-lg text-blue-600 bg-blue-50"
+                                                        className="p-1 rounded-lg text-blue-600 bg-white hover:bg-blue-50 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                         aria-label="View History"
+                                                        title="View History Timeline"
                                                     >
-                                                        <Eye className="w-4 h-4" />
+                                                        <Eye className="w-3 h-3" />
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleOpenEditProfile(p)}
-                                                        className="p-2 rounded-lg text-slate-600 bg-slate-100"
+                                                        className="p-1 rounded-lg text-slate-600 bg-white hover:bg-slate-100 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                         aria-label="Edit Profile"
+                                                        title="Edit Profile"
                                                     >
-                                                        <Edit3 className="w-4 h-4" />
+                                                        <Edit3 className="w-3 h-3" />
                                                     </button>
                                                     {isDeletable && (
                                                         <button
+                                                            type="button"
                                                             onClick={() => setDeletingPatient(p)}
-                                                            className="p-2 rounded-lg text-rose-600 bg-rose-50"
+                                                            className="p-1 rounded-lg text-rose-600 bg-white hover:bg-rose-50 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                             aria-label="Delete Patient"
                                                             title="Delete Patient Record (Available for 12 hours after last visit)"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                                                <div>
-                                                    <p className="text-slate-400 font-medium">Phone</p>
-                                                    <p className="font-bold text-slate-800 tabular-nums">{p.phonenumber}</p>
+                                            {/* Details Section */}
+                                            <div className="grid grid-cols-2 gap-2.5 text-xs bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                                                <div className="flex items-start gap-2 min-w-0">
+                                                    <Phone className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Phone</p>
+                                                        <p className="font-bold text-[10px] text-slate-800 tabular-nums mt-0.5 truncate">{p.phonenumber}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-slate-400 font-medium">Locality</p>
-                                                    <p className="font-bold text-slate-800 truncate">{p.region}</p>
+                                                <div className="flex items-start gap-2 min-w-0">
+                                                    <MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Locality</p>
+                                                        <p className="font-bold text-[10px] text-slate-800 truncate mt-0.5">{p.region}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="col-span-2 pt-1 border-t border-slate-100 mt-1 flex justify-between">
-                                                    <span className="text-slate-400 font-medium">Last Visit:</span>
-                                                    <span className="font-bold text-slate-800">{lastVisitDate}</span>
+                                                <div className="col-span-2 pt-2.5 border-t border-slate-200/60 flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                                        <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                                                        <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Last Visit</span>
+                                                    </div>
+                                                    <span className="font-bold text-slate-800 text-[9px] bg-white px-2.5 py-0.5 rounded-lg border border-slate-200/70 shadow-2xs">
+                                                        {lastVisitDate}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -845,280 +873,33 @@ export default function AllPationt() {
 
 
             {/* ── 6. DETAILED VISIT HISTORY & TIMELINE MODAL ─────────────────── */}
-            {historyPatient && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-                        {/* Header */}
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Medical Visit History</h3>
-                                <p className="text-[10px] text-slate-500 font-semibold">Patient File: {historyPatient.patientName} (ID: #{historyPatient.uniqueno})</p>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setHistoryPatient(null);
-                                    setEditingVisit(null);
-                                }}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        {/* Content Body */}
-                        <div className="flex-1 overflow-y-auto p-5 flex flex-col md:flex-row gap-5">
-                            {/* Profile details left panel */}
-                            <div className="w-full md:w-1/3 bg-slate-50/80 border border-slate-100 rounded-2xl p-4 space-y-3.5 h-fit shrink-0">
-                                <div className="text-center">
-                                    <div className="w-14 h-14 rounded-full bg-blue-100 text-blue-600 border-2 border-white shadow-sm flex items-center justify-center font-bold text-lg mx-auto">
-                                        {getInitials(historyPatient.patientName)}
-                                    </div>
-                                    <h4 className="font-bold text-slate-900 mt-2 text-sm">{historyPatient.patientName}</h4>
-                                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-100">Patient #{historyPatient.uniqueno}</span>
-                                </div>
-                                <div className="border-t border-slate-200/60 pt-3 space-y-2 text-xs font-semibold text-slate-700">
-                                    <div className="flex items-center gap-2">
-                                        <User className="w-3.5 h-3.5 text-slate-400" />
-                                        <span>{historyPatient.patientGender} • {historyPatient.patientAge} Years</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Phone className="w-3.5 h-3.5 text-slate-400" />
-                                        <span className="tabular-nums">{historyPatient.phonenumber}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                        <span className="truncate">{historyPatient.region}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Timeline visit listings right panel */}
-                            <div className="flex-1 space-y-4">
-                                {editingVisit ? (
-                                    /* ── NESTED EDIT PRESCRIPTION FORM ── */
-                                    <form onSubmit={handleSaveEditPrescription} className="bg-slate-50/50 border border-slate-200 rounded-2xl p-4 space-y-4 animate-in slide-in-from-right-2 duration-200">
-                                        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                                            <h4 className="text-xs font-bold text-slate-800">Edit Prescription Details</h4>
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingVisit(null)}
-                                                className="text-[10px] font-bold text-slate-500 hover:text-slate-800"
-                                            >
-                                                Back to timeline
-                                            </button>
-                                        </div>
-
-                                        {/* Medicine Autocomplete Search */}
-                                        <div className="relative" ref={editInventorySearchRef}>
-                                            <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Search & Add Medicine</label>
-                                            <div className="relative">
-                                                <InputField
-                                                    type="text"
-                                                    value={editMedSearchQuery}
-                                                    onChange={(e) => {
-                                                        setEditMedSearchQuery(e.target.value);
-                                                        setIsSearchingEditInventory(true);
-                                                    }}
-                                                    onFocus={() => setIsSearchingEditInventory(true)}
-                                                    placeholder="Search medicine inventory..."
-                                                    icon={Search}
-                                                />
-                                            </div>
-
-                                            {isSearchingEditInventory && editMedSearchQuery.trim() !== "" && (
-                                                <div className="absolute left-0 right-0 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden max-h-36 overflow-y-auto">
-                                                    {filteredEditMedicines.length === 0 ? (
-                                                        <div className="p-3 text-xs font-medium text-slate-500 text-center">No medicines match.</div>
-                                                    ) : (
-                                                        <div className="divide-y divide-slate-100">
-                                                            {filteredEditMedicines.map((med) => (
-                                                                <button
-                                                                    key={med._id}
-                                                                    type="button"
-                                                                    onClick={() => handleAddEditMedicine(med)}
-                                                                    className="w-full px-3 py-1.5 text-left text-xs font-semibold hover:bg-slate-50 flex items-center justify-between transition-colors cursor-pointer"
-                                                                >
-                                                                    <span>{med.medicineName}</span>
-                                                                    <span className="text-[9px] text-slate-400">Stock: {med.quantity}</span>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Edit Prescription Table */}
-                                        <div className="border border-slate-100 rounded-xl overflow-hidden bg-white">
-                                            <table className="w-full text-left text-xs border-collapse">
-                                                <thead>
-                                                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                                                        <th className="py-2 px-2.5">Medicine</th>
-                                                        <th className="py-2 px-2.5 w-24">Qty</th>
-                                                        <th className="py-2 px-2.5 text-right">Price</th>
-                                                        <th className="py-2 px-2.5 w-10"></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100">
-                                                    {editSelectedMedicines.length === 0 ? (
-                                                        <tr>
-                                                            <td colSpan="4" className="py-4 text-center text-slate-400">No medicines. Add stock items.</td>
-                                                        </tr>
-                                                    ) : (
-                                                        editSelectedMedicines.map((med) => {
-                                                            const isExceeded = med.quantity > med.availableStock;
-                                                            return (
-                                                                <tr key={med.medicineId}>
-                                                                    <td className="py-2 px-2.5">
-                                                                        <div className="font-bold text-slate-800">{med.medicineName}</div>
-                                                                        <div className="text-[9px] text-slate-400 font-semibold">Max Stock limit: {med.availableStock}</div>
-                                                                    </td>
-                                                                    <td className="py-2 px-2.5">
-                                                                        <input
-                                                                            type="number"
-                                                                            min="0"
-                                                                            required
-                                                                            value={med.quantity}
-                                                                            onChange={(e) => handleEditQuantityChange(med.medicineId, e.target.value)}
-                                                                            className={`w-16 px-1.5 py-0.5 rounded border outline-none text-xs ${isExceeded ? "border-red-500 bg-red-50" : "border-slate-200"}`}
-                                                                        />
-                                                                    </td>
-                                                                    <td className="py-2 px-2.5 text-right font-bold text-slate-700">{formatCurrency(med.price)}</td>
-                                                                    <td className="py-2 px-2.5 text-right">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleRemoveEditMedicine(med.medicineId)}
-                                                                            className="text-slate-400 hover:text-rose-600 p-0.5"
-                                                                        >
-                                                                            <X className="w-3.5 h-3.5" />
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })
-                                                    )}
-                                                </tbody>
-                                            </table>
-
-                                            {editSelectedMedicines.length > 0 && (
-                                                <div className="bg-slate-50 p-2.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-700">
-                                                    <span>Total Price:</span>
-                                                    <span className="text-blue-700">{formatCurrency(editPrescriptionPrice)}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Edit Note */}
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1 tracking-wider">Dosage Instructions</label>
-                                            <textarea
-                                                rows="2"
-                                                value={editVisitNote}
-                                                onChange={(e) => setEditVisitNote(e.target.value)}
-                                                className="w-full rounded-xl border border-slate-200 p-2.5 bg-white text-xs text-slate-800 outline-none focus:border-blue-500 resize-none font-medium"
-                                            />
-                                        </div>
-
-                                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingVisit(null)}
-                                                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-1.5 disabled:opacity-70"
-                                            >
-                                                {isSubmitting ? "Saving..." : "Save Edits"}
-                                            </button>
-                                        </div>
-                                    </form>
-                                ) : (
-                                    /* ── VISITS TIMELINE LIST ── */
-                                    <div className="space-y-4">
-                                        <h4 className="font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1">
-                                            <Clock className="w-4 h-4 text-slate-500" />
-                                            Visits History ({historyPatient.prescription?.length || 0})
-                                        </h4>
-
-                                        {!historyPatient.prescription || historyPatient.prescription.length === 0 ? (
-                                            <div className="py-12 text-center text-slate-400 font-semibold bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                                No prescription visit histories recorded.
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
-                                                {historyPatient.prescription.slice().reverse().map((visit, index) => {
-                                                    const editable = isWithin24Hours(visit.createdAt);
-                                                    return (
-                                                        <div key={visit._id} className="relative pl-5 border-l-2 border-blue-100 last:border-l-transparent pb-1">
-                                                            {/* Timeline circle node indicator */}
-                                                            <div className="absolute -left-[6px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-white shadow-sm" />
-
-                                                            <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-3.5 space-y-2">
-                                                                <div className="flex items-center justify-between border-b border-slate-50 pb-1.5">
-                                                                    <div>
-                                                                        <p className="text-xs font-bold text-slate-800">{formatDate(visit.createdAt)}</p>
-                                                                        <p className="text-[10px] text-slate-400 font-semibold">{index === 0 ? "(Initial Registration Visit)" : `(Visit #${historyPatient.prescription.length - index})`}</p>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
-                                                                            {formatCurrency(visit.totalPrice)}
-                                                                        </span>
-                                                                        {editable && (
-                                                                            <div className="flex items-center gap-0.5">
-                                                                                <button
-                                                                                    onClick={() => handleStartEditPrescription(visit)}
-                                                                                    className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                                                    title="Edit prescription (24h limit)"
-                                                                                >
-                                                                                    <Edit3 className="w-3.5 h-3.5" />
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={() => handleDeletePrescription(visit._id)}
-                                                                                    className="p-1 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded"
-                                                                                    title="Delete visit (24h limit)"
-                                                                                >
-                                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                                </button>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Medicines table listing */}
-                                                                <div className="text-[11px] text-slate-600 space-y-1">
-                                                                    <p className="font-bold text-slate-700 text-[10px] uppercase tracking-wider">Prescribed medicines</p>
-                                                                    <div className="divide-y divide-slate-100">
-                                                                        {visit.medicine.map((med) => (
-                                                                            <div key={med._id} className="py-1 flex items-center justify-between font-semibold">
-                                                                                <span className="text-slate-800">{med.medicineName}</span>
-                                                                                <span className="text-slate-500">Qty: {med.quantity} • {formatCurrency(med.price)}</span>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Notes */}
-                                                                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mt-1">
-                                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Clinical Notes</p>
-                                                                    <p className="text-xs text-slate-700 font-semibold mt-0.5 leading-snug">{visit.note}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ProfileView
+                historyPatient={historyPatient}
+                setHistoryPatient={setHistoryPatient}
+                editingVisit={editingVisit}
+                setEditingVisit={setEditingVisit}
+                handleSaveEditPrescription={handleSaveEditPrescription}
+                editInventorySearchRef={editInventorySearchRef}
+                editMedSearchQuery={editMedSearchQuery}
+                setEditMedSearchQuery={setEditMedSearchQuery}
+                setIsSearchingEditInventory={setIsSearchingEditInventory}
+                isSearchingEditInventory={isSearchingEditInventory}
+                filteredEditMedicines={filteredEditMedicines}
+                handleAddEditMedicine={handleAddEditMedicine}
+                editSelectedMedicines={editSelectedMedicines}
+                handleEditQuantityChange={handleEditQuantityChange}
+                formatCurrency={formatCurrency}
+                handleRemoveEditMedicine={handleRemoveEditMedicine}
+                editPrescriptionPrice={editPrescriptionPrice}
+                editVisitNote={editVisitNote}
+                setEditVisitNote={setEditVisitNote}
+                isSubmitting={isSubmitting}
+                isWithin24Hours={isWithin24Hours}
+                formatDate={formatDate}
+                getInitials={getInitials}
+                handleStartEditPrescription={handleStartEditPrescription}
+                handleDeletePrescription={handleDeletePrescription}
+            />
 
             {/* ── 7. PERMANENT DELETE PATIENT ALART DIALOG ─────────────────────── */}
             <DeleteAlart

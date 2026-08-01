@@ -108,7 +108,7 @@ export function getOtpHtml(otp) {
                     <p class="otp-code">${otp}</p>
                 </div>
                 <div>
-                    <span class="expiry-text">Expires in 10 minutes</span>
+                    <span class="expiry-text">Expires in 2 minutes</span>
                 </div>
                 <div class="footer">
                     <p style="margin: 0 0 8px 0;">This is an automated security notification. Please do not reply directly to this email.</p>

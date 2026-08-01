@@ -209,14 +209,14 @@ export default function SecurityTab({ userEmail = "" }) {
         <div className="space-y-6 account-fade-in">
             <Card
                 title={
-                    <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                        <Lock className="w-5 h-5 text-indigo-600" />
+                    <span className="flex items-center gap-2 text-base sm:text-lg font-bold text-slate-900">
+                        <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 shrink-0" />
                         Change Account Password
                     </span>
                 }
                 subtitle="Update your credentials securely via OTP email verification."
                 action={
-                    <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
                         HIPAA Encrypted
                     </span>
                 }
@@ -224,19 +224,19 @@ export default function SecurityTab({ userEmail = "" }) {
 
                 {/* ── STEP 1: EMAIL CONFIRMATION & SEND OTP ─────────────────────── */}
                 {step === "email" && (
-                    <form onSubmit={handleSendOtp} className="space-y-4 max-w-lg mt-4 animate-in fade-in">
+                    <form onSubmit={handleSendOtp} className="space-y-4 max-w-lg w-full mt-3 sm:mt-4 animate-in fade-in">
                         <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">
                                 Account Email Address
                             </label>
                             <InputField
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                readOnly
                                 placeholder="doctor@clinic.com"
                                 icon={Mail}
                                 iconPosition="left"
-                                className="w-full rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors"
+                                className="w-full rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 border-slate-200 outline-none cursor-not-allowed transition-colors h-10 sm:h-11"
                             />
                             <p className="text-[11px] text-slate-500 mt-1">
                                 An OTP verification code will be sent to this email address to authorize password change.
@@ -246,20 +246,19 @@ export default function SecurityTab({ userEmail = "" }) {
                         <Button
                             type="submit"
                             disabled={loading}
-                            background="bg-indigo-600"
+                            background="bg-indigo-600 hover:bg-indigo-700 text-white"
                             border="border-none"
-                            padding="px-5 py-2.5"
-                            className="rounded-xl hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer w-auto"
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             {loading ? <Loader className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                            Change Password
+                            <span>Change Password</span>
                         </Button>
                     </form>
                 )}
 
                 {/* ── STEP 2: ENTER OTP CODE ────────────────────────────────────── */}
                 {step === "otp" && (
-                    <form onSubmit={handleVerifyOtp} className="space-y-4 max-w-lg mt-4 animate-in fade-in">
+                    <form onSubmit={handleVerifyOtp} className="space-y-4 max-w-lg w-full mt-3 sm:mt-4 animate-in fade-in">
                         <div className="flex items-center justify-between">
                             <button
                                 type="button"
@@ -279,7 +278,7 @@ export default function SecurityTab({ userEmail = "" }) {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">
                                 Enter 6-Digit OTP Code
                             </label>
                             <InputField
@@ -290,39 +289,37 @@ export default function SecurityTab({ userEmail = "" }) {
                                 placeholder="123456"
                                 icon={KeyRound}
                                 iconPosition="left"
-                                className="w-full rounded-xl text-sm font-bold tracking-widest text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors"
+                                className="w-full rounded-xl text-xs sm:text-sm font-bold tracking-widest text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors h-10 sm:h-11"
                             />
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                background="bg-indigo-600"
-                                border="border-none"
-                                padding="px-5 py-2.5"
-                                className="rounded-xl hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer w-auto"
-                            >
-                                {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                Verify OTP
-                            </Button>
-
+                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                             <button
                                 type="button"
                                 disabled={resending}
                                 onClick={handleResendOtp}
-                                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors disabled:opacity-50 cursor-pointer"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors disabled:opacity-50 cursor-pointer w-full sm:w-auto"
                             >
                                 {resending ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                                 Resend OTP
                             </button>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                background="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                border="border-none"
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                <span>Verify OTP</span>
+                            </Button>
                         </div>
                     </form>
                 )}
 
                 {/* ── STEP 3: ENTER NEW PASSWORD ───────────────────────────────── */}
                 {step === "newPassword" && (
-                    <form onSubmit={handleResetPassword} className="space-y-4 max-w-lg mt-4 animate-in fade-in">
+                    <form onSubmit={handleResetPassword} className="space-y-4 max-w-lg w-full mt-3 sm:mt-4 animate-in fade-in">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
                                 <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Identity Verified
@@ -332,7 +329,7 @@ export default function SecurityTab({ userEmail = "" }) {
 
                         {/* New Password */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">New Password</label>
+                            <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">New Password</label>
                             <div className="relative">
                                 <InputField
                                     type={showPass.new ? "text" : "password"}
@@ -341,12 +338,12 @@ export default function SecurityTab({ userEmail = "" }) {
                                     placeholder="Minimum 6 characters"
                                     icon={Lock}
                                     iconPosition="left"
-                                    className="w-full rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors pr-10"
+                                    className="w-full rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors pr-10 h-10 sm:h-11"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPass({ ...showPass, new: !showPass.new })}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer z-10"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer z-10 p-1"
                                 >
                                     {showPass.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -355,7 +352,7 @@ export default function SecurityTab({ userEmail = "" }) {
 
                         {/* Confirm New Password */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Confirm New Password</label>
+                            <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">Confirm New Password</label>
                             <div className="relative">
                                 <InputField
                                     type={showPass.confirm ? "text" : "password"}
@@ -364,12 +361,12 @@ export default function SecurityTab({ userEmail = "" }) {
                                     placeholder="Re-enter new password"
                                     icon={CheckCircle2}
                                     iconPosition="left"
-                                    className="w-full rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors pr-10"
+                                    className="w-full rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-colors pr-10 h-10 sm:h-11"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPass({ ...showPass, confirm: !showPass.confirm })}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer z-10"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer z-10 p-1"
                                 >
                                     {showPass.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -379,37 +376,35 @@ export default function SecurityTab({ userEmail = "" }) {
                         <Button
                             type="submit"
                             disabled={loading}
-                            background="bg-indigo-600"
+                            background="bg-indigo-600 hover:bg-indigo-700 text-white"
                             border="border-none"
-                            padding="px-5 py-2.5"
-                            className="rounded-xl hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer w-auto"
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                            Reset Password
+                            <span>Reset Password</span>
                         </Button>
                     </form>
                 )}
 
                 {/* ── STEP 4: SUCCESS CONFIRMATION ────────────────────────────── */}
                 {step === "success" && (
-                    <div className="space-y-4 max-w-lg mt-4 animate-in fade-in p-5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                    <div className="space-y-4 max-w-lg w-full mt-3 sm:mt-4 animate-in fade-in p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-200">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">
-                                <CheckCircle2 className="w-6 h-6" />
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">
+                                <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div>
-                                <h4 className="text-sm font-extrabold text-slate-900">Password Reset Complete</h4>
-                                <p className="text-xs text-slate-600 mt-0.5">Your account password has been updated successfully.</p>
+                                <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">Password Reset Complete</h4>
+                                <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">Your account password has been updated successfully.</p>
                             </div>
                         </div>
 
                         <Button
                             type="button"
                             onClick={handleResetWorkflow}
-                            background="bg-slate-900"
+                            background="bg-slate-900 hover:bg-slate-800 text-white"
                             border="border-none"
-                            padding="px-4 py-2"
-                            className="rounded-xl hover:bg-slate-800 text-white text-xs font-bold cursor-pointer w-auto mt-2"
+                            className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold cursor-pointer mt-2 text-center"
                         >
                             Done
                         </Button>
@@ -420,22 +415,22 @@ export default function SecurityTab({ userEmail = "" }) {
             {/* Active Sessions List */}
             <Card
                 title={
-                    <span className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                        <Shield className="w-4 h-4 text-emerald-600" /> Active Security Sessions
+                    <span className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-900">
+                        <Shield className="w-4 h-4 text-emerald-600 shrink-0" /> Active Security Sessions
                     </span>
                 }
             >
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                            <Globe className="w-5 h-5" />
+                <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+                            <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
-                        <div>
-                            <p className="text-xs font-bold text-slate-900">Current Web Session (Windows Chrome)</p>
-                            <p className="text-[11px] text-slate-500">IP: 192.168.1.45 • Active Now</p>
+                        <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-900 truncate">Current Web Session (Windows Chrome)</p>
+                            <p className="text-[10px] sm:text-[11px] text-slate-500">IP: 192.168.1.45 • Active Now</p>
                         </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0 self-start sm:self-auto">
                         Current Device
                     </span>
                 </div>

@@ -6,7 +6,7 @@ import { ArrowLeft, CheckCircle2, KeyRound, ShieldCheck, RefreshCw } from "lucid
 
 /* ── Shared input styling constants ─────────────────────────── */
 const inputBase =
-  "w-full h-[46px] rounded-[10px] border-[1.5px] bg-white text-[15px] text-slate-900 " +
+  "w-full h-10 sm:h-[46px] rounded-xl border-[1.5px] bg-white text-xs sm:text-[15px] text-slate-900 " +
   "outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 " +
   "hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]";
 const inputErr = "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]";
@@ -32,8 +32,8 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // OTP countdown timer
-  const [timer, setTimer] = useState(60);
+  // OTP countdown timer (120s = 2 minutes)
+  const [timer, setTimer] = useState(120);
   const [canResend, setCanResend] = useState(false);
 
   const errorRef = useRef(null);
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
       const res = await ForgotPasswordService({ email });
       setSuccessMessage(res?.message || "OTP sent successfully to your email.");
       setStep(2);
-      setTimer(60);
+      setTimer(120);
       setCanResend(false);
     } catch (err) {
       const msg = err?.response?.data?.message || err?.response?.data?.massage || err?.message || "Failed to send OTP. Please check your email.";
@@ -117,7 +117,7 @@ export default function ForgotPassword() {
     try {
       const res = await ForgotPasswordService({ email });
       setSuccessMessage(res?.message || "A new OTP code has been sent to your email.");
-      setTimer(60);
+      setTimer(120);
       setCanResend(false);
     } catch (err) {
       const msg = err?.response?.data?.message || err?.response?.data?.massage || err?.message || "Failed to resend OTP.";
@@ -199,7 +199,7 @@ export default function ForgotPassword() {
         {/* Brand block */}
         <div className="relative z-10 max-w-sm">
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
-                          rounded-2xl mb-6 bg-white/5 border border-white/10 backdrop-blur-sm">
+                          rounded-2xl mb-6 bg-white shadow-xl shadow-slate-950/30 border border-white/30 p-3.5">
             <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
           </div>
 
@@ -209,7 +209,7 @@ export default function ForgotPassword() {
           </h1>
 
           <p className="text-white/60 text-[0.975rem] leading-relaxed mb-8">
-            Account Security & Recovery,<br />protecting doctor access seamlessly.
+            Account Security &amp; Recovery,<br />protecting doctor access seamlessly.
           </p>
 
           <ul className="list-none m-0 p-0 flex flex-col gap-3 text-left">
@@ -233,17 +233,25 @@ export default function ForgotPassword() {
       {/* ════════════════════════════════════════════════════
           RIGHT PANEL — Multi-step recovery form
       ════════════════════════════════════════════════════ */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-[440px] bg-white rounded-[20px]
+      <main className="flex-1 flex items-center justify-center px-3.5 sm:px-6 py-6 sm:py-8 overflow-y-auto">
+        <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[20px]
                         border border-slate-200
                         shadow-[0_20px_60px_rgba(15,23,42,.12),0_8px_24px_rgba(15,23,42,.06)]
-                        p-8 sm:p-10">
+                        p-4 sm:p-7 md:p-10">
+
+          {/* Mobile-only logo */}
+          <div className="lg:hidden flex justify-center mb-4 sm:mb-5">
+            <div className="inline-flex items-center justify-center w-14 h-14
+                            rounded-2xl bg-white border-2 border-slate-200 shadow-md p-2.5">
+              <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
+            </div>
+          </div>
 
           {/* Back link */}
           {step < 4 && (
             <Link
               to="/signin"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-blue-600 mb-6 transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-blue-600 mb-4 sm:mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Sign In
@@ -252,7 +260,7 @@ export default function ForgotPassword() {
 
           {/* Stepper Progress Bar */}
           {step < 4 && (
-            <div className="flex items-center justify-between gap-2 mb-7">
+            <div className="flex items-center justify-between gap-2 mb-5 sm:mb-7">
               {[1, 2, 3].map((s) => (
                 <div key={s} className="flex-1 flex flex-col gap-1.5">
                   <div
@@ -260,7 +268,7 @@ export default function ForgotPassword() {
                       step >= s ? "bg-blue-600 shadow-sm" : "bg-slate-100"
                     }`}
                   />
-                  <span className={`text-[10px] font-bold text-center uppercase tracking-wider ${
+                  <span className={`text-[9px] sm:text-[10px] font-bold text-center uppercase tracking-wider ${
                     step === s ? "text-blue-600" : "text-slate-400"
                   }`}>
                     {s === 1 ? "Email" : s === 2 ? "Verify" : "Reset"}
@@ -275,8 +283,8 @@ export default function ForgotPassword() {
             <div
               ref={errorRef}
               tabIndex={-1}
-              className="flex items-start gap-2.5 p-3.5 rounded-[10px] mb-5
-                         text-[0.875rem] font-medium leading-snug
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl mb-4 sm:mb-5
+                         text-xs sm:text-[0.875rem] font-medium leading-snug
                          bg-red-50 border border-red-200/60 text-red-600 outline-none"
               role="alert"
             >
@@ -290,21 +298,21 @@ export default function ForgotPassword() {
           ════════════════════════════════════════════════ */}
           {step === 1 && (
             <div>
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-4">
-                  <Email className="w-6 h-6" />
+              <div className="mb-4 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-3 sm:mb-4">
+                  <Email className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h2 className="text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                <h2 className="text-xl sm:text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                   Forgot Password?
                 </h2>
-                <p className="text-[0.875rem] text-slate-500">
+                <p className="text-xs sm:text-[0.875rem] text-slate-500">
                   Enter your registered doctor email address and we'll send you an OTP code.
                 </p>
               </div>
 
-              <form onSubmit={handleSendOtp} className="flex flex-col gap-5" noValidate>
+              <form onSubmit={handleSendOtp} className="flex flex-col gap-4 sm:gap-5" noValidate>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="forgot-email" className="text-[0.8125rem] font-semibold text-slate-900">
+                  <label htmlFor="forgot-email" className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900">
                     Email Address <span className="text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -326,8 +334,8 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-1
-                             border-none rounded-[10px] font-semibold text-base text-white
+                  className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                             border-none rounded-xl font-semibold text-sm sm:text-base text-white
                              bg-gradient-to-br from-blue-600 to-blue-800
                              shadow-[0_4px_14px_rgba(37,99,235,.35)]
                              transition-all hover:from-blue-700 hover:to-blue-900 cursor-pointer
@@ -344,21 +352,21 @@ export default function ForgotPassword() {
           ════════════════════════════════════════════════ */}
           {step === 2 && (
             <div>
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-4">
-                  <ShieldCheck className="w-6 h-6" />
+              <div className="mb-4 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-3 sm:mb-4">
+                  <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h2 className="text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                <h2 className="text-xl sm:text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                   Enter Verification Code
                 </h2>
-                <p className="text-[0.875rem] text-slate-500">
+                <p className="text-xs sm:text-[0.875rem] text-slate-500">
                   We sent an OTP code to <strong className="text-slate-800">{email}</strong>.
                 </p>
               </div>
 
-              <form onSubmit={handleVerifyOtp} className="flex flex-col gap-5" noValidate>
+              <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4 sm:gap-5" noValidate>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="forgot-otp" className="text-[0.8125rem] font-semibold text-slate-900">
+                  <label htmlFor="forgot-otp" className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900">
                     OTP Code <span className="text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -370,7 +378,7 @@ export default function ForgotPassword() {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       placeholder="Enter 6-digit OTP"
-                      className={`${inputBase} px-4 text-center font-mono tracking-widest text-lg font-bold ${error ? inputErr : inputOk}`}
+                      className={`${inputBase} px-4 text-center font-mono tracking-widest text-base sm:text-lg font-bold ${error ? inputErr : inputOk}`}
                     />
                   </div>
                 </div>
@@ -378,8 +386,8 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-1
-                             border-none rounded-[10px] font-semibold text-base text-white
+                  className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                             border-none rounded-xl font-semibold text-sm sm:text-base text-white
                              bg-gradient-to-br from-blue-600 to-blue-800
                              shadow-[0_4px_14px_rgba(37,99,235,.35)]
                              transition-all hover:from-blue-700 hover:to-blue-900 cursor-pointer
@@ -388,7 +396,7 @@ export default function ForgotPassword() {
                   {loading ? <><Loader />Verifying OTP…</> : "Verify & Continue"}
                 </button>
 
-                <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-500 pt-2 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
@@ -405,7 +413,7 @@ export default function ForgotPassword() {
                       canResend ? "text-blue-600 hover:underline cursor-pointer" : "text-slate-400 cursor-not-allowed"
                     }`}
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                    <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${loading ? "animate-spin" : ""}`} />
                     {canResend ? "Resend OTP" : `Resend in ${timer}s`}
                   </button>
                 </div>
@@ -418,22 +426,22 @@ export default function ForgotPassword() {
           ════════════════════════════════════════════════ */}
           {step === 3 && (
             <div>
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
-                  <KeyRound className="w-6 h-6" />
+              <div className="mb-4 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-3 sm:mb-4">
+                  <KeyRound className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h2 className="text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                <h2 className="text-xl sm:text-[1.5rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                   Reset New Password
                 </h2>
-                <p className="text-[0.875rem] text-slate-500">
+                <p className="text-xs sm:text-[0.875rem] text-slate-500">
                   Create a new password for your ClinicCMS account.
                 </p>
               </div>
 
-              <form onSubmit={handleResetPassword} className="flex flex-col gap-4" noValidate>
+              <form onSubmit={handleResetPassword} className="flex flex-col gap-3.5 sm:gap-4" noValidate>
                 {/* New Password */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="new-password" className="text-[0.8125rem] font-semibold text-slate-900">
+                  <label htmlFor="new-password" className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900">
                     New Password <span className="text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -461,7 +469,7 @@ export default function ForgotPassword() {
 
                 {/* Confirm Password */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="confirm-password" className="text-[0.8125rem] font-semibold text-slate-900">
+                  <label htmlFor="confirm-password" className="text-xs sm:text-[0.8125rem] font-semibold text-slate-900">
                     Confirm Password <span className="text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -490,8 +498,8 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-2
-                             border-none rounded-[10px] font-semibold text-base text-white
+                  className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                             border-none rounded-xl font-semibold text-sm sm:text-base text-white
                              bg-gradient-to-br from-blue-600 to-blue-800
                              shadow-[0_4px_14px_rgba(37,99,235,.35)]
                              transition-all hover:from-blue-700 hover:to-blue-900 cursor-pointer
@@ -507,16 +515,16 @@ export default function ForgotPassword() {
               STEP 4: SUCCESS CONFIRMATION
           ════════════════════════════════════════════════ */}
           {step === 4 && (
-            <div className="text-center py-4 space-y-5 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
-                <CheckCircle2 className="w-10 h-10" />
+            <div className="text-center py-3 sm:py-4 space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
               </div>
 
               <div>
-                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                   Password Reset Successful!
                 </h2>
-                <p className="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed max-w-xs mx-auto">
+                <p className="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed max-w-[260px] sm:max-w-xs mx-auto">
                   Your password has been updated successfully. You can now sign in with your new password.
                 </p>
               </div>
@@ -524,8 +532,8 @@ export default function ForgotPassword() {
               <button
                 type="button"
                 onClick={() => navigate("/signin", { replace: true })}
-                className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-4
-                           border-none rounded-[10px] font-semibold text-base text-white
+                className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-2 sm:mt-4
+                           border-none rounded-xl font-semibold text-sm sm:text-base text-white
                            bg-gradient-to-br from-blue-600 to-blue-800
                            shadow-[0_4px_14px_rgba(37,99,235,.35)]
                            transition-all hover:from-blue-700 hover:to-blue-900 cursor-pointer"

@@ -47,6 +47,19 @@ const MEDICAL_COUNCILS = [
 const notEmptyOrSpaces = (msg) => (v) =>
     (v !== null && v !== undefined && String(v).trim().length > 0) || msg;
 
+/* ── Shared label style ───────────────────────────── */
+const labelCls = "text-[11px] sm:text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1 sm:mb-1.5";
+
+/* ── Shared error row ─────────────────────────────── */
+function FieldError({ error }) {
+    if (!error) return null;
+    return (
+        <p className="flex items-center gap-1 mt-1 text-[11px] sm:text-xs text-red-600 font-medium">
+            <ErrorIcon className="w-3.5 h-3.5 text-red-500 shrink-0" /> {error.message}
+        </p>
+    );
+}
+
 export default function Step1Clinic({ register, errors, control, setValue }) {
     React.useEffect(() => {
         const storedUsername = localStorage.getItem("username");
@@ -56,11 +69,13 @@ export default function Step1Clinic({ register, errors, control, setValue }) {
     }, [setValue]);
 
     return (
-        <div className="mi-fade-in space-y-4">
-            {/* Doctor Title & Full Name */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="mi-fade-in space-y-3.5 sm:space-y-4">
+
+            {/* ── Doctor Title & Full Name ─────────────────── */}
+            <div className="grid grid-cols-[5rem_1fr] sm:grid-cols-4 gap-2 sm:gap-3">
+                {/* Title */}
                 <div className="sm:col-span-1">
-                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className={labelCls}>
                         Title <span className="text-red-500">*</span>
                     </label>
                     <Controller
@@ -75,47 +90,43 @@ export default function Step1Clinic({ register, errors, control, setValue }) {
                                 value={field.value}
                                 onChange={(e) => field.onChange(e.target.value)}
                                 options={TITLE_OPTIONS}
-                                selectClassName={`h-11 px-3 w-full text-sm font-semibold focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 ${errors?.doctorTitle ? "border-red-500" : ""}`}
+                                selectClassName={`h-10 sm:h-11 px-2 sm:px-3 w-full text-xs sm:text-sm font-semibold
+                                    focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15
+                                    ${errors?.doctorTitle ? "border-red-500" : ""}`}
                             />
                         )}
                     />
-                    {errors?.doctorTitle && (
-                        <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                            <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.doctorTitle.message}
-                        </p>
-                    )}
+                    <FieldError error={errors?.doctorTitle} />
                 </div>
 
+                {/* Full Name */}
                 <div className="sm:col-span-3">
-                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className={labelCls}>
                         Full Doctor Name <span className="text-red-500">*</span>
                     </label>
                     <InputField
                         type="text"
                         placeholder="e.g. Arvin joshi"
                         icon={UserCheck}
-                        padding="px-4 h-11"
+                        padding="px-4 h-10 sm:h-11"
                         background="bg-slate-100/80"
                         border="border border-slate-200"
                         readOnly
                         disabled
-                        className="w-full rounded-xl text-sm font-semibold text-slate-700 outline-none cursor-not-allowed select-none bg-slate-100/80"
+                        className="w-full rounded-xl text-xs sm:text-sm font-semibold text-slate-700
+                                   outline-none cursor-not-allowed select-none bg-slate-100/80"
                         {...register("doctorName", {
                             required: "Doctor name is required.",
                             validate: notEmptyOrSpaces("Doctor name cannot be empty or spaces only.")
                         })}
                     />
-                    {errors?.doctorName && (
-                        <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                            <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.doctorName.message}
-                        </p>
-                    )}
+                    <FieldError error={errors?.doctorName} />
                 </div>
             </div>
 
-            {/* Primary Specialization */}
+            {/* ── Primary Specialization ───────────────────── */}
             <div>
-                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                <label className={labelCls}>
                     Primary Specialization <span className="text-red-500">*</span>
                 </label>
                 <Controller
@@ -131,70 +142,64 @@ export default function Step1Clinic({ register, errors, control, setValue }) {
                             onChange={(e) => field.onChange(e.target.value)}
                             options={SPECIALIZATIONS}
                             icon={Stethoscope}
-                            selectClassName={`h-11 px-4 w-full text-sm font-medium focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 ${errors?.specialty ? "border-red-500" : ""}`}
+                            selectClassName={`h-10 sm:h-11 px-3 sm:px-4 w-full text-xs sm:text-sm font-medium
+                                focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15
+                                ${errors?.specialty ? "border-red-500" : ""}`}
                         />
                     )}
                 />
-                {errors?.specialty && (
-                    <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                        <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.specialty.message}
-                    </p>
-                )}
+                <FieldError error={errors?.specialty} />
             </div>
 
-            {/* Medical Degrees & Qualifications */}
+            {/* ── Medical Degrees & Qualifications ─────────── */}
             <div>
-                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
-                    Medical Degrees & Qualifications <span className="text-red-500">*</span>
+                <label className={labelCls}>
+                    Medical Degrees &amp; Qualifications <span className="text-red-500">*</span>
                 </label>
                 <InputField
                     type="text"
                     placeholder="e.g. MBBS, MD (Internal Medicine), DNB"
                     icon={Award}
-                    padding="px-4 h-11"
+                    padding="px-4 h-10 sm:h-11"
                     background="bg-white"
                     border={errors?.qualification ? "border border-red-500" : "border border-slate-200"}
-                    className="w-full rounded-xl text-sm font-medium text-slate-900 outline-none hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
+                    className="w-full rounded-xl text-xs sm:text-sm font-medium text-slate-900 outline-none
+                               hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
                     {...register("qualification", {
                         required: "Medical qualification is required.",
                         validate: notEmptyOrSpaces("Medical qualification cannot be empty or spaces only.")
                     })}
                 />
-                {errors?.qualification && (
-                    <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                        <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.qualification.message}
-                    </p>
-                )}
+                <FieldError error={errors?.qualification} />
             </div>
 
-            {/* Medical Registration No. & State Council */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* ── Reg No. & Years of Experience ────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                {/* Registration No. */}
                 <div>
-                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className={labelCls}>
                         Medical License / Reg No. <span className="text-red-500">*</span>
                     </label>
                     <InputField
                         type="text"
                         placeholder="e.g. MCI-2023-89412"
                         icon={FileText}
-                        padding="px-4 h-11"
+                        padding="px-4 h-10 sm:h-11"
                         background="bg-white"
                         border={errors?.registrationNo ? "border border-red-500" : "border border-slate-200"}
-                        className="w-full rounded-xl text-sm font-mono font-medium text-slate-900 outline-none hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
+                        className="w-full rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-900
+                                   outline-none hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
                         {...register("registrationNo", {
                             required: "Registration number is required.",
                             validate: notEmptyOrSpaces("Registration number cannot be empty or spaces only.")
                         })}
                     />
-                    {errors?.registrationNo && (
-                        <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                            <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.registrationNo.message}
-                        </p>
-                    )}
+                    <FieldError error={errors?.registrationNo} />
                 </div>
 
+                {/* Years of Experience */}
                 <div>
-                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className={labelCls}>
                         Years of Experience <span className="text-red-500">*</span>
                     </label>
                     <InputField
@@ -202,26 +207,23 @@ export default function Step1Clinic({ register, errors, control, setValue }) {
                         min="0"
                         max="60"
                         placeholder="e.g. 8"
-                        padding="px-4 h-11"
+                        padding="px-4 h-10 sm:h-11"
                         background="bg-white"
                         border={errors?.experienceYears ? "border border-red-500" : "border border-slate-200"}
-                        className="w-full rounded-xl text-sm font-medium text-slate-900 outline-none hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
+                        className="w-full rounded-xl text-xs sm:text-sm font-medium text-slate-900
+                                   outline-none hover:border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15"
                         {...register("experienceYears", {
                             required: "Years of experience is required.",
                             validate: notEmptyOrSpaces("Years of experience cannot be empty or spaces only.")
                         })}
                     />
-                    {errors?.experienceYears && (
-                        <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                            <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.experienceYears.message}
-                        </p>
-                    )}
+                    <FieldError error={errors?.experienceYears} />
                 </div>
             </div>
 
-            {/* Medical Council Name */}
+            {/* ── Registering Medical Council ───────────────── */}
             <div>
-                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
+                <label className={labelCls}>
                     Registering Medical Council <span className="text-red-500">*</span>
                 </label>
                 <Controller
@@ -236,15 +238,13 @@ export default function Step1Clinic({ register, errors, control, setValue }) {
                             value={field.value}
                             onChange={(e) => field.onChange(e.target.value)}
                             options={MEDICAL_COUNCILS}
-                            selectClassName={`h-11 px-4 w-full text-sm font-medium focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 ${errors?.medicalCouncil ? "border-red-500" : ""}`}
+                            selectClassName={`h-10 sm:h-11 px-3 sm:px-4 w-full text-xs sm:text-sm font-medium
+                                focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15
+                                ${errors?.medicalCouncil ? "border-red-500" : ""}`}
                         />
                     )}
                 />
-                {errors?.medicalCouncil && (
-                    <p className="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                        <ErrorIcon className="w-3.5 h-3.5 text-red-500" /> {errors.medicalCouncil.message}
-                    </p>
-                )}
+                <FieldError error={errors?.medicalCouncil} />
             </div>
         </div>
     );

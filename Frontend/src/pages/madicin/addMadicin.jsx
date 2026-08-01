@@ -115,15 +115,16 @@ export default function AddMedicine({
 
     return (
         <PageWrapper
+            title={editingMedicine ? "Edit Medicine" : "Add New Medicine"}
+            subtitle="Enter medicine stock details, unit price, and initial quantity."
             onBack={() => navigate("/allmadicin")}
-
         >
-            <div className="max-w-2xl mx-auto py-2">
-                <Card title={editingMedicine ? "Edit Medicine" : "Add New Medicine"}>
-                    <form onSubmit={handleSubmit} className="space-y-4 pt-2" noValidate>
+            <div className="max-w-xl md:max-w-2xl mx-auto py-2">
+                <Card title={editingMedicine ? "Edit Medicine Details" : "Add New Medicine to Inventory"}>
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 pt-2" noValidate>
                         <div>
-                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                Medicine Name *
+                            <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">
+                                Medicine Name <span className="text-rose-500">*</span>
                             </label>
                             <InputField
                                 type="text"
@@ -135,16 +136,17 @@ export default function AddMedicine({
                                     if (errors.medicineName) setErrors((prev) => ({ ...prev, medicineName: "" }));
                                 }}
                                 placeholder="e.g. Amoxicillin 500mg"
+                                className="h-10 sm:h-11"
                             />
                             {errors.medicineName && (
                                 <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.medicineName}</p>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Unit Price (₹) *
+                                <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">
+                                    Unit Price (₹) <span className="text-rose-500">*</span>
                                 </label>
                                 <InputField
                                     type="number"
@@ -157,6 +159,7 @@ export default function AddMedicine({
                                         if (errors.unitPrice) setErrors((prev) => ({ ...prev, unitPrice: "" }));
                                     }}
                                     placeholder="12.5"
+                                    className="h-10 sm:h-11"
                                 />
                                 {errors.unitPrice && (
                                     <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.unitPrice}</p>
@@ -164,8 +167,8 @@ export default function AddMedicine({
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                    Initial Quantity *
+                                <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1.5 tracking-wider">
+                                    Initial Quantity <span className="text-rose-500">*</span>
                                 </label>
                                 <InputField
                                     type="number"
@@ -177,6 +180,7 @@ export default function AddMedicine({
                                         if (errors.quantity) setErrors((prev) => ({ ...prev, quantity: "" }));
                                     }}
                                     placeholder="50"
+                                    className="h-10 sm:h-11"
                                 />
                                 {errors.quantity && (
                                     <p className="text-red-500 text-[11px] font-medium mt-1 pl-1 animate-fade-in">{errors.quantity}</p>
@@ -185,18 +189,19 @@ export default function AddMedicine({
                         </div>
 
                         {/* Form Footer Controls */}
-                        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                        <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3">
                             <Button
                                 type="button"
                                 onClick={handleCancel}
-                                background="bg-slate-100!"
-                                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-black/50!"
+                                background="bg-slate-100 hover:bg-slate-200 text-slate-700"
+                                border="border-none"
+                                className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 text-center cursor-pointer"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
-                                className="px-5 py-2.5 font-semibold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-sm w-auto flex items-center gap-1.5"
+                                className="w-full sm:w-auto px-5 py-2.5 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                             >
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span>{editingMedicine ? "Update Medicine" : "Save Medicine"}</span>

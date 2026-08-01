@@ -363,23 +363,23 @@ export default function SignUp() {
                 {/* ════════════════════════════════════════════════════
             RIGHT PANEL — Registration Form
         ════════════════════════════════════════════════════ */}
-                <main className="flex-1 flex items-start justify-center px-6 py-10 overflow-y-auto">
-                    <div className="su-card-rise w-full max-w-[480px] bg-white rounded-[1.25rem]
+                <main className="flex-1 flex items-start justify-center px-3.5 sm:px-6 py-6 sm:py-10 overflow-y-auto">
+                    <div className="su-card-rise w-full max-w-[480px] bg-white rounded-2xl sm:rounded-[1.25rem]
                           border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,.12),0_8px_24px_rgba(15,23,42,.06)]
-                          p-10">
+                          p-4 sm:p-7 md:p-10">
 
                         {step === "otp" ? (
                             <div>
                                 {/* ── OTP Header ──────────────────────────── */}
-                                <div className="mb-7 text-center">
-                                    <div className="inline-flex items-center justify-center w-14 h-14
-                                                  rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto text-blue-600">
-                                        <Email className="w-7 h-7" />
+                                <div className="mb-5 sm:mb-7 text-center">
+                                    <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14
+                                                  rounded-xl bg-blue-50 border border-slate-200 mb-4 sm:mb-5 mx-auto text-blue-600">
+                                        <Email className="w-6 h-6 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                                    <h2 className="text-xl sm:text-2xl md:text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                                         Verify your email
                                     </h2>
-                                    <p className="text-[.9rem] text-slate-500">
+                                    <p className="text-xs sm:text-[.9rem] text-slate-500">
                                         We sent a verification code to<br />
                                         <span className="font-semibold text-slate-800">{userEmail}</span>
                                     </p>
@@ -390,22 +390,22 @@ export default function SignUp() {
                                     <div
                                         id="otp-error-banner"
                                         ref={errorRef}
-                                        className="su-alert-in flex items-start gap-[.625rem] p-[.875rem_1rem]
-                                               rounded-[.625rem] mb-5 text-[.875rem] font-medium leading-snug
+                                        className="su-alert-in flex items-start gap-2.5 p-3 sm:p-3.5
+                                               rounded-xl mb-4 sm:mb-5 text-xs sm:text-[.875rem] font-medium leading-snug
                                                bg-red-50 border border-red-200/50 text-red-600"
                                         role="alert"
                                         tabIndex={-1}
                                     >
-                                        <ErrorIcon className="w-[18px] h-[18px] shrink-0 mt-px" />
+                                        <ErrorIcon className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 mt-px" />
                                         <span>{error}</span>
                                     </div>
                                 )}
 
                                 {/* ── OTP Form ─────────────────────────────── */}
                                 <form id="otp-form" className="flex flex-col gap-4" onSubmit={handleOtpSubmit}>
-                                    <div className="flex flex-col gap-[.375rem]">
+                                    <div className="flex flex-col gap-1.5">
                                         <label htmlFor="signup-otp"
-                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                             One-Time Password (OTP) <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <input
@@ -416,7 +416,7 @@ export default function SignUp() {
                                             maxLength={6}
                                             placeholder="Enter OTP code"
                                             autoFocus
-                                            className="w-full h-[50px] px-4 text-center text-xl tracking-[0.35em] font-bold rounded-[.625rem] border-[1.5px] border-slate-200 bg-white text-slate-900 outline-none placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 placeholder:text-base transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]"
+                                            className="w-full h-11 sm:h-[50px] px-4 text-center text-lg sm:text-xl tracking-[0.35em] font-bold rounded-xl border-[1.5px] border-slate-200 bg-white text-slate-900 outline-none placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm sm:placeholder:text-base transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]"
                                         />
                                     </div>
 
@@ -425,8 +425,8 @@ export default function SignUp() {
                                         type="submit"
                                         disabled={loading}
                                         aria-busy={loading}
-                                        className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-2
-                                                 border-none rounded-[.625rem] cursor-pointer font-semibold text-base
+                                        className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                                                 border-none rounded-xl cursor-pointer font-semibold text-sm sm:text-base
                                                  text-white tracking-[.01em]
                                                  bg-gradient-to-br from-blue-600 to-blue-800
                                                  shadow-[0_4px_14px_rgba(37,99,235,.35)]
@@ -444,7 +444,7 @@ export default function SignUp() {
                                 </form>
 
                                 {/* ── Actions ──────────────────────────────── */}
-                                <div className="flex flex-col gap-2 mt-6 text-center text-sm">
+                                <div className="flex flex-col gap-2 mt-5 sm:mt-6 text-center text-xs sm:text-sm">
                                     <button
                                         type="button"
                                         onClick={handleResendOtp}
@@ -469,16 +469,16 @@ export default function SignUp() {
                         ) : (
                             <>
                                 {/* ── Card header ──────────────────────────── */}
-                                <div className="mb-7 text-center">
+                                <div className="mb-5 sm:mb-7 text-center">
                                     {/* Mobile logo */}
-                                    <div className="lg:hidden inline-flex items-center justify-center w-14 h-14
-                                  rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto">
-                                        <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
+                                    <div className="lg:hidden inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14
+                                  rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-4 sm:mb-5 mx-auto p-2 sm:p-2.5">
+                                        <ClinicLogo className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-sm" />
                                     </div>
-                                    <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                                    <h2 className="text-xl sm:text-2xl md:text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                                         Create your account
                                     </h2>
-                                    <p className="text-[.9rem] text-slate-500">
+                                    <p className="text-xs sm:text-[.9rem] text-slate-500">
                                         Doctor registration — takes less than 2 minutes
                                     </p>
                                 </div>
@@ -488,13 +488,13 @@ export default function SignUp() {
                                     <div
                                         id="signup-error-banner"
                                         ref={errorRef}
-                                        className="su-alert-in flex items-start gap-[.625rem] p-[.875rem_1rem]
-                               rounded-[.625rem] mb-5 text-[.875rem] font-medium leading-snug
-                               bg-red-50 border border-red-200/50 text-red-600"
+                                        className="su-alert-in flex items-start gap-2.5 p-3 sm:p-3.5
+                                rounded-xl mb-4 sm:mb-5 text-xs sm:text-[.875rem] font-medium leading-snug
+                                bg-red-50 border border-red-200/50 text-red-600"
                                         role="alert"
                                         tabIndex={-1}
                                     >
-                                        <svg className="w-[18px] h-[18px] shrink-0 mt-px" viewBox="0 0 20 20"
+                                        <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 mt-px" viewBox="0 0 20 20"
                                             fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd"
                                                 d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -505,32 +505,32 @@ export default function SignUp() {
                                 )}
 
                                 {/* ── Form ─────────────────────────────────── */}
-                                <form id="signup-form" className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+                                <form id="signup-form" className="flex flex-col gap-3.5 sm:gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
 
                                     {/* Section label */}
-                                    <p className="text-[.7rem] font-bold text-slate-400 uppercase tracking-widest -mb-1">
+                                    <p className="text-[10px] sm:text-[.7rem] font-bold text-slate-400 uppercase tracking-widest -mb-1">
                                         Personal information
                                     </p>
 
                                     {/* First + Last name row */}
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {/* First name */}
-                                        <div className="flex flex-col gap-[.375rem]">
+                                        <div className="flex flex-col gap-1.5">
                                             <label htmlFor="signup-firstname"
-                                                className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                                className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                                 First name <span className="text-red-600" aria-hidden="true">*</span>
                                             </label>
                                             <div className="relative flex items-center">
-                                                <Firstname className={`absolute left-[.875rem] w-[16px] h-[16px] pointer-events-none shrink-0 transition-colors duration-150 ${errors.firstName ? "text-red-500" : "text-slate-400"}`} />
+                                                <Firstname className={`absolute left-3.5 w-4 h-4 pointer-events-none shrink-0 transition-colors duration-150 ${errors.firstName ? "text-red-500" : "text-slate-400"}`} />
                                                 <input
                                                     id="signup-firstname"
                                                     type="text"
-                                                    className={`w-full h-[46px] pl-[2.5rem] pr-3 rounded-[.625rem] border-[1.5px]
-                                      bg-white text-[.9375rem] text-slate-900 outline-none
-                                      placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150
-                                      hover:border-slate-300
-                                      focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
-                                      ${errors.firstName
+                                                    className={`w-full h-10 sm:h-[46px] pl-[2.5rem] pr-3 rounded-xl border-[1.5px]
+                                       bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none
+                                       placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150
+                                       hover:border-slate-300
+                                       focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
+                                       ${errors.firstName
                                                             ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                             : "border-slate-200"}`}
                                                     placeholder="John"
@@ -546,7 +546,7 @@ export default function SignUp() {
                                             </div>
                                             {errors.firstName && (
                                                 <p id="signup-firstname-error"
-                                                    className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
+                                                    className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.78rem] font-medium text-red-600"
                                                     role="alert">
                                                     <ErrorIcon />{errors.firstName.message}
                                                 </p>
@@ -554,16 +554,16 @@ export default function SignUp() {
                                         </div>
 
                                         {/* Last name */}
-                                        <div className="flex flex-col gap-[.375rem]">
+                                        <div className="flex flex-col gap-1.5">
                                             <label htmlFor="signup-lastname"
-                                                className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                                className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                                 Last name <span className="text-red-600" aria-hidden="true">*</span>
                                             </label>
                                             <div className="relative flex items-center">
                                                 <input
                                                     id="signup-lastname"
                                                     type="text"
-                                                    className={`w-full h-[46px] px-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.lastName
+                                                    className={`w-full h-10 sm:h-[46px] px-3.5 rounded-xl border-[1.5px] bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.lastName
                                                         ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                         : "border-slate-200"}`}
                                                     placeholder="Smith"
@@ -579,7 +579,7 @@ export default function SignUp() {
                                             </div>
                                             {errors.lastName && (
                                                 <p id="signup-lastname-error"
-                                                    className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
+                                                    className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.78rem] font-medium text-red-600"
                                                     role="alert">
                                                     <ErrorIcon />{errors.lastName.message}
                                                 </p>
@@ -588,17 +588,17 @@ export default function SignUp() {
                                     </div>
 
                                     {/* Email */}
-                                    <div className="flex flex-col gap-[.375rem]">
+                                    <div className="flex flex-col gap-1.5">
                                         <label htmlFor="signup-email"
-                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                             Work email <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <div className="relative flex items-center">
-                                            <Email className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${errors.email ? "text-red-500" : "text-slate-400"}`} />
+                                            <Email className={`absolute left-3.5 w-4 h-4 pointer-events-none transition-colors duration-150 ${errors.email ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-email"
                                                 type="email"
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-4 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.email
+                                                className={`w-full h-10 sm:h-[46px] pl-[2.875rem] pr-4 rounded-xl border-[1.5px] bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.email
                                                     ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                     : "border-slate-200"}`}
                                                 placeholder="doctor@clinic.com"
@@ -617,7 +617,7 @@ export default function SignUp() {
                                         </div>
                                         {errors.email && (
                                             <p id="signup-email-error"
-                                                className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
+                                                className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.79rem] font-medium text-red-600"
                                                 role="alert">
                                                 <ErrorIcon />{errors.email.message}
                                             </p>
@@ -625,19 +625,19 @@ export default function SignUp() {
                                     </div>
 
                                     {/* Phone */}
-                                    <div className="flex flex-col gap-[.375rem]">
+                                    <div className="flex flex-col gap-1.5">
                                         <label htmlFor="signup-phone"
-                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                             Phone
-                                            <span className="ml-1.5 text-[.75rem] font-normal text-slate-400">(optional)</span>
+                                            <span className="ml-1.5 text-[10px] sm:text-[.75rem] font-normal text-slate-400">(optional)</span>
                                         </label>
                                         <div className="relative flex items-center">
-                                            <Phone className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150
+                                            <Phone className={`absolute left-3.5 w-4 h-4 pointer-events-none transition-colors duration-150
                                                     ${errors.phone ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-phone"
                                                 type="tel"
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-3 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
+                                                className={`w-full h-10 sm:h-[46px] pl-[2.875rem] pr-3 rounded-xl border-[1.5px] bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
                                                         ${errors.phone
                                                         ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]"
                                                         : "border-slate-200"}`}
@@ -655,7 +655,7 @@ export default function SignUp() {
                                         </div>
                                         {errors.phone && (
                                             <p id="signup-phone-error"
-                                                className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.78rem] font-medium text-red-600"
+                                                className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.78rem] font-medium text-red-600"
                                                 role="alert">
                                                 <ErrorIcon />{errors.phone.message}
                                             </p>
@@ -663,27 +663,27 @@ export default function SignUp() {
                                     </div>
 
                                     {/* Divider */}
-                                    <p className="text-[.7rem] font-bold text-slate-400 uppercase tracking-widest mt-1 -mb-1">
+                                    <p className="text-[10px] sm:text-[.7rem] font-bold text-slate-400 uppercase tracking-widest mt-1 -mb-1">
                                         Security
                                     </p>
 
                                     {/* Password */}
-                                    <div className="flex flex-col gap-[.375rem]">
+                                    <div className="flex flex-col gap-1.5">
                                         <label htmlFor="signup-password"
-                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                             Password <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <div className="relative flex items-center">
 
-                                            <Password className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none
+                                            <Password className={`absolute left-3.5 w-4 h-4 pointer-events-none
                                                 transition-colors duration-150
                                                 ${errors.password ? "text-red-500" : "text-slate-400"}`} />
 
                                             <input
                                                 id="signup-password"
                                                 type={showPw ? "text" : "password"}
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-12 rounded-[.625rem] border-[1.5px]
-                                                bg-white text-[.9375rem] text-slate-900 outline-none
+                                                className={`w-full h-10 sm:h-[46px] pl-[2.875rem] pr-12 rounded-xl border-[1.5px]
+                                                bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none
                                                 placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150
                                                 hover:border-slate-300
                                                 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)]
@@ -709,7 +709,7 @@ export default function SignUp() {
                                             <button
                                                 type="button"
                                                 className="absolute right-3 flex items-center justify-center w-8 h-8
-                                                border-none bg-transparent text-slate-400 cursor-pointer rounded-md p-0
+                                                border-none bg-transparent text-slate-400 cursor-pointer rounded-lg p-0
                                                 hover:text-blue-600 transition-colors duration-150
                                                 focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-1"
                                                 onClick={() => setShowPw((v) => !v)}
@@ -728,7 +728,7 @@ export default function SignUp() {
                                                         style={{ width: `${strength.pct}%`, background: strength.color }}
                                                     />
                                                 </div>
-                                                <p className="mt-1 text-[.76rem] font-medium" style={{ color: strength.color }}>
+                                                <p className="mt-1 text-[11px] sm:text-[.76rem] font-medium" style={{ color: strength.color }}>
                                                     {strength.label}
                                                     {strength.score < 3 && (
                                                         <span className="text-slate-400 font-normal ml-1">
@@ -741,7 +741,7 @@ export default function SignUp() {
 
                                         {errors.password && (
                                             <p id="signup-password-error"
-                                                className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
+                                                className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.79rem] font-medium text-red-600"
                                                 role="alert">
                                                 <ErrorIcon />{errors.password.message}
                                             </p>
@@ -749,17 +749,17 @@ export default function SignUp() {
                                     </div>
 
                                     {/* Confirm password */}
-                                    <div className="flex flex-col gap-[.375rem]">
+                                    <div className="flex flex-col gap-1.5">
                                         <label htmlFor="signup-confirm"
-                                            className="text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
+                                            className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">
                                             Confirm password <span className="text-red-600" aria-hidden="true">*</span>
                                         </label>
                                         <div className="relative flex items-center">
-                                            <Password className={`absolute left-[.875rem] w-[18px] h-[18px] pointer-events-none transition-colors duration-150 ${errors.confirm ? "text-red-500" : "text-slate-400"}`} />
+                                            <Password className={`absolute left-3.5 w-4 h-4 pointer-events-none transition-colors duration-150 ${errors.confirm ? "text-red-500" : "text-slate-400"}`} />
                                             <input
                                                 id="signup-confirm"
                                                 type={showConfirm ? "text" : "password"}
-                                                className={`w-full h-[46px] pl-[2.875rem] pr-12 rounded-[.625rem] border-[1.5px] bg-white text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.confirm ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]" : confirmVal && confirmVal === passwordVal ? "border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,.15)]" : "border-slate-200"}`}
+                                                className={`w-full h-10 sm:h-[46px] pl-[2.875rem] pr-12 rounded-xl border-[1.5px] bg-white text-xs sm:text-[.9375rem] text-slate-900 outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 hover:border-slate-300 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,.18)] ${errors.confirm ? "border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]" : confirmVal && confirmVal === passwordVal ? "border-teal-400 focus:shadow-[0_0_0_3px_rgba(20,184,166,.15)]" : "border-slate-200"}`}
                                                 placeholder="Re-enter password"
                                                 autoComplete="new-password"
                                                 aria-required="true"
@@ -772,7 +772,7 @@ export default function SignUp() {
                                             />
                                             <button
                                                 type="button"
-                                                className="absolute right-3 flex items-center justify-center w-8 h-8 border-none bg-transparent text-slate-400 cursor-pointer rounded-md p-0 hover:text-blue-600 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-1"
+                                                className="absolute right-3 flex items-center justify-center w-8 h-8 border-none bg-transparent text-slate-400 cursor-pointer rounded-lg p-0 hover:text-blue-600 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-1"
                                                 onClick={() => setShowConfirm((v) => !v)}
                                                 aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
                                             >
@@ -781,7 +781,7 @@ export default function SignUp() {
                                         </div>
                                         {errors.confirm && (
                                             <p id="signup-confirm-error"
-                                                className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
+                                                className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.79rem] font-medium text-red-600"
                                                 role="alert">
                                                 <ErrorIcon />{errors.confirm.message}
                                             </p>
@@ -789,8 +789,8 @@ export default function SignUp() {
                                     </div>
 
                                     {/* Terms checkbox */}
-                                    <div className="flex flex-col gap-[.375rem] mt-1">
-                                        <label className="flex items-start gap-[.625rem] cursor-pointer" htmlFor="signup-terms">
+                                    <div className="flex flex-col gap-1.5 mt-1">
+                                        <label className="flex items-start gap-2.5 cursor-pointer" htmlFor="signup-terms">
                                             <input
                                                 id="signup-terms"
                                                 type="checkbox"
@@ -800,17 +800,17 @@ export default function SignUp() {
                                                 })}
                                             />
                                             <span
-                                                className={`shrink-0 w-[18px] h-[18px] mt-px rounded-[.3rem] border-[1.5px] bg-white flex items-center justify-center transition-colors duration-150 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600 peer-focus-visible:outline-offset-2 ${errors.agreed ? "border-red-400" : "border-slate-200"}`}
+                                                className={`shrink-0 w-4 h-4 sm:w-[18px] sm:h-[18px] mt-px rounded-md border-[1.5px] bg-white flex items-center justify-center transition-colors duration-150 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600 peer-focus-visible:outline-offset-2 ${errors.agreed ? "border-red-400" : "border-slate-200"}`}
                                                 aria-hidden="true"
                                             >
                                                 {agreedVal && (
-                                                    <svg className="w-[10px] h-[10px] text-white" viewBox="0 0 12 12" fill="none"
+                                                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 12" fill="none"
                                                         stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                         <polyline points="2,6 5,9 10,3" />
                                                     </svg>
                                                 )}
                                             </span>
-                                            <span className="text-[.875rem] text-slate-500 leading-snug">
+                                            <span className="text-xs sm:text-[.875rem] text-slate-500 leading-snug">
                                                 I agree to the{" "}
                                                 <a href="/terms" className="text-blue-600 font-medium no-underline hover:underline focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:rounded-sm">
                                                     Terms of Service
@@ -823,7 +823,7 @@ export default function SignUp() {
                                             </span>
                                         </label>
                                         {errors.agreed && (
-                                            <p className="su-error-pop flex items-center gap-[.3rem] m-0 text-[.79rem] font-medium text-red-600"
+                                            <p className="su-error-pop flex items-center gap-1.5 m-0 text-[11px] sm:text-[.79rem] font-medium text-red-600"
                                                 role="alert">
                                                 <ErrorIcon />{errors.agreed.message}
                                             </p>
@@ -836,8 +836,8 @@ export default function SignUp() {
                                         type="submit"
                                         disabled={loading}
                                         aria-busy={loading}
-                                        className="flex items-center justify-center gap-2 h-12 w-full px-6 mt-2
-                                        border-none rounded-[.625rem] cursor-pointer font-semibold text-base
+                                        className="flex items-center justify-center gap-2 h-11 sm:h-12 w-full px-6 mt-1
+                                        border-none rounded-xl cursor-pointer font-semibold text-sm sm:text-base
                                         text-white tracking-[.01em]
                                         bg-gradient-to-br from-blue-600 to-blue-800
                                         shadow-[0_4px_14px_rgba(37,99,235,.35)]
@@ -855,7 +855,7 @@ export default function SignUp() {
                                 </form>
 
                                 {/* ── Divider ──────────────────────────────── */}
-                                <div className="flex items-center gap-3 my-5 text-slate-400 text-[.8rem]" aria-hidden="true">
+                                <div className="flex items-center gap-3 my-4 sm:my-5 text-slate-400 text-xs sm:text-[.8rem]" aria-hidden="true">
                                     <span className="flex-1 h-px bg-slate-200" />
                                     <span>Already have an account?</span>
                                     <span className="flex-1 h-px bg-slate-200" />
@@ -865,9 +865,9 @@ export default function SignUp() {
                                 <a
                                     href="/login"
                                     id="signup-signin-link"
-                                    className="flex items-center justify-center h-[46px] w-full px-6
-                                    border-[1.5px] border-slate-200 rounded-[.625rem] bg-white
-                                    text-slate-900 font-semibold text-[.9375rem] no-underline
+                                    className="flex items-center justify-center h-10 sm:h-[46px] w-full px-6
+                                    border-[1.5px] border-slate-200 rounded-xl bg-white
+                                    text-slate-900 font-semibold text-xs sm:text-[.9375rem] no-underline
                                     transition-all duration-150
                                     hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600
                                     hover:shadow-sm hover:-translate-y-px
