@@ -47,7 +47,6 @@ import { GetMeService } from "../../service/api/authServices.js";
 import { accountDetails, updateDetails } from "../../service/api/accountServices.js";
 import { useNotification } from "../../hooks/showNotification.jsx";
 
-/* ── Inject Custom Animations & Keyframes ────────────────────── */
 const ACCOUNT_STYLES = `
   @keyframes account-fade-in {
     from { opacity: 0; transform: translateY(12px); }
@@ -76,7 +75,6 @@ function InjectAccountStyles() {
     return null;
 }
 
-/* ── Options for Dropdowns ────────────────────────────────────── */
 const SPECIALIZATIONS = [
     "General Physician / Internal Medicine",
     "Cardiology",
@@ -113,11 +111,10 @@ export default function DoctorAccount() {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState("profile"); // 'profile' | 'clinic' | 'security' | 'preferences'
+    const [activeTab, setActiveTab] = useState("profile");
     const [isEditing, setIsEditing] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
 
-    // Header display state (only updated from accountDetails API response / saved changes)
     const [headerData, setHeaderData] = useState({
         doctorTitle: "Dr.",
         doctorName: "",
@@ -126,9 +123,7 @@ export default function DoctorAccount() {
         specialty: ""
     });
 
-    // Main Form State initialized from database
     const [formData, setFormData] = useState({
-        // Auth / User Account
         username: "",
         email: "",
 
@@ -251,7 +246,6 @@ export default function DoctorAccount() {
         };
     }, []);
 
-    // Handle Form Change
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
@@ -261,7 +255,6 @@ export default function DoctorAccount() {
         setIsDirty(true);
     };
 
-    // Save Profile & Clinic Info to Backend using updateDetails API
     const handleSaveProfile = async (e) => {
         if (e) e.preventDefault();
         setSaving(true);
@@ -364,20 +357,16 @@ export default function DoctorAccount() {
             {/* Top Navigation */}
             <Navbar onBack={() => navigate("/dashboard")} />
 
-            {/* ════════════════════════════════════════════════════════════════
-          HERO BANNER & PROFILE HEADER
-      ════════════════════════════════════════════════════════════════ */}
+            {/* HERO BANNER & PROFILE HEADER */}
             <SectionWrapper
                 className="bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-b border-slate-800 text-white relative overflow-hidden"
             >
-                {/* Background decorative Orbs */}
                 <div className="absolute top-0 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-10 left-10 w-60 sm:w-80 h-60 sm:h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 lg:py-9 relative z-10">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
 
-                        {/* Left: Avatar & Identity Summary */}
                         <div className="flex flex-row items-center gap-3.5 sm:gap-5 min-w-0">
                             <div className="relative group shrink-0">
                                 <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-tr from-teal-500 via-sky-600 to-blue-600 text-white flex items-center justify-center font-extrabold text-xl sm:text-2xl lg:text-3xl shadow-xl ring-2 sm:ring-4 ring-white/10 group-hover:scale-105 transition-transform duration-200">
@@ -413,9 +402,7 @@ export default function DoctorAccount() {
                             </div>
                         </div>
 
-                        {/* Right: Quick Action Controls & Practice Status */}
                         <div className="w-full md:w-auto">
-                            {/* Practice Status */}
                             <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 bg-white/5 border border-white/10 p-1 sm:p-1.5 rounded-2xl w-full">
                                 <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-teal-500/20 border border-teal-500/30 text-center min-w-0">
                                     <span className="text-xs sm:text-sm font-extrabold text-teal-300 block leading-none">Active</span>
@@ -429,7 +416,6 @@ export default function DoctorAccount() {
                         </div>
                     </div>
 
-                    {/* Navigation Tabs Header */}
                     <div className="flex items-center gap-1.5 sm:gap-2 mt-5 sm:mt-8 pt-3.5 sm:pt-4 border-t border-white/10 overflow-x-auto no-scrollbar pb-0.5">
                         {[
                             { id: "profile", label: "Profile & Credentials", icon: User },
@@ -459,12 +445,9 @@ export default function DoctorAccount() {
                 </div>
             </SectionWrapper>
 
-            {/* ════════════════════════════════════════════════════════════════
-          MAIN CONTENT AREA & LIVE PREVIEW SIDEBAR
-      ════════════════════════════════════════════════════════════════ */}
+            {/* MAIN CONTENT AREA & LIVE PREVIEW SIDEBAR */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex-1 w-full">
 
-                {/* View-Only Mode Banner */}
                 {!isEditing && activeTab !== "security" && (
                     <div className="mb-6 p-4 rounded-2xl bg-slate-100 border border-slate-200/90 text-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 animate-in fade-in">
                         <div className="flex items-center gap-3">
@@ -526,7 +509,7 @@ export default function DoctorAccount() {
 
                 <div className="w-full space-y-6">
 
-                    {/* ── TAB 1: DOCTOR PROFILE & CREDENTIALS ──────────────── */}
+                    {/*TAB 1: DOCTOR PROFILE & CREDENTIALS  */}
                     {activeTab === "profile" && (
                         <DoctorProfileTab
                             formData={formData}
@@ -535,7 +518,7 @@ export default function DoctorAccount() {
                         />
                     )}
 
-                    {/* ── TAB 2: CLINIC & OPD DETAILS ──────────────────────── */}
+                    {/*  TAB 2: CLINIC & OPD DETAILS  */}
                     {activeTab === "clinic" && (
                         <ClinicEdit
                             formData={formData}
@@ -544,7 +527,7 @@ export default function DoctorAccount() {
                         />
                     )}
 
-                    {/* ── TAB 3: SECURITY & PASSWORD ───────────────────────── */}
+                    {/*  TAB 3: SECURITY & PASSWORD  */}
                     {activeTab === "security" && (
                         <SecurityTab
                             userEmail={formData.email}

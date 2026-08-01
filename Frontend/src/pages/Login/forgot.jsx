@@ -4,7 +4,6 @@ import { ForgotPasswordService, OtpVerifyService, ResetPasswordService } from ".
 import { ClinicLogo, CloseEye, Email, ErrorIcon, IconAlert, Loader, OpenEye, Password } from "../../assets/Icons/index.js";
 import { ArrowLeft, CheckCircle2, KeyRound, ShieldCheck, RefreshCw } from "lucide-react";
 
-/* ── Shared input styling constants ─────────────────────────── */
 const inputBase =
   "w-full h-10 sm:h-[46px] rounded-xl border-[1.5px] bg-white text-xs sm:text-[15px] text-slate-900 " +
   "outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 " +
@@ -15,30 +14,25 @@ const inputOk = "border-slate-200";
 export default function ForgotPassword() {
   const navigate = useNavigate();
 
-  // Multi-step flow: 1 = Email, 2 = Verify OTP, 3 = New Password, 4 = Success
   const [step, setStep] = useState(1);
 
-  // Form states
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // UI / Action states
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // OTP countdown timer (120s = 2 minutes)
   const [timer, setTimer] = useState(120);
   const [canResend, setCanResend] = useState(false);
 
   const errorRef = useRef(null);
 
-  // Focus error message when set
   useEffect(() => {
     if (error && errorRef.current) {
       errorRef.current.focus();
@@ -165,9 +159,7 @@ export default function ForgotPassword() {
   return (
     <div className="flex min-h-dvh font-sans bg-slate-50">
 
-      {/* ════════════════════════════════════════════════════
-          LEFT PANEL — Branding (desktop only)
-      ════════════════════════════════════════════════════ */}
+      {/* LEFT PANEL */}
       <aside
         className="hidden lg:flex relative flex-col justify-center items-center
                    w-[45%] shrink-0 px-12 py-12 overflow-hidden text-center
@@ -230,9 +222,7 @@ export default function ForgotPassword() {
         </p>
       </aside>
 
-      {/* ════════════════════════════════════════════════════
-          RIGHT PANEL — Multi-step recovery form
-      ════════════════════════════════════════════════════ */}
+      {/* RIGHT PANEL */}
       <main className="flex-1 flex items-center justify-center px-3.5 sm:px-6 py-6 sm:py-8 overflow-y-auto">
         <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[20px]
                         border border-slate-200
@@ -264,13 +254,11 @@ export default function ForgotPassword() {
               {[1, 2, 3].map((s) => (
                 <div key={s} className="flex-1 flex flex-col gap-1.5">
                   <div
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      step >= s ? "bg-blue-600 shadow-sm" : "bg-slate-100"
-                    }`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${step >= s ? "bg-blue-600 shadow-sm" : "bg-slate-100"
+                      }`}
                   />
-                  <span className={`text-[9px] sm:text-[10px] font-bold text-center uppercase tracking-wider ${
-                    step === s ? "text-blue-600" : "text-slate-400"
-                  }`}>
+                  <span className={`text-[9px] sm:text-[10px] font-bold text-center uppercase tracking-wider ${step === s ? "text-blue-600" : "text-slate-400"
+                    }`}>
                     {s === 1 ? "Email" : s === 2 ? "Verify" : "Reset"}
                   </span>
                 </div>
@@ -293,9 +281,7 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════════
-              STEP 1: REQUEST OTP
-          ════════════════════════════════════════════════ */}
+          {/*STEP 1: REQUEST OTP*/}
           {step === 1 && (
             <div>
               <div className="mb-4 sm:mb-6">
@@ -347,9 +333,7 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════════
-              STEP 2: VERIFY OTP
-          ════════════════════════════════════════════════ */}
+          {/*STEP 2: VERIFY OTP*/}
           {step === 2 && (
             <div>
               <div className="mb-4 sm:mb-6">
@@ -409,9 +393,8 @@ export default function ForgotPassword() {
                     type="button"
                     disabled={!canResend || loading}
                     onClick={handleResendOtp}
-                    className={`flex items-center gap-1 font-bold ${
-                      canResend ? "text-blue-600 hover:underline cursor-pointer" : "text-slate-400 cursor-not-allowed"
-                    }`}
+                    className={`flex items-center gap-1 font-bold ${canResend ? "text-blue-600 hover:underline cursor-pointer" : "text-slate-400 cursor-not-allowed"
+                      }`}
                   >
                     <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${loading ? "animate-spin" : ""}`} />
                     {canResend ? "Resend OTP" : `Resend in ${timer}s`}
@@ -421,9 +404,7 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════════
-              STEP 3: RESET PASSWORD
-          ════════════════════════════════════════════════ */}
+          {/* STEP 3: RESET PASSWORD*/}
           {step === 3 && (
             <div>
               <div className="mb-4 sm:mb-6">
@@ -511,9 +492,7 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════════
-              STEP 4: SUCCESS CONFIRMATION
-          ════════════════════════════════════════════════ */}
+          {/*STEP 4: SUCCESS CONFIRMATION*/}
           {step === 4 && (
             <div className="text-center py-3 sm:py-4 space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">

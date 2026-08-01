@@ -5,7 +5,6 @@ import { LoginService } from "../../service/api/authServices.js";
 import { saveToken } from "../../service/httpServices.js";
 import { ClinicLogo, CloseEye, Email, ErrorIcon, IconAlert, Loader, OpenEye, Password } from "../../assets/Icons/index.js";
 
-/* ── Shared class strings ───────────────────────────────────── */
 const inputBase =
   "w-full h-10 sm:h-[46px] rounded-xl border-[1.5px] bg-white text-xs sm:text-[15px] text-slate-900 " +
   "outline-none placeholder:text-slate-400 transition-[border-color,box-shadow] duration-150 " +
@@ -14,9 +13,7 @@ const inputErr =
   "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(220,38,38,.15)]";
 const inputOk = "border-slate-200";
 
-/* ══════════════════════════════════════════════════════════════
-   MAIN COMPONENT
-══════════════════════════════════════════════════════════════ */
+/* MAIN COMPONENT*/
 export default function SignIn() {
   const navigate = useNavigate();
   const {
@@ -42,10 +39,8 @@ export default function SignIn() {
 
   const rememberMe = watch("rememberMe");
 
-  /* Initial focus */
   useEffect(() => { setFocus("email"); }, [setFocus]);
 
-  /* Pre-fill remembered email */
   useEffect(() => {
     const saved = localStorage.getItem("cms_remembered_email");
     if (saved) {
@@ -68,15 +63,12 @@ export default function SignIn() {
         password: data.password,
       });
 
-      // Persist the access token using the shared helper (key: "token")
       saveToken(resData.accessToken ?? "");
 
-      // Store username in localStorage
       if (resData?.user?.username) {
         localStorage.setItem("username", resData.user.username);
       }
 
-      // Honour "Remember me" for email pre-fill on next visit
       if (data.rememberMe) localStorage.setItem("cms_remembered_email", data.email);
       else localStorage.removeItem("cms_remembered_email");
 
@@ -88,8 +80,7 @@ export default function SignIn() {
       }
 
     } catch (err) {
-      // For 401 errors, httpServices.js returns the raw Axios error (no enrichment).
-      // We therefore read the backend's own message first (they use "massage" typo).
+
       const apiMessage =
         err?.response?.data?.massage ||
         err?.response?.data?.message ||
@@ -111,22 +102,18 @@ export default function SignIn() {
   return (
     <div className="flex min-h-dvh font-sans bg-slate-50">
 
-      {/* ════════════════════════════════════════════════════
-          LEFT PANEL — Branding (desktop only)
-      ════════════════════════════════════════════════════ */}
+      {/* LEFT PANEL */}
       <aside
         className="hidden lg:flex relative flex-col justify-center items-center
                    w-[45%] shrink-0 px-12 py-12 overflow-hidden text-center
                    bg-gradient-to-br from-[#0b1437] via-[#0f2060] to-[#071428]"
         aria-hidden="true"
       >
-        {/* Radial overlay glows */}
         <div className="absolute inset-0 pointer-events-none
                         bg-[radial-gradient(ellipse_at_30%_20%,rgba(37,99,235,.28)_0%,transparent_60%)]" />
         <div className="absolute inset-0 pointer-events-none
                         bg-[radial-gradient(ellipse_at_75%_80%,rgba(20,184,166,.2)_0%,transparent_55%)]" />
 
-        {/* Floating orbs — animate-pulse gives a breathing glow */}
         <div className="animate-pulse absolute -top-20 -left-16 w-80 h-80 rounded-full
                         bg-blue-600 blur-[60px] opacity-20 pointer-events-none" />
         <div className="animate-pulse absolute -bottom-10 -right-20 w-64 h-64 rounded-full
@@ -136,7 +123,6 @@ export default function SignIn() {
                         w-44 h-44 rounded-full bg-indigo-400 blur-[60px] opacity-10 pointer-events-none
                         [animation-delay:3s]" />
 
-        {/* Heartbeat SVG line */}
         <svg className="absolute bottom-28 left-0 w-full opacity-50 pointer-events-none"
           viewBox="0 0 400 80" fill="none" xmlns="http://www.w3.org/2000/svg">
           <polyline
@@ -146,16 +132,13 @@ export default function SignIn() {
           />
         </svg>
 
-        {/* Brand block */}
         <div className="relative z-10 max-w-sm">
-          {/* Logo */}
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
                           rounded-2xl mb-6 bg-white shadow-xl shadow-slate-950/30 border border-white/30 p-3.5"
             aria-label="ClinicCMS">
             <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
           </div>
 
-          {/* Title with gradient text */}
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-3
                          bg-gradient-to-br from-white via-white to-teal-400 bg-clip-text text-transparent">
             ClinicCMS
@@ -165,7 +148,6 @@ export default function SignIn() {
             Doctor-only clinic management,<br />built for the speed of care.
           </p>
 
-          {/* Feature list */}
           <ul className="list-none m-0 p-0 flex flex-col gap-3 text-left" role="list">
             {features.map((f, i) => (
               <li key={i}
@@ -180,15 +162,12 @@ export default function SignIn() {
           </ul>
         </div>
 
-        {/* Legal */}
         <p className="absolute bottom-6 text-[0.75rem] text-white/30 z-10">
           © {new Date().getFullYear()} ClinicCMS · Licensed medical software
         </p>
       </aside>
 
-      {/* ════════════════════════════════════════════════════
-          RIGHT PANEL — Sign-in form
-      ════════════════════════════════════════════════════ */}
+      {/* RIGHT PANEL */}
       <main className="flex-1 flex items-center justify-center px-3.5 sm:px-6 py-6 sm:py-8 overflow-y-auto">
         <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[20px]
                         border border-slate-200

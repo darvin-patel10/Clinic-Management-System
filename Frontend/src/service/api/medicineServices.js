@@ -17,20 +17,11 @@ export const UpdateMedicineService = async (id, payload) => {
     return data;
 };
 
-/**
- * Fetch all medicines from the inventory.
- * @returns {Promise<Object>} Response from the server containing the list of medicines.
- */
 export const AllMedicinesService = async () => {
     const { data } = await apiClient.get(medicineEndpoints.allMedicines);
     return data;
 };
 
-/**
- * Search medicines by name.
- * @param {string} name Query name.
- * @returns {Promise<Object>} Response from the server.
- */
 export const SearchMedicineService = async (name) => {
     const { data } = await apiClient.get(medicineEndpoints.searchMedicine, {
         params: { name }

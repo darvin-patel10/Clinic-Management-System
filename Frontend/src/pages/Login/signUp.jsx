@@ -267,16 +267,13 @@ export default function SignUp() {
 
             <div className="su-root-in flex min-h-dvh font-[Inter,system-ui,sans-serif] bg-slate-50">
 
-                {/* ════════════════════════════════════════════════════
-            LEFT PANEL — Branding (desktop only)
-        ════════════════════════════════════════════════════ */}
+                {/*LEFT PANEL*/}
                 <aside
                     className="hidden lg:flex relative flex-col justify-center items-center
                      w-[42%] shrink-0 px-12 py-12 overflow-hidden text-center
                      bg-gradient-to-br from-[#0b1437] via-[#0f2060] to-[#071428]"
                     aria-hidden="true"
                 >
-                    {/* Radial overlay */}
                     <div className="pointer-events-none absolute inset-0"
                         style={{
                             background:
@@ -285,12 +282,10 @@ export default function SignUp() {
                         }}
                     />
 
-                    {/* Orbs */}
                     <div className="su-orb-1 absolute -top-20 -left-16 w-80 h-80 rounded-full bg-blue-600 blur-[60px] opacity-20 pointer-events-none" />
                     <div className="su-orb-2 absolute -bottom-10 -right-20 w-64 h-64 rounded-full bg-teal-500 blur-[60px] opacity-20 pointer-events-none" />
                     <div className="su-orb-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-indigo-400 blur-[60px] opacity-10 pointer-events-none" />
 
-                    {/* Heartbeat SVG */}
                     <svg className="absolute bottom-28 left-0 right-0 w-full opacity-50 pointer-events-none"
                         viewBox="0 0 400 80" fill="none">
                         <polyline
@@ -301,9 +296,7 @@ export default function SignUp() {
                         />
                     </svg>
 
-                    {/* Brand */}
                     <div className="relative z-10 max-w-sm">
-                        {/* Logo */}
                         <div className="inline-flex items-center justify-center rounded-2xl mb-6
                             bg-white/7 border border-white/12 backdrop-blur-sm"
                             style={{ width: 72, height: 72 }}
@@ -311,7 +304,6 @@ export default function SignUp() {
                             <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
                         </div>
 
-                        {/* Headline */}
                         <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-3"
                             style={{
                                 background: "linear-gradient(135deg, #fff 40%, rgba(20,184,166,.9) 100%)",
@@ -326,7 +318,6 @@ export default function SignUp() {
                             Set up your clinic in minutes.
                         </p>
 
-                        {/* Stats */}
                         <div className="flex flex-col gap-4">
                             {stats.map((s, i) => (
                                 <div key={i}
@@ -342,7 +333,6 @@ export default function SignUp() {
                             ))}
                         </div>
 
-                        {/* Trust badge */}
                         <div className="mt-8 flex items-center justify-center gap-2
                             px-4 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm
                             text-[.8rem] text-[rgba(255,255,255,.5)]">
@@ -360,9 +350,7 @@ export default function SignUp() {
                     </p>
                 </aside>
 
-                {/* ════════════════════════════════════════════════════
-            RIGHT PANEL — Registration Form
-        ════════════════════════════════════════════════════ */}
+                {/* RIGHT PANEL */}
                 <main className="flex-1 flex items-start justify-center px-3.5 sm:px-6 py-6 sm:py-10 overflow-y-auto">
                     <div className="su-card-rise w-full max-w-[480px] bg-white rounded-2xl sm:rounded-[1.25rem]
                           border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,.12),0_8px_24px_rgba(15,23,42,.06)]
@@ -507,14 +495,11 @@ export default function SignUp() {
                                 {/* ── Form ─────────────────────────────────── */}
                                 <form id="signup-form" className="flex flex-col gap-3.5 sm:gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
 
-                                    {/* Section label */}
                                     <p className="text-[10px] sm:text-[.7rem] font-bold text-slate-400 uppercase tracking-widest -mb-1">
                                         Personal information
                                     </p>
 
-                                    {/* First + Last name row */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {/* First name */}
                                         <div className="flex flex-col gap-1.5">
                                             <label htmlFor="signup-firstname"
                                                 className="text-xs sm:text-[.8125rem] font-semibold text-slate-900 tracking-[.01em]">

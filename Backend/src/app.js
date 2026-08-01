@@ -13,22 +13,14 @@ import accountRouter from "./routes/account.routes.js";
 
 const app = express();
 
-// Filter out undefined/empty entries — if an env var is missing in Vercel
-// it would be stored as undefined in the array, which causes .includes(origin)
-// to never match any real URL and silently blocks ALL cross-origin requests.
 const allowedOrigins = [
     config.CLIENT_URL,
     config.DEV_URL,
 ].filter(Boolean);
 
-// ---------------------------------------------------------------------------
-// CORS — must be registered BEFORE every other middleware and route so that
-// OPTIONS preflight requests from the browser are answered immediately and
-// never fall through to auth/route middleware (which would reject them).
-// ---------------------------------------------------------------------------
+
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (Postman, curl, server-to-server, mobile)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -47,23 +39,13 @@ const corsOptions = {
     ],
 };
 
-// Apply CORS to all routes (sets the Access-Control-* headers on every response).
-// cors() with preflightContinue: false (the default) also handles OPTIONS preflight
-// requests automatically — no separate app.options() call is needed.
 app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
 
-// ---------------------------------------------------------------------------
-// Serverless DB-connection middleware
-// ---------------------------------------------------------------------------
 // On Vercel every request can land on a cold container with no active DB
-// connection.  This middleware awaits connectDB() (which caches the promise)
-// BEFORE calling next(), so route handlers never touch Mongoose without a
-// live connection.
-// ---------------------------------------------------------------------------
 app.use(async (req, res, next) => {
     try {
         await connectDB();
@@ -74,9 +56,7 @@ app.use(async (req, res, next) => {
     }
 });
 
-// ---------------------------------------------------------------------------
 // Root Route — Health / status response when visiting the API base URL
-// ---------------------------------------------------------------------------
 app.get("/", (req, res) => {
     res.status(200).json({
         message: "Clinic_Management_System API is running",
@@ -85,13 +65,10 @@ app.get("/", (req, res) => {
     });
 });
 
-// ---------------------------------------------------------------------------
 // Diagnostic route — deploy, hit GET /api/db-check, verify readyState === 1
-// ---------------------------------------------------------------------------
 app.get("/api/db-check", (req, res) => {
     res.json({
         readyState: mongoose.connection.readyState,
-        // 0 = disconnected | 1 = connected | 2 = connecting | 3 = disconnecting
         readyStateLabel: ["disconnected", "connected", "connecting", "disconnecting"][
             mongoose.connection.readyState
         ] ?? "unknown",

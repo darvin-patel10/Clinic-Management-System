@@ -425,9 +425,6 @@ export default function Dashboard() {
         ]
         : [];
 
-    /* ── Skeletons ────────────────────────────────────────────────────── */
-
-
     /* ── Error state ──────────────────────────────────────────────────── */
     if (!loading && error) {
         return (

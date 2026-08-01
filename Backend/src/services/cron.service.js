@@ -1,9 +1,8 @@
 import cron from "node-cron";
 import { deleteOldPrescription } from "../controllers/patient.controller.js";
 
-/**
- * Initializes and starts all scheduled background tasks.
- */
+// Initializes and starts all scheduled background tasks.
+
 export function initCronJobs() {
     // Schedule deleteOldPrescription to run once every 24 hours (at midnight: 00:00)
     // Cron syntax: minute hour day-of-month month day-of-week

@@ -30,7 +30,6 @@ import StepBar from "../../component/Auth/StepBar.jsx";
 import Button from "../../component/Button.jsx";
 import { useNotification } from "../../hooks/showNotification";
 
-/* ── Inject Keyframe Animations ───────────────────────────────── */
 const KEYFRAMES = `
   @keyframes mi-orb-float {
     0%, 100% { transform: translateY(0) scale(1); }
@@ -75,7 +74,6 @@ function InjectStyles() {
     return null;
 }
 
-/* ── Medical Specialization Options ───────────────────────────── */
 const SPECIALIZATIONS = [
     "General Physician / Internal Medicine",
     "Cardiology",
@@ -93,7 +91,6 @@ const SPECIALIZATIONS = [
     "General Surgery"
 ];
 
-/* ── State Medical Councils ───────────────────────────────────── */
 const MEDICAL_COUNCILS = [
     "National Medical Commission (NMC)",
     "Medical Council of India (MCI)",
@@ -146,7 +143,6 @@ export default function MedicalInfo() {
         }
     });
 
-    // Watch form fields for live medical badge preview
     const watchedValues = watch();
 
     const handleFormSubmit = async (data, e) => {
@@ -239,10 +235,7 @@ export default function MedicalInfo() {
 
             <div className="mi-card-rise flex min-h-dvh font-sans bg-slate-50/90 text-slate-800 antialiased">
 
-                {/* ════════════════════════════════════════════════════
-                    LEFT PANEL — Branding & Live Medical Badge Preview
-                    (desktop only)
-                ════════════════════════════════════════════════════ */}
+                {/* LEFT PANEL  */}
                 <aside
                     className="hidden lg:flex relative flex-col justify-between
                      w-[46%] shrink-0 px-10 py-9 overflow-hidden select-none
@@ -385,9 +378,7 @@ export default function MedicalInfo() {
                     </div>
                 </aside>
 
-                {/* ════════════════════════════════════════════════════
-                    RIGHT PANEL — Interactive Medical Details Form
-                ════════════════════════════════════════════════════ */}
+                {/*RIGHT PANEL */}
                 <main className="flex-1 flex flex-col justify-start sm:justify-center items-center
                                  px-3.5 sm:px-6 py-5 sm:py-8 lg:p-10
                                  bg-slate-50/70 overflow-y-auto">
@@ -448,9 +439,7 @@ export default function MedicalInfo() {
                             noValidate
                         >
 
-                            {/* ────────────────────────────────────────────────
-                                STEP 1: QUALIFICATIONS & MEDICAL LICENSE
-                            ──────────────────────────────────────────────── */}
+                            {/* STEP 1: QUALIFICATIONS & MEDICAL LICENSE */}
                             {currentStep === 1 && (
                                 <Step1Clinic
                                     register={register}
@@ -460,9 +449,7 @@ export default function MedicalInfo() {
                                 />
                             )}
 
-                            {/* ────────────────────────────────────────────────
-                                STEP 2: CLINIC DETAILS & OPD TIMINGS
-                            ──────────────────────────────────────────────── */}
+                            {/* STEP 2: CLINIC DETAILS & OPD TIMINGS */}
                             {currentStep === 2 && (
                                 <Step2Clinic
                                     register={register}
@@ -470,9 +457,7 @@ export default function MedicalInfo() {
                                 />
                             )}
 
-                            {/* ────────────────────────────────────────────────
-                                STEP 3: PRESCRIPTION & BADGES
-                            ──────────────────────────────────────────────── */}
+                            {/*STEP 3: PRESCRIPTION & BADGES */}
                             {currentStep === 3 && (
                                 <Step3Clinic
                                     register={register}
@@ -480,9 +465,7 @@ export default function MedicalInfo() {
                                 />
                             )}
 
-                            {/* ────────────────────────────────────────────────
-                                STEP NAVIGATION ACTIONS
-                            ──────────────────────────────────────────────── */}
+                            {/*STEP NAVIGATION ACTIONS*/}
                             <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200/80">
                                 {currentStep > 1 ? (
                                     <Button
