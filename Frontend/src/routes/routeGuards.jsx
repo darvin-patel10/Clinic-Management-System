@@ -4,27 +4,19 @@ import { apiClient } from "../service/httpServices";
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 
-/** Read the access token stored after login / email-verify / token-refresh. */
 export function getAccessToken() {
     return localStorage.getItem("token");
 }
 
-/** Persist a new access token (e.g. received in X-New-Access-Token header). */
 export function setAccessToken(token) {
     localStorage.setItem("token", token);
 }
-
-/** Remove the access token on logout or auth failure. */
 export function clearAccessToken() {
     localStorage.removeItem("token");
 }
 
 // ─── Session Verification ─────────────────────────────────────────────────────
 
-/**
- * Calls GET /api/auth/get-me via the shared apiClient.
- * Returns { isValid: boolean, user: object | null }.
- */
 async function verifySession() {
     const token = getAccessToken();
 
@@ -57,7 +49,7 @@ function AuthLoadingSpinner() {
  */
 export function ProtectedRoute({ children, redirectTo = "/signin" }) {
     const location = useLocation();
-    const [status, setStatus] = useState("checking"); // "checking" | "auth" | "unauth"
+    const [status, setStatus] = useState("checking");
     const [hasClinicInfo, setHasClinicInfo] = useState(false);
 
     useEffect(() => {
@@ -96,12 +88,8 @@ export function ProtectedRoute({ children, redirectTo = "/signin" }) {
 
 // ─── PublicRoute ──────────────────────────────────────────────────────────────
 
-/**
- * Wraps public-only routes (e.g. Sign In, Sign Up, Forgot Password).
- * Redirects already-authenticated users away from these pages.
- */
 export function PublicRoute({ children, redirectTo = "/dashboard" }) {
-    const [status, setStatus] = useState("checking"); // "checking" | "auth" | "unauth"
+    const [status, setStatus] = useState("checking");
     const [hasClinicInfo, setHasClinicInfo] = useState(false);
 
     useEffect(() => {

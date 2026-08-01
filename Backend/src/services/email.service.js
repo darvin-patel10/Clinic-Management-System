@@ -3,27 +3,13 @@ import https from "https";
 import querystring from "querystring";
 import config from "../config/config.js";
 
-// ---------------------------------------------------------------------------
-// OAuth2 Token Manager
-// Handles fetching a fresh access token from Google using the refresh token.
-// Caches the token in memory and only refreshes when it is about to expire.
-// This is the correct pattern — access tokens expire after 1 hour; the
-// refresh token is long-lived but must NOT be confused with an access token.
-// ---------------------------------------------------------------------------
-
 const tokenCache = {
     accessToken: null,
-    expiresAt: 0, // Unix timestamp in ms
+    expiresAt: 0,
 };
 
-/**
- * Exchange the refresh token for a new access token using Google's token endpoint.
- * Uses Node's built-in `https` module — no extra dependency needed.
- *
- * @returns {Promise<string>} A valid access token
- */
 async function getAccessToken() {
-    const EXPIRY_BUFFER_MS = 5 * 60 * 1000; // refresh 5 minutes before expiry
+    const EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
     // Return cached token if it is still valid
     if (tokenCache.accessToken && Date.now() < tokenCache.expiresAt - EXPIRY_BUFFER_MS) {
@@ -98,17 +84,8 @@ async function getAccessToken() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// Transporter Factory
 // Creates a fresh Nodemailer transporter with a valid access token each time.
-// This is safer than a static singleton because it avoids stale token issues.
-// ---------------------------------------------------------------------------
 
-/**
- * Create a Nodemailer transporter authenticated with a fresh OAuth2 access token.
- *
- * @returns {Promise<import("nodemailer").Transporter>}
- */
 async function createTransporter() {
     const accessToken = await getAccessToken();
 
@@ -120,16 +97,13 @@ async function createTransporter() {
             clientId: config.GOOGLE_CLIENT_ID,
             clientSecret: config.GOOGLE_CLIENT_SECRET,
             refreshToken: config.GOOGLE_REFRESH_TOKEN,
-            accessToken, // Providing a fresh access token avoids Nodemailer's own (often broken) refresh logic
+            accessToken,
         },
     });
 }
 
-// ---------------------------------------------------------------------------
 // Startup Diagnostic
-// Verifies connectivity at startup WITHOUT crashing the server.
 // A healthy email server is desirable but not a hard dependency for startup.
-// ---------------------------------------------------------------------------
 
 async function verifyEmailConnection() {
     console.log("[EmailService] Running startup email connectivity check...");
@@ -138,8 +112,6 @@ async function verifyEmailConnection() {
         await transporter.verify();
         console.log("[EmailService] ✅ Email server is ready to send messages.");
     } catch (error) {
-        // Log clearly but do NOT throw — the server should still start.
-        // Email failures should be handled per-request, not at startup.
         console.error("[EmailService] ⚠️  Email server connectivity check failed.");
         console.error("[EmailService] Error:", error.message);
         console.error(
@@ -149,26 +121,13 @@ async function verifyEmailConnection() {
     }
 }
 
-// Run the check asynchronously at module load — does not block startup
 verifyEmailConnection();
 
-// ---------------------------------------------------------------------------
-// sendEmail — Public API
 // Sends an email with automatic token refresh and a retry on transient errors.
-// ---------------------------------------------------------------------------
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
-/**
- * Send an email via Gmail using OAuth2.
- *
- * @param {string}  to       - Recipient email address
- * @param {string}  subject  - Email subject line
- * @param {string}  text     - Plain-text body (fallback)
- * @param {string}  html     - HTML body
- * @returns {Promise<import("nodemailer").SentMessageInfo>}
- */
 export async function sendEmail(to, subject, text, html) {
     let lastError;
 
