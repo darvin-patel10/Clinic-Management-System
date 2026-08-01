@@ -43,15 +43,15 @@ export default function Dropdown({
         : value;
 
     return (
-        <div className={`relative w-full ${className}`} ref={containerRef}>
+        <div className={`relative w-full min-w-0 ${className}`.trim()} ref={containerRef}>
             {/* Trigger Button */}
             <button
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
-                className={`flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-4 h-11 bg-white text-sm font-medium ${!value ? "text-slate-400" : "text-slate-900"} shadow-sm w-full hover:border-slate-300 transition-all cursor-pointer focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50 ${selectClassName}`}
+                className={`flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-3.5 h-10 bg-white text-xs sm:text-sm font-semibold ${!value ? "text-slate-400" : "text-slate-800"} shadow-sm w-full hover:border-slate-300 transition-all cursor-pointer focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50 ${selectClassName}`}
             >
-                <div className="flex items-center gap-2.5 truncate">
+                <div className="flex items-center gap-2 truncate min-w-0">
                     {Icon && <Icon className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />}
                     <span className="truncate">{triggerLabel}</span>
                 </div>
@@ -60,8 +60,8 @@ export default function Dropdown({
 
             {/* Dropdown Panel */}
             {isOpen && (
-                <div className="absolute left-0 mt-1.5 w-full min-w-[185px] rounded-xl border border-slate-200/80 bg-white shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="max-h-60 overflow-y-auto">
+                <div className="absolute left-0 mt-1.5 w-full min-w-[180px] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200/90 bg-white shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar">
                         {options.map((opt) => {
                             const isObject = typeof opt === "object" && opt !== null;
                             const val = isObject ? opt.value : opt;
@@ -75,11 +75,11 @@ export default function Dropdown({
                                     type="button"
                                     disabled={isDisabled}
                                     onClick={() => !isDisabled && handleSelect(val)}
-                                    className={`w-full text-left px-3.5 py-2.5 text-xs transition-colors block ${
+                                    className={`w-full text-left px-3.5 py-2 sm:py-2 text-xs sm:text-sm transition-colors block ${
                                         isDisabled
                                             ? "text-slate-300 font-normal cursor-not-allowed bg-slate-50/50 pointer-events-none"
                                             : isSelected
-                                                ? "text-teal-600 bg-teal-50/50 font-bold cursor-pointer"
+                                                ? "text-blue-600 bg-blue-50/70 font-bold cursor-pointer"
                                                 : "text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
                                     }`}
                                 >

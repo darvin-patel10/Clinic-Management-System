@@ -62,9 +62,9 @@ async function getAccessToken() {
                         const hint =
                             parsed.error === "invalid_grant"
                                 ? " → The refresh token is expired or revoked. " +
-                                  "Generate a new one at https://developers.google.com/oauthplayground " +
-                                  "with scope 'https://mail.google.com/' and update GOOGLE_REFRESH_TOKEN in .env. " +
-                                  "If the OAuth Consent Screen is in Testing mode, tokens expire after 7 days."
+                                "Generate a new one at https://developers.google.com/oauthplayground " +
+                                "with scope 'https://mail.google.com/' and update GOOGLE_REFRESH_TOKEN in .env. " +
+                                "If the OAuth Consent Screen is in Testing mode, tokens expire after 7 days."
                                 : "";
                         return reject(
                             new Error(

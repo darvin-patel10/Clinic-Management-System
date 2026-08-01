@@ -17,22 +17,22 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
     return (
         <Card
             title={
-                <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                    <Building2 className="w-5 h-5 text-blue-600" />
+                <span className="flex items-center gap-2 text-base sm:text-lg font-bold text-slate-900">
+                    <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
                     Clinic Address & OPD Timings
                 </span>
             }
             subtitle="Clinic profile, emergency support, consultation fees & practice location."
             action={
-                <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                     Prescription Print Header
                 </span>
             }
         >
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 sm:gap-4 mt-3 sm:mt-4">
                 {/* Clinic Name */}
                 <div className="sm:col-span-7">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Clinic / Hospital Name</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">Clinic / Hospital Name</label>
                     <InputField
                         type="text"
                         name="clinicName"
@@ -40,12 +40,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         onChange={handleChange}
                         placeholder="e.g. Apex Wellness Clinic"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* Consultation Fee */}
                 <div className="sm:col-span-5">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Consultation Fee (₹)</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">Consultation Fee (₹)</label>
                     <InputField
                         type="number"
                         name="consultationfee"
@@ -55,13 +56,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         icon={Coins}
                         iconPosition="left"
                         disabled={disabled}
-                        className="w-full rounded-xl text-sm font-bold text-emerald-700 outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                        className="w-full rounded-xl text-xs sm:text-sm font-bold text-emerald-700 outline-none focus:border-emerald-500 focus:bg-white transition-colors h-10 sm:h-11"
                     />
                 </div>
 
                 {/* Clinic Phone */}
                 <div className="sm:col-span-6">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Clinic Contact Number</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">Clinic Contact Number</label>
                     <InputField
                         type="tel"
                         name="clinicphone"
@@ -71,12 +72,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         icon={Phone}
                         iconPosition="left"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* OPD Timings */}
                 <div className="sm:col-span-6">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">OPD Practice Timings</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">OPD Practice Timings</label>
                     <InputField
                         type="text"
                         name="clinicTiming"
@@ -86,12 +88,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         icon={Clock}
                         iconPosition="left"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* Street Address */}
                 <div className="sm:col-span-12">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Street Address & Landmark</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">Street Address & Landmark</label>
                     <InputField
                         type="text"
                         name="address"
@@ -101,12 +104,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         icon={MapPin}
                         iconPosition="left"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* City */}
                 <div className="sm:col-span-4">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">City</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">City</label>
                     <InputField
                         type="text"
                         name="city"
@@ -114,12 +118,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         onChange={handleChange}
                         placeholder="Ahmedabad"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* State */}
                 <div className="sm:col-span-4">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">State</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">State</label>
                     <InputField
                         type="text"
                         name="state"
@@ -127,12 +132,13 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         onChange={handleChange}
                         placeholder="Gujarat"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* Pincode */}
                 <div className="sm:col-span-4">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Pincode</label>
+                    <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase mb-1 tracking-wider">Pincode</label>
                     <InputField
                         type="text"
                         name="pinCode"
@@ -140,19 +146,20 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                         onChange={handleChange}
                         placeholder="380009"
                         disabled={disabled}
+                        className="h-10 sm:h-11"
                     />
                 </div>
 
                 {/* Practice Feature Toggles */}
-                <div className="sm:col-span-12 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer"} ${formData?.emergencyAvailable ? "bg-rose-50/70 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-xl ${formData?.emergencyAvailable ? "bg-rose-500 text-white" : "bg-slate-200 text-slate-600"}`}>
-                                <Zap className="w-5 h-5" />
+                <div className="sm:col-span-12 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <label className={`p-3 sm:p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer"} ${formData?.emergencyAvailable ? "bg-rose-50/70 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                            <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${formData?.emergencyAvailable ? "bg-rose-500 text-white" : "bg-slate-200 text-slate-600"}`}>
+                                <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-900">24/7 Emergency Service</p>
-                                <p className="text-[11px] text-slate-500">Highlight emergency availability on prescription header</p>
+                            <div className="min-w-0">
+                                <p className="text-xs font-bold text-slate-900 truncate">24/7 Emergency Service</p>
+                                <p className="text-[10px] sm:text-[11px] text-slate-500 leading-tight truncate">Highlight emergency availability</p>
                             </div>
                         </div>
                         <input
@@ -161,18 +168,18 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                             checked={!!formData?.emergencyAvailable}
                             onChange={handleChange}
                             disabled={disabled}
-                            className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 cursor-pointer disabled:cursor-not-allowed"
+                            className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 cursor-pointer disabled:cursor-not-allowed shrink-0"
                         />
                     </label>
 
-                    <label className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer"} ${formData?.teleConsultation ? "bg-teal-50/70 border-teal-200" : "bg-slate-50 border-slate-200"}`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-xl ${formData?.teleConsultation ? "bg-teal-600 text-white" : "bg-slate-200 text-slate-600"}`}>
-                                <Smartphone className="w-5 h-5" />
+                    <label className={`p-3 sm:p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer"} ${formData?.teleConsultation ? "bg-teal-50/70 border-teal-200" : "bg-slate-50 border-slate-200"}`}>
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                            <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${formData?.teleConsultation ? "bg-teal-600 text-white" : "bg-slate-200 text-slate-600"}`}>
+                                <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-900">Tele-Consultation Active</p>
-                                <p className="text-[11px] text-slate-500">Allow remote online follow-ups for verified patients</p>
+                            <div className="min-w-0">
+                                <p className="text-xs font-bold text-slate-900 truncate">Tele-Consultation Active</p>
+                                <p className="text-[10px] sm:text-[11px] text-slate-500 leading-tight truncate">Allow remote online follow-ups</p>
                             </div>
                         </div>
                         <input
@@ -181,7 +188,7 @@ export default function ClinicEdit({ formData = {}, handleChange, isEditing = fa
                             checked={!!formData?.teleConsultation}
                             onChange={handleChange}
                             disabled={disabled}
-                            className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer disabled:cursor-not-allowed"
+                            className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer disabled:cursor-not-allowed shrink-0"
                         />
                     </label>
                 </div>

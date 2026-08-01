@@ -238,9 +238,11 @@ export default function MedicalInfo() {
             <InjectStyles />
 
             <div className="mi-card-rise flex min-h-dvh font-sans bg-slate-50/90 text-slate-800 antialiased">
+
                 {/* ════════════════════════════════════════════════════
-            LEFT PANEL — Branding & Live Medical Badge Preview
-        ════════════════════════════════════════════════════ */}
+                    LEFT PANEL — Branding & Live Medical Badge Preview
+                    (desktop only)
+                ════════════════════════════════════════════════════ */}
                 <aside
                     className="hidden lg:flex relative flex-col justify-between
                      w-[46%] shrink-0 px-10 py-9 overflow-hidden select-none
@@ -384,23 +386,51 @@ export default function MedicalInfo() {
                 </aside>
 
                 {/* ════════════════════════════════════════════════════
-            RIGHT PANEL — Interactive Medical Details Form
-        ════════════════════════════════════════════════════ */}
-                <main className="flex-1 flex flex-col justify-center items-center p-4 sm:p-8 lg:p-10 bg-slate-50/70 overflow-y-auto">
-                    <div className="w-full max-w-[620px] bg-white rounded-3xl border border-slate-200/80 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.08)] p-6 sm:p-9 transition-all duration-300">
+                    RIGHT PANEL — Interactive Medical Details Form
+                ════════════════════════════════════════════════════ */}
+                <main className="flex-1 flex flex-col justify-start sm:justify-center items-center
+                                 px-3.5 sm:px-6 py-5 sm:py-8 lg:p-10
+                                 bg-slate-50/70 overflow-y-auto">
+
+                    {/* Mobile-only logo badge */}
+                    <div className="lg:hidden flex justify-center mb-4 sm:mb-5 w-full">
+                        <div className="inline-flex items-center justify-center w-14 h-14
+                                        rounded-2xl bg-white border-2 border-slate-200 shadow-md p-2.5">
+                            <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
+                        </div>
+                    </div>
+
+                    {/* Mobile step counter */}
+                    <div className="lg:hidden flex items-center justify-between w-full max-w-[620px]
+                                    mb-3 px-1">
+                        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+                            Doctor Profile Setup
+                        </span>
+                        <span className="text-[11px] font-semibold text-teal-600">
+                            Step {currentStep} of 3
+                        </span>
+                    </div>
+
+                    <div className="w-full max-w-[620px] bg-white rounded-2xl sm:rounded-3xl
+                                    border border-slate-200/80
+                                    shadow-[0_20px_50px_-15px_rgba(15,23,42,0.08)]
+                                    p-4 sm:p-6 md:p-9 transition-all duration-300">
 
                         {/* Form Header */}
-                        <div className="mb-6">
+                        <div className="mb-4 sm:mb-6">
                             <div className="flex items-center justify-between mb-2">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold">
-                                    <Sparkles className="w-3.5 h-3.5 text-teal-600" /> Mandatory Medical & Practice Profile
+                                <div className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-lg
+                                                bg-teal-50 border border-teal-200 text-teal-700
+                                                text-[11px] sm:text-xs font-semibold">
+                                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-teal-600" />
+                                    Mandatory Medical &amp; Practice Profile
                                 </div>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                                 Complete Your Medical Profile
                             </h2>
-                            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
                                 Provide your medical qualifications and clinic details to customize your prescription header and patient portal.
                             </p>
                         </div>
@@ -412,11 +442,15 @@ export default function MedicalInfo() {
                         />
 
                         {/* MAIN FORM */}
-                        <form onSubmit={currentStep === 3 ? handleSubmit(handleFormSubmit) : (e) => e.preventDefault()} className="space-y-6" noValidate>
+                        <form
+                            onSubmit={currentStep === 3 ? handleSubmit(handleFormSubmit) : (e) => e.preventDefault()}
+                            className="space-y-4 sm:space-y-6"
+                            noValidate
+                        >
 
                             {/* ────────────────────────────────────────────────
-                  STEP 1: QUALIFICATIONS & MEDICAL LICENSE
-              ──────────────────────────────────────────────── */}
+                                STEP 1: QUALIFICATIONS & MEDICAL LICENSE
+                            ──────────────────────────────────────────────── */}
                             {currentStep === 1 && (
                                 <Step1Clinic
                                     register={register}
@@ -427,8 +461,8 @@ export default function MedicalInfo() {
                             )}
 
                             {/* ────────────────────────────────────────────────
-                  STEP 2: CLINIC DETAILS & OPD TIMINGS
-              ──────────────────────────────────────────────── */}
+                                STEP 2: CLINIC DETAILS & OPD TIMINGS
+                            ──────────────────────────────────────────────── */}
                             {currentStep === 2 && (
                                 <Step2Clinic
                                     register={register}
@@ -437,8 +471,8 @@ export default function MedicalInfo() {
                             )}
 
                             {/* ────────────────────────────────────────────────
-                  STEP 3: PRESCRIPTION & BADGES
-              ──────────────────────────────────────────────── */}
+                                STEP 3: PRESCRIPTION & BADGES
+                            ──────────────────────────────────────────────── */}
                             {currentStep === 3 && (
                                 <Step3Clinic
                                     register={register}
@@ -447,16 +481,17 @@ export default function MedicalInfo() {
                             )}
 
                             {/* ────────────────────────────────────────────────
-                  STEP NAVIGATION ACTIONS
-              ──────────────────────────────────────────────── */}
-                            <div className="flex items-center justify-between pt-4 border-t border-slate-200/80">
+                                STEP NAVIGATION ACTIONS
+                            ──────────────────────────────────────────────── */}
+                            <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200/80">
                                 {currentStep > 1 ? (
                                     <Button
                                         type="button"
                                         onClick={() => setCurrentStep((prev) => prev - 1)}
                                         background="bg-slate-100"
                                         border="border-none"
-                                        className="flex items-center gap-1.5 px-4 h-11 rounded-xl text-xs font-semibold text-black! w-auto"
+                                        className="flex items-center gap-1.5 px-3 sm:px-4 h-10 sm:h-11
+                                                   rounded-xl text-xs font-semibold text-black! w-auto"
                                     >
                                         <ArrowLeft className="w-4 h-4" /> Previous
                                     </Button>
@@ -470,7 +505,10 @@ export default function MedicalInfo() {
                                         onClick={handleNextStep}
                                         background="bg-teal-600 hover:bg-teal-700"
                                         border="border-none"
-                                        className="flex items-center gap-2 px-6 h-11 rounded-xl text-white text-xs font-semibold shadow-lg shadow-teal-600/25 transition-all hover:-translate-y-0.5 ml-auto w-auto"
+                                        className="flex items-center gap-2 px-4 sm:px-6 h-10 sm:h-11
+                                                   rounded-xl text-white text-xs font-semibold
+                                                   shadow-lg shadow-teal-600/25
+                                                   transition-all hover:-translate-y-0.5 ml-auto w-auto"
                                     >
                                         Next Step <ArrowRight className="w-4 h-4" />
                                     </Button>
@@ -480,16 +518,23 @@ export default function MedicalInfo() {
                                         disabled={loading}
                                         background="bg-gradient-to-r from-teal-600 via-sky-600 to-blue-600 hover:from-teal-700 hover:to-blue-700"
                                         border="border-none"
-                                        className="flex items-center gap-2 px-7 h-11 rounded-xl text-white text-sm font-bold shadow-xl shadow-teal-600/25 transition-all hover:-translate-y-0.5 disabled:opacity-70 ml-auto w-auto"
+                                        className="flex items-center gap-2 px-4 sm:px-7 h-10 sm:h-11
+                                                   rounded-xl text-white text-xs sm:text-sm font-bold
+                                                   shadow-xl shadow-teal-600/25
+                                                   transition-all hover:-translate-y-0.5
+                                                   disabled:opacity-70 ml-auto w-auto"
                                     >
                                         {loading ? (
                                             <>
                                                 <Loader className="w-4 h-4 animate-spin text-white" />
-                                                Saving Medical Profile…
+                                                <span className="hidden sm:inline">Saving Medical Profile…</span>
+                                                <span className="sm:hidden">Saving…</span>
                                             </>
                                         ) : (
                                             <>
-                                                Complete Setup & Launch Dashboard <CheckCircle2 className="w-4 h-4" />
+                                                <span className="hidden sm:inline">Complete Setup &amp; Launch Dashboard</span>
+                                                <span className="sm:hidden">Complete Setup</span>
+                                                <CheckCircle2 className="w-4 h-4" />
                                             </>
                                         )}
                                     </Button>

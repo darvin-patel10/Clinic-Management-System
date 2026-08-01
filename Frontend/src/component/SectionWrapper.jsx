@@ -10,10 +10,11 @@ export default function SectionWrapper({
 }) {
   return (
     <section
-      className={`${background} ${border} ${padding} ${className} min-h-0 content-scroll overflow-x-hidden w-full`.trim()}
+      className={`w-full max-w-full min-w-0 ${background} ${border} ${padding} ${className}`.trim()}
       {...props}
     >
       {children}
     </section>
   );
 }
+

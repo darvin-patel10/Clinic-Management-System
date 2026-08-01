@@ -464,80 +464,112 @@ export default function AllMedicines() {
                             </div>
 
                             {/* ── Mobile Card View (< md) ──────────────────────────────── */}
-                            <div className="block md:hidden divide-y divide-slate-100 -mx-2">
+                            <div className="block md:hidden space-y-3 -mx-1 sm:mx-0">
                                 {filteredMedicines.map((med) => {
                                     const isOut = med.quantity === 0;
                                     const isLow = med.quantity > 0 && med.quantity <= med.lowStockThreshold;
                                     const totalPrice = med.quantity * med.unitPrice;
 
                                     return (
-                                        <div key={med.id} className="p-3 space-y-2.5">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-slate-900 leading-snug">{med.name}</h4>
-                                                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                                        ID: {med.id} • {med.dosageForm}
-                                                    </p>
+                                        <div
+                                            key={med.id}
+                                            className="bg-white rounded-2xl border border-slate-200/90 p-2.5 shadow-sm hover:shadow-md transition-all duration-200 space-y-2.5 min-w-0 relative overflow-hidden"
+                                        >
+                                            {/* Top Row: Icon Avatar, Name, Dosage Badge & Action Buttons */}
+                                            <div className="flex items-start justify-between gap-1.5">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                                                        <Pill className="w-4 h-4 text-white" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <h4 className="text-sm font-bold text-slate-900 truncate tracking-tight">
+                                                                {med.name}
+                                                            </h4>
+                                                            <span className="p-0.5 px-1 bg-blue-50 text-blue-700 border border-blue-200/60 rounded text-[8px] font-bold shrink-0">
+                                                                {med.dosageForm}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] text-slate-500 font-medium mt-0.5 truncate">
+                                                            ID: #{med.id.slice(-6)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1 shrink-0">
+
+                                                {/* Action Buttons */}
+                                                <div className="flex items-center gap-1 shrink-0 bg-slate-50 p-0.5 rounded-xl border border-slate-100">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             setSelectedMedicineForQty(med);
                                                             setIsAddQtyOpen(true);
                                                         }}
-                                                        className="p-2 rounded-lg text-slate-600 bg-slate-100 active:bg-emerald-50 active:text-emerald-600"
+                                                        className="p-1 rounded-lg text-emerald-600 bg-white hover:bg-emerald-50 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                         aria-label="Add Quantity"
+                                                        title="Add Quantity Stock"
                                                     >
-                                                        <Plus className="w-4 h-4" />
+                                                        <Plus className="w-3 h-3" />
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleOpenEditModal(med)}
-                                                        className="p-2 rounded-lg text-slate-600 bg-slate-100 active:bg-blue-50 active:text-blue-600"
+                                                        className="p-1 rounded-lg text-slate-600 bg-white hover:bg-slate-100 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                         aria-label="Edit Medicine"
+                                                        title="Edit Medicine Details"
                                                     >
-                                                        <Edit3 className="w-4 h-4" />
+                                                        <Edit3 className="w-3 h-3" />
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleDelete(med.id)}
-                                                        className="p-2 rounded-lg text-slate-600 bg-slate-100 active:bg-rose-50 active:text-rose-600"
+                                                        className="p-1 rounded-lg text-rose-600 bg-white hover:bg-rose-50 active:scale-95 transition-all shadow-2xs cursor-pointer"
                                                         aria-label="Delete Medicine"
+                                                        title="Delete Medicine Record"
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="w-3 h-3" />
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between gap-2 pt-1">
+                                            {/* Stock Status & Valuation Banner */}
+                                            <div className="flex items-center justify-between gap-2 bg-slate-50/80 p-2 rounded-xl border border-slate-100">
                                                 <div>
                                                     {isOut ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                                            <PackageX className="w-3.5 h-3.5 text-rose-600" />
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                            <PackageX className="w-3 h-3 text-rose-600" />
                                                             Out of stock (0)
                                                         </span>
                                                     ) : isLow ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                            <AlertTriangle className="w-3 h-3 text-amber-600" />
                                                             Low stock ({med.quantity})
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                                             {med.quantity} in stock
                                                         </span>
                                                     )}
                                                 </div>
 
                                                 <div className="text-right">
-                                                    <p className="text-[11px] text-slate-400">Total Valuation</p>
-                                                    <p className="text-xs font-extrabold text-emerald-700 leading-tight">
+                                                    <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Total Valuation</p>
+                                                    <p className="text-[10px] font-bold text-emerald-700 tabular-nums">
                                                         {formatCurrency(totalPrice)}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                                                <span>Price / Unit: <strong className="text-slate-800">{formatCurrency(med.unitPrice)}</strong></span>
-                                                <span>Category: <strong className="text-slate-800">{med.category}</strong></span>
+                                            {/* Footer Grid Details */}
+                                            <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                                                <div className="min-w-0">
+                                                    <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider block">Price / Unit</span>
+                                                    <span className="font-bold text-[10px] text-slate-800 tabular-nums mt-0.5 block">{formatCurrency(med.unitPrice)}</span>
+                                                </div>
+                                                <div className="min-w-0 text-right">
+                                                    <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider block">Category</span>
+                                                    <span className="font-bold text-[10px] text-slate-800 truncate mt-0.5 block">{med.category}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     );

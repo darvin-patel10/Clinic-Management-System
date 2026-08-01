@@ -477,23 +477,13 @@ export default function Dashboard() {
         <PageWrapper
             title="Dashboard"
             subtitle="Here's what's happening at your clinic today."
-            action={
-                <button
-                    onClick={fetchStats}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
-                >
-                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-                    Refresh
-                </button>
-            }
         >
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-5 sm:gap-6 lg:gap-8">
 
                 {/* ── Row 1: KPI Cards ──────────────────────────────────── */}
                 <SectionWrapper
                     aria-label="Key metrics"
-                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                    className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 sm:grid-cols-2 xl:grid-cols-4"
                 >
                     {loading
                         ? Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)
@@ -514,19 +504,19 @@ export default function Dashboard() {
                             <div className="flex flex-col items-center justify-center py-10 gap-2 text-slate-400">
                                 <CalendarCheck className="w-9 h-9 text-slate-200" />
                                 <p className="text-sm font-semibold">No patients today</p>
-                                <p className="text-xs">Add a patient or prescribe a visit to see data here.</p>
+                                <p className="text-xs text-center">Add a patient or prescribe a visit to see data here.</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto -mx-1">
-                                <table className="w-full text-left text-xs border-collapse">
+                            <div className="overflow-x-auto -mx-2 sm:mx-0">
+                                <table className="w-full text-left text-xs border-collapse min-w-[600px]">
                                     <thead>
-                                        <tr className="border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider">
-                                            <th className="py-2 px-3">Patient</th>
-                                            <th className="py-2 px-3">ID</th>
-                                            <th className="py-2 px-3">Contact</th>
-                                            <th className="py-2 px-3">Visits</th>
-                                            <th className="py-2 px-3 text-right">Pay Amount</th>
-                                            <th className="py-2 px-3 text-right">Actions</th>
+                                        <tr className="border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider whitespace-nowrap">
+                                            <th className="py-2.5 px-3">Patient</th>
+                                            <th className="py-2.5 px-3">ID</th>
+                                            <th className="py-2.5 px-3">Contact</th>
+                                            <th className="py-2.5 px-3">Visits</th>
+                                            <th className="py-2.5 px-3 text-right">Pay Amount</th>
+                                            <th className="py-2.5 px-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -543,7 +533,7 @@ export default function Dashboard() {
 
                                             return (
                                                 <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
-                                                    <td className="py-3 px-3">
+                                                    <td className="py-3 px-3 whitespace-nowrap">
                                                         <div className="flex items-center gap-2.5">
                                                             <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-[10px] shrink-0">
                                                                 {getInitials(p.patientName)}
@@ -556,17 +546,17 @@ export default function Dashboard() {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="py-3 px-3 font-bold text-slate-700">#{p.uniqueno}</td>
-                                                    <td className="py-3 px-3 text-slate-600 tabular-nums">{p.phonenumber}</td>
-                                                    <td className="py-3 px-3">
+                                                    <td className="py-3 px-3 font-bold text-slate-700 whitespace-nowrap">#{p.uniqueno}</td>
+                                                    <td className="py-3 px-3 text-slate-600 tabular-nums whitespace-nowrap">{p.phonenumber}</td>
+                                                    <td className="py-3 px-3 whitespace-nowrap">
                                                         <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-100">
                                                             {(p.prescription || []).length} visits
                                                         </span>
                                                     </td>
-                                                    <td className="py-3 px-3 text-right font-bold text-slate-800">
+                                                    <td className="py-3 px-3 text-right font-bold text-slate-800 whitespace-nowrap">
                                                         {formatCurrency(payAmount)}
                                                     </td>
-                                                    <td className="py-3 px-3 text-right">
+                                                    <td className="py-3 px-3 text-right whitespace-nowrap">
                                                         <div className="flex items-center justify-end gap-1">
                                                             <button
                                                                 onClick={() => setHistoryPatient(p)}
@@ -604,7 +594,7 @@ export default function Dashboard() {
                 </SectionWrapper>
 
                 {/* ── Row 3: Monthly + Yearly Historical Data ───────────── */}
-                <SectionWrapper className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                <SectionWrapper className="grid grid-cols-1 gap-5 lg:gap-6 xl:grid-cols-2">
 
                     {/* Monthly Data */}
                     <Card

@@ -1075,20 +1075,20 @@ export default function AddPationt() {
                 </div>
 
                 {/* ── Form Controls Footer ────────────────────────────────────────── */}
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3.5">
+                <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3.5">
                     <Button
                         type="button"
                         onClick={() => navigate("/dashboard")}
-                        background="bg-slate-100! text-slate-500!"
-                        border="border-none!"
-                        className="px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider hover:bg-slate-200! transition-colors cursor-pointer"
+                        background="bg-slate-100 hover:bg-slate-200 text-slate-600"
+                        border="border-none"
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-colors cursor-pointer text-center"
                     >
                         Cancel
                     </Button>
                     <Button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-2.5 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-md hover:shadow-lg transition-all duration-150 active:scale-98 flex items-center gap-1.5 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto px-6 py-2.5 font-bold text-xs rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-md hover:shadow-lg transition-all duration-150 active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <>
