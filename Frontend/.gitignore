@@ -29,11 +29,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Agent and Documentation files
-Agent.md
-AgentPrompts.md
-Design.md
-ProjectStructure.md
-
-
