@@ -7,6 +7,7 @@ const patientRouter = Router();
 patientRouter.use(authenticate);
 
 patientRouter.get("/search-patient", patientController.searchPatient);
+patientRouter.get("/patients", patientController.getPatient);
 patientRouter.get("/next-uniqueno", patientController.getNextUniqueNoRoute);
 patientRouter.get("/dashboard-stats", patientController.getDashboardStats);
 patientRouter.post("/add-patient", patientController.addPatient);

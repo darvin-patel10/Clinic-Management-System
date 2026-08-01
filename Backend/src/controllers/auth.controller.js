@@ -274,6 +274,8 @@ export async function getMe(req, res) {
     res.status(200).json({
         message: "User fetched successfully",
         user: {
+            id: user._id,
+            _id: user._id,
             username: user.username,
             email: user.email,
             clinicinfo: user.clinicinfo

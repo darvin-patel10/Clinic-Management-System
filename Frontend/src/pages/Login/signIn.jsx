@@ -152,7 +152,7 @@ export default function SignIn() {
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
                           rounded-2xl mb-6 bg-white/5 border border-white/10 backdrop-blur-sm"
             aria-label="ClinicCMS">
-            <div className="w-11 h-11"><ClinicLogo className="text-teal-400" /></div>
+            <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
           </div>
 
           {/* Title with gradient text */}
@@ -200,7 +200,7 @@ export default function SignIn() {
             {/* Mobile-only logo */}
             <div className="lg:hidden inline-flex items-center justify-center w-14 h-14
                             rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto">
-              <div className="w-9 h-9"><ClinicLogo className="text-teal-400" /></div>
+              <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
             </div>
             <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
               Welcome back, Doctor

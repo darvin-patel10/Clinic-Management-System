@@ -143,8 +143,8 @@ export default function Navbar({
                             href="/dashboard"
                             className="flex items-center gap-2.5 group focus:outline-none"
                         >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 p-2 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-[1.03] transition-transform">
-                                <ClinicLogo className="w-6 h-6 text-teal-300" />
+                            <div className="w-10 h-10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+                                <ClinicLogo className="w-10 h-10 drop-shadow-sm" />
                             </div>
                             <div className="flex flex-col">
                                 <div className="flex items-center gap-1.5">
@@ -274,7 +274,10 @@ export default function Navbar({
                                             Medicines Inventory
                                         </button>
                                         <button
-                                            onClick={() => setIsProfileOpen(false)}
+                                            onClick={() => {
+                                                setIsProfileOpen(false);
+                                                navigate("/doctor-account");
+                                            }}
                                             className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
                                         >
                                             <Settings className="w-4 h-4 text-slate-400" />
