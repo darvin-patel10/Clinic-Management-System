@@ -9,6 +9,7 @@ import connectDB from "./config/database.js";
 import authRouter from "./routes/auth.routes.js"
 import medicineRouter from "./routes/medicines.routes.js"
 import patientRouter from "./routes/patient.routes.js";
+import accountRouter from "./routes/account.routes.js";
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.get("/api/db-check", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/medicines", medicineRouter);
 app.use("/api/patient", patientRouter);
+app.use("/api/account", accountRouter)
 
 // Fallback 404 handler
 app.use((req, res) => {

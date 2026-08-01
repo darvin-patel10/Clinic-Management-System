@@ -10,8 +10,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 p-2 flex items-center justify-center shadow-md shadow-blue-500/20">
-                <ClinicLogo className="w-5 h-5 text-teal-300" />
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <ClinicLogo className="w-8 h-8 drop-shadow-sm" />
               </div>
               <span className="font-extrabold text-xl text-white tracking-tight leading-none font-sans">
                 Clinic<span className="text-blue-500">CMS</span>

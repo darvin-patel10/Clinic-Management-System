@@ -11,6 +11,8 @@ import AddPationt from "../pages/pationt/AddPationt";
 import AllPationt from "../pages/pationt/AllPationt";
 import MedicalInfo from "../pages/Login/clinicinfo";
 
+import DoctorAccount from "../pages/Docter/Account";
+
 export default function AppRoutes() {
     const location = useLocation();
     useEffect(() => {
@@ -54,6 +56,20 @@ export default function AppRoutes() {
                 element={
                     <ProtectedRoute>
                         <Dashboard />
+                    </ProtectedRoute>
+                } />
+            <Route
+                path="/doctor-account"
+                element={
+                    <ProtectedRoute>
+                        <DoctorAccount />
+                    </ProtectedRoute>
+                } />
+            <Route
+                path="/account"
+                element={
+                    <ProtectedRoute>
+                        <DoctorAccount />
                     </ProtectedRoute>
                 } />
             <Route

@@ -308,7 +308,7 @@ export default function SignUp() {
                             bg-white/7 border border-white/12 backdrop-blur-sm"
                             style={{ width: 72, height: 72 }}
                             aria-label="ClinicCMS logo">
-                            <div className="w-11 h-11"><ClinicLogo className="text-teal-400" /></div>
+                            <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
                         </div>
 
                         {/* Headline */}
@@ -473,7 +473,7 @@ export default function SignUp() {
                                     {/* Mobile logo */}
                                     <div className="lg:hidden inline-flex items-center justify-center w-14 h-14
                                   rounded-xl bg-blue-50 border border-slate-200 mb-5 mx-auto">
-                                        <div className="w-9 h-9"><ClinicLogo className="text-blue-600" /></div>
+                                        <ClinicLogo className="w-9 h-9 drop-shadow-sm" />
                                     </div>
                                     <h2 className="text-[1.625rem] font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
                                         Create your account

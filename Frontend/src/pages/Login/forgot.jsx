@@ -200,7 +200,7 @@ export default function ForgotPassword() {
         <div className="relative z-10 max-w-sm">
           <div className="inline-flex items-center justify-center w-[72px] h-[72px]
                           rounded-2xl mb-6 bg-white/5 border border-white/10 backdrop-blur-sm">
-            <div className="w-11 h-11"><ClinicLogo className="text-teal-400" /></div>
+            <ClinicLogo className="w-11 h-11 drop-shadow-sm" />
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-3

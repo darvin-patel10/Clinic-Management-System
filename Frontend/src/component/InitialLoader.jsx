@@ -52,8 +52,8 @@ export default function InitialLoader({ onComplete }) {
                     <div className="absolute -inset-2 rounded-2xl border border-teal-400/40 animate-ping opacity-25" />
 
                     {/* Icon Card */}
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-teal-500 via-blue-600 to-indigo-600 p-4 shadow-2xl shadow-blue-500/30 flex items-center justify-center transform transition-transform duration-700 animate-in zoom-in-75">
-                        <ClinicLogo className="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-md animate-pulse" />
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center transform transition-transform duration-700 animate-in zoom-in-75">
+                        <ClinicLogo className="w-20 h-20 sm:w-24 sm:h-24 drop-shadow-xl animate-pulse" />
                     </div>
                 </div>
 

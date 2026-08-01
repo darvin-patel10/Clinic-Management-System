@@ -307,7 +307,7 @@ export default function MedicalInfo() {
                             {/* Header Badge */}
                             <div className="flex items-center justify-between pb-3 border-b border-white/10">
                                 <div className="flex items-center gap-2">
-                                    <ClinicLogo className="w-6 h-6 text-teal-300" />
+                                    <ClinicLogo className="w-6 h-6 drop-shadow-sm" />
                                     <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
                                         Official Doctor ID Card
                                     </span>

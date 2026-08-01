@@ -102,3 +102,9 @@ export const patientEndpoints = {
     /** GET  — Aggregate dashboard KPIs, today's patients, monthly & yearly historical data. */
     dashboardStats: "patient/dashboard-stats",
 };
+
+export const accountEndpoints = {
+    /** PUT  — Update user details.  Append /:id */
+    updateDetails: "account/update-details",
+
+}
