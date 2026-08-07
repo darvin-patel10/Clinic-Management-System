@@ -24,6 +24,7 @@ import Button from "../../component/Button";
 import InputField from "../../component/InputField";
 import Dropdown from "../../component/Dropdown";
 import { useNotification } from "../../hooks/showNotification";
+import Invoice from "../../component/Patient/Invoice";
 import {
     AddPatientService,
     FetchNextUniqueNoService,
@@ -93,6 +94,10 @@ export default function AddPationt() {
 
     // Form Validation Errors State
     const [errors, setErrors] = useState({});
+
+    // Invoice Modal States
+    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+    const [invoiceData, setInvoiceData] = useState(null);
 
     const searchRef = useRef(null);
     const patientSearchRef = useRef(null);
@@ -234,6 +239,12 @@ export default function AddPationt() {
         setPayAmount("");
         setErrors({});
         fetchNextNo();
+    };
+
+    const handleCloseInvoice = () => {
+        setShowInvoiceModal(false);
+        setInvoiceData(null);
+        handleClearExistingSelection();
     };
 
     const handleEditPrescription = (pres) => {
@@ -448,7 +459,8 @@ export default function AddPationt() {
                             message: `Prescription updated successfully for ${patientName}!`,
                             type: "success",
                         });
-                        handleClearExistingSelection();
+                        setInvoiceData(response);
+                        setShowInvoiceModal(true);
                     }
                     handleCancelEdit();
                 } else {
@@ -475,7 +487,8 @@ export default function AddPationt() {
                             message: `Visit and prescription added successfully for ${patientName}!`,
                             type: "success",
                         });
-                        handleClearExistingSelection();
+                        setInvoiceData(response);
+                        setShowInvoiceModal(true);
                     }
                 }
             } else {
@@ -511,7 +524,8 @@ export default function AddPationt() {
                         message: response.message || "Patient registered and initial prescription added successfully!",
                         type: "success",
                     });
-                    handleClearExistingSelection();
+                    setInvoiceData(response);
+                    setShowInvoiceModal(true);
                 }
             }
             // navigate("/add-patient");
@@ -1104,6 +1118,13 @@ export default function AddPationt() {
                     </Button>
                 </div>
             </form>
+
+            {/* ── Invoice & Receipt Modal Popup ────────────────────────────── */}
+            <Invoice
+                isOpen={showInvoiceModal}
+                onClose={handleCloseInvoice}
+                invoiceData={invoiceData}
+            />
         </PageWrapper>
     );
 }
